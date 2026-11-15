@@ -506,12 +506,22 @@ def test_the_cave_files_go_from_the_nearest_mine_to_the_farthest():
     mines = mines_nearest_first(world)
     numbers = [hand_drawn_number(world.cave_plan[mine]) for mine in mines]
     files = len(caves.CAVE_LEVELS)
-    if len(mines) >= files:
-        ok(numbers == [i % files for i in range(len(mines))],
-           "file 01 is under the nearest Mine, 02 under the next... and with more Mines than files they go round again")
-    else:
-        ok(numbers[0] == 0 and numbers[-1] == files - 1 and numbers == sorted(numbers),
-           "the first file is under the nearest Mine, the last under the farthest, in order in between")
+    ok(numbers == [i % files for i in range(len(mines))],
+       "file 01 is under the nearest Mine, 02 under the next... and with more Mines than files they go round again")
+
+
+def test_fewer_mines_than_cave_files_play_the_first_files():
+    """A pretend map with 12 Mines in a row and 17 files: Mine i plays file i, so 13 to 17 are left over."""
+    ok(len(caves.CAVE_LEVELS) == 17, "this test wants 17 cave files (found %d)" % len(caves.CAVE_LEVELS))
+    home = (0, 0)
+    mines = [(0, step) for step in range(1, 13)]
+    plan = caves.plan_cave_files(list(reversed(mines)), home)
+    ok([plan[mine] for mine in mines] == list(range(12)),
+       "with 17 files and 12 Mines, Mine i plays file i: the classic map keeps caves 01 to 12")
+    world = new_world()
+    numbers = [hand_drawn_number(world.cave_plan[mine]) for mine in mines_nearest_first(world)]
+    if len(numbers) == 12:
+        ok(numbers == list(range(12)), "the classic map's 12 Mines play files 01 to 12, in order")
 
 
 def test_more_mines_than_cave_files_use_the_files_again():
@@ -527,8 +537,7 @@ def test_more_mines_than_cave_files_use_the_files_again():
     ok(plan[mines[0]] == plan[mines[files]] == caves.CAVE_LEVELS[0], "Mine %d plays file 01 again" % (files + 1))
     few = mines[:5]
     numbers = [caves.plan_cave_files(few, home)[mine] for mine in few]
-    ok(numbers[0] == 0 and numbers[-1] == files - 1 and numbers == sorted(set(numbers)),
-       "fewer Mines than files: the first and the last file, and some in between: %s" % numbers)
+    ok(numbers == [0, 1, 2, 3, 4], "fewer Mines than files: Mine i plays file i, so the first 5 files: %s" % numbers)
 
 
 def test_the_cave_pieces_are_gone():

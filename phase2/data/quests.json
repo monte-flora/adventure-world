@@ -1,0 +1,15 @@
+{
+  "farmer_wood": {
+    "title": "Wood for the Winter",
+    "giver": "farmer_bo",
+    "steps": ["Bring Farmer Bo 10 wood (chop trees with T)"],
+    "reward": {"gold": 25, "xp": 15}
+  },
+  "lost_cat": {
+    "title": "Whiskers Is Lost",
+    "giver": "pip",
+    "steps": ["Find Pip's cat Whiskers in the Whispering Woods",
+              "Go back to Pip in Home Meadow"],
+    "reward": {"gold": 15, "xp": 20, "food": 1}
+  }
+}

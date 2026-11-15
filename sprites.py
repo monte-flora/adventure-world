@@ -1525,6 +1525,254 @@ CASTLE = [
     "................",
 ]
 
+
+# ---------------------------------------------------------------------------
+# Phase 2 monsters (phase2/monsters.py). They look right; the game flips them to look left.
+# ---------------------------------------------------------------------------
+
+# A little green Slime that wobbles around Home Meadow. The weakest monster of all.
+SLIME = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "......kkkk......",
+    "....kkggggkk....",
+    "...kgggwggggk...",
+    "..kggwwgggkwgk..",
+    "..kgggggggkkgk..",
+    ".kggggggggggggk.",
+    ".kgGgggggggggGk.",
+    ".kGGGgggggggGGk.",
+    "..kkkkkkkkkkkk..",
+    "................",
+]
+
+# A desert Scorpion: big pincers in front, its stinger curled up over its back.
+SCORPION = [
+    "................",
+    "...kkk..........",
+    "..koook.........",
+    "..kok.ok........",
+    "...k..ok........",
+    "......ok........",
+    ".......ok...k.k.",
+    "........k..koko.",
+    "...kkkkkkkk.kok.",
+    "..koooooookkok..",
+    ".koYoYoYooookkk.",
+    ".koooooookrokok.",
+    "..kkkkkkkkkkkok.",
+    "..k.k.k.k.k..k..",
+    ".k.k.k.k.k......",
+    "................",
+]
+
+# A Frost Wolf from the snowy peaks: pale fur, icy blue eyes, and fast!
+FROST_WOLF = [
+    "................",
+    "...........k.k..",
+    "..........klkl..",
+    "..........klllk.",
+    ".........klllckk",
+    "k........kllllkl",
+    "lk.......klllkkk",
+    ".lkkkkkkkklllk..",
+    "..klllllllllk...",
+    "..klllllllllk...",
+    "..kllellllelk...",
+    "..klk.klk.klk...",
+    "..klk.klk.klk...",
+    "..kk..kk..kk....",
+    "................",
+    "................",
+]
+
+# A Bog Lurker rises out of the swamp mud, dripping weeds. Tough: your hits do 1 less damage.
+BOG_LURKER = [
+    "................",
+    "....kkkkkkk.....",
+    "...kNnnnnnNk....",
+    "..kNnyknnyknk...",
+    "..kNnnnnnnnnk...",
+    "..kNnkkkkknNk...",
+    "..kGnnwnwnnGk...",
+    ".kGgGNnnnNGgGk..",
+    ".kGkGnnnnnGkGk..",
+    ".kgkNnnGnnNkgk..",
+    ".kGkNnGnnnNkGk..",
+    "...kNnnnGnNk....",
+    "...kNNnnnNNk....",
+    "..kNNNNNNNNNk...",
+    ".kNNNNNNNNNNNk..",
+    "................",
+]
+
+# ---------------------------------------------------------------------------
+# PEOPLE for Phase 2 (phase2/people.py puts them on the map; phase2/data/people.json says who
+# looks like what). They face you, like the Hero on the map. Want a new look? Copy one, change the
+# letters and add it to PEOPLE_ART below.
+# ---------------------------------------------------------------------------
+
+# A farmer in a big straw hat and blue overalls
+FARMER = [
+    "................",
+    "......kkkk......",
+    "....kkyyyykk....",
+    "...kyyyyyyyyk...",
+    ".kkYYYYYYYYYYkk.",
+    "kyyyyyyyyyyyyyyk",
+    ".kkksssssssskkk.",
+    "...kskssssksk...",
+    "...kssssssssk...",
+    "...ksssRRsssk...",
+    "..kkbrrrrrrbkk..",
+    "..krbbbbbbbbrk..",
+    "..ksbbbybbbbsk..",
+    "...kbbbbbbbbk...",
+    "...kbbbkkbbbk...",
+    "..kNNNk..kNNNk..",
+]
+
+# The shopkeeper: hair in a bun, a green dress and a white apron
+SHOPKEEPER = [
+    "......kkkk......",
+    ".....khhhhk.....",
+    "....kkhhhhkk....",
+    "...khhhhhhhhk...",
+    "...khsssssshk...",
+    "...khsksskshk...",
+    "...khsssssshk...",
+    "...kssssssssk...",
+    "...ksssRRsssk...",
+    "....kksssskk....",
+    "...kkggggggkk...",
+    "..kgggwwwwgggk..",
+    "..ksggwwwwggsk..",
+    "...kgwwwwwwgk...",
+    "...kggggggggk...",
+    "....kkk..kkk....",
+]
+
+# The blacksmith: bald, a big bushy beard, strong arms and a leather apron
+BLACKSMITH = [
+    "................",
+    ".....kkkkkk.....",
+    "....kssssssk....",
+    "...kssssssssk...",
+    "...kskssssksk...",
+    "...kssssssssk...",
+    "...ksNNNNNNsk...",
+    "...kNNNRRNNNk...",
+    "....kNNNNNNk....",
+    ".kkkkkNNNNkkkkk.",
+    "kssskEnnnnEksssk",
+    "kssskEnnnnEksssk",
+    ".kkkkEnnnnEkkkk.",
+    "....kEnnnnEk....",
+    "....kEEkkEEk....",
+    "...kkkk..kkkk...",
+]
+
+# The guide: a green traveller's cap with a red feather, and a green tunic
+GUIDE = [
+    "...........r....",
+    "......kkkk.r....",
+    ".....kggggkr....",
+    "....kgggggGk....",
+    "...kggggggggk...",
+    "..kkGGGGGGGGkk..",
+    "...khsssssshk...",
+    "...kskssssksk...",
+    "...kssssssssk...",
+    "...ksssRRsssk...",
+    "....kkGGGGkk....",
+    "..kgggnyyngggk..",
+    "..ksggggggggsk..",
+    "...kggggggggk...",
+    "...kNNNkkNNNk...",
+    "..kNNNk..kNNNk..",
+]
+
+# An old wizard: a tall purple hat with a star, and a long white beard
+WIZARD = [
+    ".......kk.......",
+    "......kppk......",
+    ".....kpppk......",
+    ".....kpypppk....",
+    "....kppppppk....",
+    "..kkPPPPPPPPkk..",
+    "...kssssssssk...",
+    "...kskssssksk...",
+    "...kwwsssswwk...",
+    "...kwwwwwwwwk...",
+    "..kpkwwwwwwkpk..",
+    "..kppkwwwwkppk..",
+    "..ksppkwwkppsk..",
+    "...kpppppppPk...",
+    "...kppppppppk...",
+    "...kkkkkkkkkk...",
+]
+
+# A kid in a red cap and a yellow shirt (smaller than the grown-ups)
+KID = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "......kkkk......",
+    ".....krrrrk.....",
+    "....krrrrrrkk...",
+    "....khsssshk....",
+    "....kskssksk....",
+    "....kssRRssk....",
+    ".....kyyyyk.....",
+    "....kyyyyyyk....",
+    "....ksyyyysk....",
+    ".....kbbbbk.....",
+    ".....kbkkbk.....",
+    ".....kk..kk.....",
+]
+
+# A little orange cat, sitting
+CAT = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "....k....k......",
+    "...kok..kok.....",
+    "...koooooook....",
+    "...kokoookok....",
+    "...kooorooook...",
+    "....kooooook....",
+    "...koowwwook....",
+    "...koowwwook.kk.",
+    "...koooooookok..",
+    "....kkkkkkkk....",
+]
+
+# More townsfolk, made by changing the colors of the ones above
+VILLAGER = [row.replace("h", "y").replace("g", "b").replace("G", "B") for row in SHOPKEEPER]
+FISHER = [row.replace("y", "c").replace("Y", "C").replace("r", "o") for row in FARMER]
+
+# Which picture goes with each "look" in phase2/data/people.json
+PEOPLE_ART = {
+    "farmer": FARMER,
+    "shopkeeper": SHOPKEEPER,
+    "blacksmith": BLACKSMITH,
+    "guide": GUIDE,
+    "wizard": WIZARD,
+    "kid": KID,
+    "cat": CAT,
+    "villager": VILLAGER,
+    "fisher": FISHER,
+}
+
 # Which picture to use for each monster in rules.MONSTER_TYPES
 MONSTER_ART = {
     "Zombie": ZOMBIE,
@@ -1534,6 +1782,10 @@ MONSTER_ART = {
     "Sea Serpent": SERPENT,
     "Guardian": GUARDIAN,
     "Warden": WARDEN,
+    "Slime": SLIME,                 # (these four only live in Phase 2: phase2/monsters.py)
+    "Scorpion": SCORPION,
+    "Frost Wolf": FROST_WOLF,
+    "Bog Lurker": BOG_LURKER,
 }
 
 

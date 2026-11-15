@@ -34,7 +34,7 @@ SHARD_XP = 10              # every light shard you find is worth this much XP
 #   name: The Great Hall                 the level's name
 #   locked door says: Locked! ...        what the locked door says when you don't have the key yet
 # levels/README.md says what every letter means. The castle has a few of its own:
-#   K = the key    L = a lever (press R next to it)    D = the locked door to the next level
+#   K = the key    L = a lever (press R next to it; G in Phase 2)    D = the locked door to the next level
 #   + = a light shard    u = a healing fountain    i = torch, w = moonlit window, f = banner (just for looks)
 # The gap in the left wall is the way back: in level 1 it's the castle gate, out
 # into Nightfall Hollow. In the other levels it's the door back to the level before.

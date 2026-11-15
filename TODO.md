@@ -3,6 +3,34 @@
 Everything we've asked for and agreed on, in the order it gets built.
 `[ ]` = not started, `[~]` = being built now, `[x]` = done (with the date).
 
+## Phase 2: a bigger game that lasts a few hours (asked 2026-11-13, branch `phase-2`, see PHASE2.md)
+
+Classic stays playable: the title screen offers Classic or Phase 2.
+
+- [x] 2026-11-13 **Stage 1, the base:** title-screen choice, `phase2/` package, world map from files in `levels/world/`, no fog, save and load.
+- [x] 2026-11-13 **Stage 2a, the world:** 3-4x bigger map in 6-7 lands, waystones for fast travel, lookouts that point to treasure. A 110x76 world in 8 land files (6 villages, the Desert Gate at level 3, two old bridges), lit waystones and a travel list, lookout towers that spot hidden chests, sand/snow/swamp looks.
+- [x] 2026-11-13 **Stage 2b, people:** villages, townsfolk, a shop, a blacksmith, a guide, quest givers, dialogue with choices, a quest log on Q.
+- [x] 2026-11-13 **Stage 2c, monsters:** visible on the map (no random fights), patrol and chase, first strike from behind, weak ones flee, a timing strike in fights.
+- [x] 2026-11-13 **Stage 3a, the main quest:** Rosa starts it; 7 Light Stones, one per land (Home Meadow, Whispering Woods, Great Lake, Old Ruins, Frost Peaks, Sunscorch Desert at level 3, Murk Swamp), each from a person there for a cave, monsters or a lookout; with all 7 the Portal opens to Nightfall Hollow, the castle and the Shadow King, then a short ending takes you home to keep playing. Quest log and Rosa say where to go next; it's data in `phase2/data/main_quest.json`.
+- [x] 2026-11-13 **Stage 3b, side quests:** 12 side quests, 2 in every village (`phase2/data/side_quests.json`, new people in `people_side.json`, goals in `phase2/side_steps.py`): letters between villages, a lost toy boat and a runaway frog to follow, beat Spiders/Sea Serpents/Frost Wolves/Scorpions, climb a lookout and dig up its chest, forge a Great sword for Bram, berries and a potion; rewards of gold, XP, food, arrows, a Great sword, armor, extra lives and treasure maps, and two quests where you pick the reward.
+- [x] 2026-11-13 **Pause and save slots:** P/ESC pauses Phase 2 (frozen: Resume, Save game, Save and go to the title, Quit -> Save first?), 3 save slots on the title screen (Load lists them, Phase 2 asks which slot, D deletes), play time, the old save is slot 1 (asked 2026-11-13).
+- [x] 2026-11-13 **New side panel and message box (Phase 2):** (asked 2026-11-13) the panel shows only what matters now: a hero card, a NEXT card from the main quest (an arrow, steps, the 7 Light Stones filling in), the pack as icons (nothing says "none"; hover for a tooltip), and the 2-4 keys that work where you stand ("SPACE talk to Rosa"); the newest message is big with a picture and glows, big news pops up as a toast, the little map has a gold pin; L message log, B big map, H every key; the welcome and How to Play goal are the Light Stones. `phase2/hud.py`, `phase2/draw_hud.py`, screenshots in `docs/ui-redesign/`.
+- [x] 2026-11-13 **New art for people and the Shadow King (Phase 2):** every look redrawn with an outline, shades and a prop (plus a hunter), a 32x32 face for the dialogue box, and a new 36x36 Shadow King with glowing eyes and gems; Classic keeps the old art; `tools/art_preview.py` saves old-vs-new sheets in `docs/art-refresh/` (asked 2026-11-13).
+- [x] 2026-11-13 **People on the map at 32x32 (Phase 2)** (asked 2026-11-13)
+- [x] 2026-11-13 **New monster art (Phase 2)**, all but Skeleton and Ember Skull (asked 2026-11-13)
+- [x] 2026-11-13 **The Hero at 32x32 (Phase 2)**, plus new monster art in caves and crisp map monsters (asked 2026-11-13)
+- [x] 2026-11-13 **Cohesion pass before the first full play-test:** one box look and one key-hint row (`phase2/ui.py`) for the pause menu, save slots, talk, shop, quest log and the L/B/H pages; a face in the shop header; Phase 2 words on the title, Game Over and How to Play (7 Light Stones, Shadow King); the NEXT card's words match its arrow; toasts stay off the Shadow King's bar; a picture of every screen in `docs/cohesion/` (`take_screenshots.py`). Part B adds the play-through test (asked 2026-11-13).
+- [x] 2026-11-13 **Phase 2 on its own Restricted itch.io page** (for the Chromebook; asked 2026-11-13): every merge into `phase-2` goes to the page in `ITCH_GAME_PHASE2`, main still goes to `ITCH_GAME`; the web build needed no fix (title choice, 3 save slots and the big world checked in a browser, pictures in `docs/phase2-web/`). **Still for you to do:** make the itch.io page (HTML, Restricted, password) and set `ITCH_GAME_PHASE2` (`web/README.md`, "Phase 2 page").
+- [x] 2026-11-13 **5 new caves for the farthest Mines (Phase 2)** (asked 2026-11-13): files 13-17 in `levels/caves/`, hard ones, all beaten by the robot. Frost Peaks gets The Frozen Falls (13), The Icicle Tunnels (15) and The Glacier Crossing (16); Sunscorch Desert gets The Scorching Swings (14, three swinging vines) and The Fire Mountain (17, the lava rises). New rule: Mine i plays file i, so the classic map's 12 Mines keep caves 01-12 and all 17 Phase 2 Mines play a different cave. Pictures in `docs/new-caves/` (`tools/cave_preview.py` makes them). The user does the final editing.
+- [ ] **Stage 4, balance:** about 2-4 hours of play, and a robot test that plays the main quest.
+
+## Next: a teen version of Phase 2 (asked 2026-11-15, on `phase-2`)
+- [x] 2026-11-14 **T1 Teen look and name.** Darker theme across Phase 2 (palette, UI, music mood), a cooler game name (agent picks one, easy to change; note the choice), and a fuller story (Shadow King backstory and motive, lore, darker but kid-safe tone).
+- [ ] **T2 The world grows dark.** The overworld light fades very slowly over the game as the Shadow King pulls light from the world (story-linked; tie to the main quest's Light Stones).
+- [x] 2026-11-14 **T3 R attacks everywhere.** Every attack uses R: map fights (Run moves off R, e.g. to X), cave sword swings, castle and throne. Update hints, tips, guide. Done: fights R attack / X run; caves, castle, throne R swing, G dig/open/pull; F stays the bow.
+- [ ] **T4 Smooth overworld movement.** The Hero moves smoothly on the Phase 2 map instead of one square per step, and map monsters roam freely (not square by square).
+- [ ] **T5 No random effects.** Remove `random_event` (thistle hurts, random heals, random armor) in Phase 2.
+
 ## Now: being built in parallel sessions (asked 2026-11-08)
 
 - [~] Go public: new repo monte-flora/adventure-world, name removed

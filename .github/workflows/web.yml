@@ -4,11 +4,12 @@
 #
 # Once you've set up itch.io (see web/README.md, "New versions go up by themselves"), every
 # merge into main also puts the new version on your itch.io page. Until then it skips that step.
+# Phase 2 has a page of its own: every merge into phase-2 goes to that one (web/README.md, "Phase 2 page").
 name: Web version
 
 on:
   push:
-    branches: [main]           # every time something is merged into main
+    branches: [main, phase-2]  # every time something is merged into main, or into phase-2
   pull_request:                # and for every pull request, to check it still builds
   workflow_dispatch:           # the "Run workflow" button on the Actions tab
 
@@ -23,7 +24,10 @@ jobs:
     timeout-minutes: 20
     env:
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}   # your itch.io key (a secret: nobody can read it back)
-      ITCH_GAME: ${{ vars.ITCH_GAME }}                # your itch.io page, like  yourname/adventure-world
+      # Your itch.io page, like  yourname/adventure-world. main goes to the Classic page (ITCH_GAME),
+      # phase-2 goes to the Phase 2 page (ITCH_GAME_PHASE2), and any other branch goes nowhere.
+      ITCH_GAME: ${{ github.ref == 'refs/heads/main' && vars.ITCH_GAME || github.ref == 'refs/heads/phase-2' && vars.ITCH_GAME_PHASE2 || '' }}
+      ITCH_VARIABLE: ${{ github.ref == 'refs/heads/phase-2' && 'ITCH_GAME_PHASE2' || 'ITCH_GAME' }}
     steps:
       - name: Get the code
         uses: actions/checkout@v7
@@ -49,7 +53,7 @@ jobs:
 
       # butler is itch.io's own tool for uploading games. It only sends the parts that changed.
       - name: Put the new version on itch.io
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && env.BUTLER_API_KEY != '' && env.ITCH_GAME != ''
+        if: github.event_name != 'pull_request' && env.BUTLER_API_KEY != '' && env.ITCH_GAME != ''
         run: |
           curl -sSfL -o butler.zip https://broth.itch.zone/butler/linux-amd64/15.32.0/archive/default
           unzip -q butler.zip -d butler-tool
@@ -59,5 +63,5 @@ jobs:
             --userversion "$(date -u +%Y.%m.%d)-${GITHUB_SHA::7}"
 
       - name: Say whether it went to itch.io
-        if: github.ref == 'refs/heads/main' && (env.BUTLER_API_KEY == '' || env.ITCH_GAME == '')
-        run: echo "::notice::Not uploaded to itch.io yet - see web/README.md to set up BUTLER_API_KEY and ITCH_GAME."
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase-2') && (env.BUTLER_API_KEY == '' || env.ITCH_GAME == '')
+        run: echo "::notice::Not uploaded to itch.io yet - see web/README.md to set up BUTLER_API_KEY and $ITCH_VARIABLE."

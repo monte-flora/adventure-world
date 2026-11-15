@@ -5,11 +5,13 @@ when it starts, so a change you save shows up the next time you play.
 
 - `caves/` - the caves under the Mines. Cave `01` goes under the Mine nearest home, and the
   last one under the Mine farthest away. Keep them in order, from the easiest to the hardest!
-  There are 12, one for every Mine on the map.
+  There are 17: the classic map has 12 Mines (they play `01` to `12`), and the big Phase 2 map has 17.
 - `secret/` - the cave under the Secret Mine in the Whispering Woods.
 - `shadow/` - the 3 dark caves under the Mines in Nightfall Hollow, easiest first. Each has a diamond (`*`)
   and a harder-to-reach Sun Shard (`s`). The robot checks them with the others.
 - `castle/` - the 5 levels of the Shadow Castle, from the gate (`1`) to the battlements (`5`).
+- `world/` - the Phase 2 world map: one file for every land, stitched into one big map (see
+  "The Phase 2 world map" at the bottom).
 
 ## Which Mine plays which cave
 
@@ -17,11 +19,11 @@ Every Mine plays one of the files in `caves/`. The game never makes up a cave, s
 meet in the game is a file you can open in the editor. The rule (`plan_cave_files` in `caves.py`):
 
 - Count the Mines from the nearest to home to the farthest. The nearest plays `01`, the next `02`, and so on.
-- **More Mines than files:** the files go round again. With 12 files and 17 Mines, Mines 13 to 17 play `01` to `05` again.
-- **Fewer Mines than files:** the nearest Mine plays `01`, the farthest plays the last file, and the ones in between are spread out.
+- **More Mines than files:** the files go round again: after the last file, the next Mine plays `01` again.
+- **Fewer Mines than files:** the last files are left over. The classic map's 12 Mines play `01` to `12`, so `13` to `17` are only in Phase 2 (under the far Mines in Frost Peaks and Sunscorch Desert).
 - A Secret Mine plays a file from `secret/`.
 
-Want a new cave in the game? Draw it and save it here as the next number, like `caves/13_my_cave.txt`.
+Want a new cave in the game? Draw it and save it here as the next number, like `caves/18_my_cave.txt`.
 
 ## Changing one
 
@@ -111,3 +113,43 @@ door back to the level before.
 - Very long U tracks are slow: for a deep shaft, a ladder is better.
 - A swinging vine's bottom should be at most 3 blocks above the floor you jump from, and 2 or 3 blocks
   out from the edge, so you can jump into it. A vine 6 to 8 blocks long swings you across about 10 blocks.
+
+## The Phase 2 world map
+
+Phase 2 (`pixi run game2`, or pick it on the title screen) plays on a big map made of the files in
+`world/`, one for every land. The game stitches them together when it starts. Each file looks like this:
+
+    name: Home Meadow                the land's name (it pops up the first time you walk in)
+    at: 28 0                         where its top-left corner goes on the big map: row, then column
+    landmark: Windmill               the name of its landmark (the L), if it has one
+    says: Your home meadow. ...      what you're told the first time you get there
+    about: ...                       a note for people (the game ignores it)
+    home: 13 13                      where you start (just one land has this; it must be on an H)
+    village: Meadowbrook 6 24        a village: its name, then the middle of its open square
+    lookout: 18 9                    a lookout tower (put it on open ground)
+    gate: Desert Gate 16 0 3         a gate: its name, where it is (draw an X there), the level that opens it
+    GFFGGGGGGGGGGFGG
+    FFFFFGGGGGGGGGGG                 the drawing, one letter per square, with no spaces
+    WWWWWWWWWW=WWWWW
+
+- The letters are the classic map's (the list is at the top of `rules.py`): `G` grass, `F` forest,
+  `W` water, `X` rock, `R` path, `M` Mine, `H` house, `L` landmark, `T` chest, `+` signpost, `P` the Portal,
+  `=` a broken bridge (5 wood fixes it), `~` the Icy River, `B` reeds, `I` ice, `V` steam vent...
+- A `.` means "not this land": the square belongs to another land's file. So a land can have any shape.
+- Two lands can't draw the same square (the game says which ones do). Squares no land draws are open water.
+- The numbers in `home:`, `village:`, `lookout:` and `gate:` are the land's OWN rows and columns: row 0,
+  column 0 is the top-left letter of its drawing (not the big map's). You can have many villages, lookouts
+  and gates. A village is a few houses (H) around an open square of grass or path; people move in later.
+- Home is the house the `home:` line points at. Every other `H` is a rest house.
+- Each land's landmark (`L`) is a **waystone**: walk onto it and it lights up. On any lit waystone (or at
+  home) SPACE opens a list of the lit ones, and you can travel to any of them. Draw just one `L` per land.
+- A lookout: climb it with SPACE and you spot the nearest hidden chest. Chests (`T`) are hidden in the grass
+  until a lookout spots them or you step on one. What's inside depends on the land.
+- A gate is solid rock until you reach its level; then it opens for good.
+- A landmark needs its picture in `sprites.py` (and `LANDMARK_ART` in `game.py`). New lands can borrow one.
+- Mines get caves the same way as on the classic map: the cave files from nearest home outward, one for each
+  of the 17 Mines (see "Which Mine plays which cave" above). Keep every Mine reachable (the tests check).
+
+The lands open up in an order: from home you can walk to the Whispering Woods, the Old Ruins and the lake
+shores. Fix the old bridge over the Icy River for Frost Peaks, and the log bridge over the Murk River for
+Murk Swamp (or row there). The Desert Gate opens Sunscorch Desert at level 3. Row out to Portal Island.

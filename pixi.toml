@@ -10,6 +10,7 @@ conda-pypi-map = { conda-forge = false }
 
 [tasks]
 game = { cmd = "python game.py", description = "Play Adventure World" }
+game2 = { cmd = "python game.py --phase2", description = "Play Phase 2 (the bigger world) straight away" }
 nightfall = { cmd = "python game.py --nightfall", description = "Play-test: start in Nightfall Hollow (the second world)" }
 castle = { cmd = "python game.py --castle", description = "Play-test: start next to the Shadow King's castle" }
 throne = { cmd = "python game.py --throne", description = "Play-test: start in the throne room, fighting the Shadow King" }

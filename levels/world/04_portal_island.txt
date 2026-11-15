@@ -1,0 +1,11 @@
+name: Portal Island
+at: 29 50
+says: The Portal hums in the middle of the lake.
+about: Row out to it with a boat.
+WGGGGGGW
+GFGGGGMG
+GGGGGGGG
+GGGPGGGG
+GGGGGGGG
+GFGGGGGG
+WGGGGGGW

@@ -94,3 +94,30 @@ into `main`. It uses butler, itch.io's own upload tool. To set it up, once:
 
 Until the key and the page are set, the job just builds the web page and skips the upload.
 If the key ever ends up somewhere public, delete it on itch.io's API keys page, and make a new one.
+
+### Phase 2 page
+
+Phase 2 (the bigger world, on the `phase-2` branch) has an itch.io page of its own, so the
+Classic page keeps working while Phase 2 is being built. Every merge into `phase-2` goes to
+the Phase 2 page, and every merge into `main` still goes to the Classic page. To set it up, once:
+
+1. **Make a second itch.io page**: **Dashboard** > **Create new project**, "Kind of project" **HTML**.
+   Give it its own name, like "Adventure World: Phase 2". Download `adventure-web`
+   from a `phase-2` run on the Actions tab (under "Artifacts"), upload that zip, and tick
+   **"This file will be played in the browser"**. Viewport **1280 × 737**, **Fullscreen button** on,
+   the same as the Classic page.
+2. **Make it Restricted**: under **Visibility & access**, pick **Restricted** and turn on a
+   password, like the Classic page. Save.
+3. **Tell GitHub which page** (`https://YOURNAME.itch.io/PAGE` means `YOURNAME/PAGE`):
+
+       gh variable set ITCH_GAME_PHASE2 --repo monte-flora/hero-adventure --body "YOURNAME/PAGE"
+
+   The key is the same one as before (`BUTLER_API_KEY`), so there's nothing new to paste.
+4. **Run it once**: **Actions** > **Web version** > **Run workflow**, and pick the branch **`phase-2`**.
+   On the page's edit screen, tick **"This file will be played in the browser"** for the new
+   "html5" file, and delete the zip you uploaded by hand.
+
+On the Chromebook, open the page in Chrome, type the password, and click the game once.
+The 3 save slots are kept by that browser on that Chromebook: they stay when the game gets a
+new version, and go away if the browser's site data is cleared. Until `ITCH_GAME_PHASE2` is set,
+merges into `phase-2` just build the web page and skip the upload.

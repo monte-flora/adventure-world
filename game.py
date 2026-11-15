@@ -20,6 +20,7 @@ import pygame
 
 import castle
 import caves
+import phase2
 import rules
 import sprites
 import throne
@@ -302,6 +303,7 @@ TIP_READ_TIME = 0.5                 # keys wait this long after a bubble opens, 
 TIP_GAP = 1.5                       # after you close a bubble, the next one waits at least this long
                                     # (and on the world map, until you've taken a step too)
 TIP_LOOK_EVERY = 0.25               # how often the game checks if a tip fits (in seconds)
+GAME_MODES = {"classic": "Classic", "phase2": "Phase 2", "continue": "Load"}   # the title screen's choice
 TIP_CLOSE_KEYS = (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE, pygame.K_ESCAPE)
 
 # The picture for each level-up power on the LEVEL UP! card (a new power with no picture gets a star)
@@ -582,6 +584,7 @@ TUNES = {
                          "E2 - - - - - - - | E2 - - - B1 - - - | A1 - - - - - - - | B1 - - - - - - - |")],
         "drums": "k . h . s . h . | k . h k s . h . |" * 4},
 }
+TUNES.update(phase2.theme.TUNES)        # Phase 2's darker map tune (phase2/theme.py)
 NOTE_STEPS = {"C": -9, "C#": -8, "D": -7, "D#": -6, "E": -5, "F": -4, "F#": -3, "G": -2, "G#": -1, "A": 0, "A#": 1, "B": 2}
 
 
@@ -896,7 +899,7 @@ class SunfangForge:
 # ---------------------------------------------------------------------------
 
 class App:
-    def __init__(self, player_name="", seed=None, sound=True, castle=False, throne=False, nightfall=False):
+    def __init__(self, player_name="", seed=None, sound=True, castle=False, throne=False, nightfall=False, phase2_mode=None):
         pygame.mixer.pre_init(22050, -16, 1, 512)
         pygame.init()
         pygame.display.set_caption("Adventure World")
@@ -924,6 +927,11 @@ class App:
         self.state = "title"
         self.running = True
         self.time = 0.0
+        # Classic or Phase 2 (see phase2/)? Load (mode "continue") lists the Phase 2 save slots, if one has a save
+        self.modes = ["classic", "phase2"] + (["continue"] if phase2.has_save() else [])
+        self.mode = "classic"
+        self.save_slot = 1                  # the Phase 2 save slot (1-3) the next game loads from or saves into
+        self.mode_buttons = {}              # where each choice is on the title screen, so you can click it
 
         self.load_art()
         pygame.display.set_icon(self.art["player"])
@@ -937,6 +945,10 @@ class App:
         self.game = rules.Game(self.name_input, seed=seed)   # also the title background
         self.build_tiles()
         self.reset_visuals()
+        if phase2_mode:                     # python game.py --phase2 (or --continue): straight into Phase 2
+            self.mode = "continue" if phase2_mode == "continue" and "continue" in self.modes else "phase2"
+            self.save_slot = phase2.newest_slot() if self.mode == "continue" else 1
+            self.new_game()
 
     # ----- setup ------------------------------------------------------------
 
@@ -1090,10 +1102,10 @@ class App:
         self.light = pygame.Surface((VIEW_W, VIEW_H), pygame.SRCALPHA)     # the light coming back
 
     def monster_sprite(self, kind, scale, shadow=False):
-        key = (kind, scale, shadow)
+        key = (kind, scale, shadow, phase2.is_phase2(self.game))
         if key not in self.monster_cache:
             art = sprites.MONSTER_ART.get(kind, sprites.ZOMBIE)
-            image = make_sprite(art, scale)
+            image = phase2.monster_picture(self, kind, scale) or make_sprite(art, scale)    # (Phase 2: new art)
             if shadow:                              # a shadow monster: darker, with a purple glow
                 image.fill((120, 96, 160), special_flags=pygame.BLEND_RGB_MULT)
                 image.fill((26, 0, 40), special_flags=pygame.BLEND_RGB_ADD)
@@ -1102,6 +1114,8 @@ class App:
 
     def build_tiles(self):
         """Paint each map tile once, with a little randomness so they all look different."""
+        if phase2.build_tiles(self):            # Phase 2's big map paints each tile when it's first seen
+            return
         self.tiles = {}
         self.land_of = {(r, c): self.game.land_name((r, c)) for r in range(self.game.rows) for c in range(self.game.cols)}
         for r in range(self.game.rows):
@@ -1114,6 +1128,8 @@ class App:
             self.fog_tile.fill((30, 30, 48), (rng.randint(0, 62), rng.randint(0, 62), 2, 2))
 
     def paint_tile(self, r, c):
+        if phase2.paint_tile(self, r, c):               # Phase 2: the new lands, waystones, lookouts...
+            return
         rng = random.Random(r * 1000 + c * 7 + 3)       # the same square always looks the same
         letter = self.game.map[r][c]
         surf = pygame.Surface((TILE, TILE))
@@ -1426,7 +1442,15 @@ class App:
 
     def new_game(self):
         name = self.name_input.strip() or "Adventurer"
-        self.game = rules.Game(name, seed=self.seed)
+        saved = phase2.load_game(self.save_slot) if self.mode == "continue" else None
+        if saved:
+            self.mode = "phase2"            # (playing again after this one starts a new Phase 2 game)
+            self.continue_game(saved)
+            return
+        if self.mode in ("phase2", "continue"):
+            self.game = phase2.new_game(name, self.seed, self.save_slot)
+        else:
+            self.game = rules.Game(name, seed=self.seed)
         if self.games_started:
             self.game.story.clear()         # playing again: you've already seen the intro
         self.games_started += 1
@@ -1437,7 +1461,19 @@ class App:
         elif self.skip_to_nightfall:
             self.start_in_nightfall()
         self.in_intro = bool(self.game.story)   # the first story cards are coming, with their spooky tune
+        phase2.set_caption(self.game)       # the window's name (Phase 2 has its own)
         self.build_tiles()                  # a new world: houses you built last time are gone
+        self.reset_visuals()
+        self.state = "play"
+
+    def continue_game(self, saved):
+        """Back into a saved Phase 2 game, on the map where you saved it."""
+        self.game = saved
+        self.game.story.clear()
+        self.games_started += 1
+        self.in_intro = False
+        phase2.set_caption(self.game)
+        self.build_tiles()
         self.reset_visuals()
         self.state = "play"
 
@@ -1495,6 +1531,11 @@ class App:
     def step(self, dt):
         for event in pygame.event.get():
             self.handle_event(event)
+        if not self.running and self.state != "title":
+            phase2.on_quit(self.game)       # quitting: a Phase 2 game saves itself
+        if phase2.paused(self):             # Phase 2's pause menu: nothing moves or ticks, the game is frozen
+            phase2.draw_pause(self)
+            return
         self.update(dt)
         self.draw()
 
@@ -1504,9 +1545,15 @@ class App:
         if event.type == pygame.QUIT:
             self.running = False
             return
+        if self.state != "title" and phase2.pause_event(self, event):   # Phase 2: P or ESC pauses
+            return
+        if self.state != "title" and phase2.on_event(self, event):   # Phase 2: talking, the shop, the quest log
+            return
         getattr(self, "on_" + self.state)(event)
 
     def on_title(self, event):
+        if phase2.title_event(self, event):         # Phase 2's save slot list is open
+            return
         if event.type == pygame.TEXTINPUT:
             if len(self.name_input) < 12 and event.text.isprintable():
                 self.name_input += event.text
@@ -1514,16 +1561,25 @@ class App:
             if event.key == pygame.K_BACKSPACE:
                 self.name_input = self.name_input[:-1]
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                self.new_game()
+                if not phase2.open_slots(self):     # Load / Phase 2: pick a save slot first
+                    self.new_game()
             elif event.key == pygame.K_TAB:
                 self.tips.switch()                # tip bubbles on or off
+            elif event.key in (pygame.K_LEFT, pygame.K_RIGHT):     # Classic, Phase 2 or Continue
+                way = 1 if event.key == pygame.K_RIGHT else -1
+                self.mode = self.modes[(self.modes.index(self.mode) + way) % len(self.modes)]
             elif event.key == pygame.K_ESCAPE:
                 self.running = False
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.tips_switch and self.tips_switch.collidepoint(event.pos):
                 self.tips.switch()
+            for mode, button in self.mode_buttons.items():
+                if button.collidepoint(event.pos):
+                    self.mode = mode
 
     def on_play(self, event):
+        if phase2.on_play(self, event):         # Phase 2: the waystone travel list
+            return
         if event.type != pygame.KEYDOWN or self.game.over:
             return
         key, game = event.key, self.game
@@ -1584,7 +1640,7 @@ class App:
                     "space_pressed": space and not self.space_was_held}
         self.jump_was_held, self.use_was_held, self.shoot_was_held = jump, use, shoot
         self.space_was_held = space
-        return controls
+        return phase2.cave_controls(self, keys, controls)     # (Phase 2: R fights, G digs and opens)
 
     def on_battle(self, event):
         battle = self.game.battle
@@ -1593,10 +1649,10 @@ class App:
             return
         action = None
         if event.type == pygame.KEYDOWN:
-            action = {pygame.K_a: "attack", pygame.K_1: "attack",
+            action = phase2.battle_keys(self.game, {pygame.K_a: "attack", pygame.K_1: "attack",
                       pygame.K_r: "run", pygame.K_2: "run",
                       pygame.K_e: "eat", pygame.K_3: "eat",
-                      pygame.K_SPACE: "continue", pygame.K_RETURN: "continue"}.get(event.key)
+                      pygame.K_SPACE: "continue", pygame.K_RETURN: "continue"}).get(event.key)   # (Phase 2: R attacks)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             action = "continue"
             for name, rect in self.battle_buttons:
@@ -1614,7 +1670,7 @@ class App:
                 return                              # too soon: wait for the pause to end (mashing A does nothing)
             if action == "attack":
                 self.lunge = 0.25
-            self.game.battle_action(action)
+            phase2.battle_action(self.game, action, self.time)   # (Phase 2: Attack is a timing strike)
             self.battle_ready_at = self.time + BATTLE_PAUSE   # a short pause before your next turn
 
     # Everything you can craft, top to bottom in the Craft menu
@@ -1810,7 +1866,7 @@ class App:
             return "home" if cave.beaten_time is not None else "boss"
         if cave:
             return "castle" if cave.is_castle else cave.theme
-        return "nightfall" if self.game.world == 2 else "home"
+        return "nightfall" if self.game.world == 2 else phase2.tune(self, "home")     # (Phase 2: its own map tune)
 
     def update(self, dt):
         self.time += dt
@@ -1924,6 +1980,8 @@ class App:
                 if game.battle.result in ("won", "exploded"):
                     x, y = self.battle_spot("monster")
                     self.burst(x + 64, y + 64, (200, 200, 210), 30, layer="battle")
+        if self.state != "title":
+            phase2.update_screens(self, dt)       # Phase 2: someone to talk to? (phase2/draw_people.py)
         self.look_for_tips(dt)
         if self.state == "end" and game.won and random.random() < 0.5:
             self.particles.append({
@@ -2193,13 +2251,14 @@ class App:
     def key_box(self, surf, label, x, y):
         image = self.words(label, 20, TEXT)
         rect = pygame.Rect(x, y, image.get_width() + 12, 22)
-        pygame.draw.rect(surf, (70, 74, 102), rect, border_radius=5)
-        pygame.draw.rect(surf, (124, 130, 170), rect, 1, border_radius=5)
+        pygame.draw.rect(surf, phase2.color(self, "key", (70, 74, 102)), rect, border_radius=5)    # (Phase 2: darker)
+        pygame.draw.rect(surf, phase2.color(self, "key_edge", (124, 130, 170)), rect, 1, border_radius=5)
         surf.blit(image, image.get_rect(center=rect.center))
         return rect.right
 
     def bar(self, surf, rect, fraction, color, back=(58, 60, 82)):
         rect = pygame.Rect(rect)
+        back = phase2.color(self, "bar_back", back) if back == (58, 60, 82) else back     # (Phase 2: darker)
         pygame.draw.rect(surf, back, rect, border_radius=rect.h // 2)
         if fraction > 0:
             fill = rect.copy()
@@ -2218,7 +2277,7 @@ class App:
         self.screen.blit(self.overlay, (0, 0))
 
     def panel_box(self, rect, border=YELLOW):
-        pygame.draw.rect(self.screen, (38, 34, 54), rect, border_radius=18)
+        pygame.draw.rect(self.screen, phase2.color(self, "box", (38, 34, 54)), rect, border_radius=18)
         pygame.draw.rect(self.screen, border, rect, 3, border_radius=18)
 
     def draw(self):
@@ -2260,6 +2319,8 @@ class App:
             self.draw_tip()
         elif self.state == "end":
             self.draw_end()
+        phase2.draw_over(self)              # Phase 2: the waystone travel list
+        phase2.draw_screens(self)                # Phase 2: talking, the shop, the quest log
         self.draw_particles(self.screen, "screen")
         if self.flash > 0:
             self.overlay.fill((255, 240, 200, int(220 * self.flash / 0.35)))
@@ -2321,6 +2382,7 @@ class App:
     def draw_world(self, surf):
         game = self.game
         self.draw_tiles(surf)
+        phase2.draw_dusk(self, surf)                # Phase 2: a thin violet dusk over the ground (phase2/theme.py)
         if game.castle and game.castle in game.seen:      # the Shadow King's castle glows
             x, y = self.on_screen(*tile_px(game.castle))
             glow = pygame.transform.smoothscale(self.violet_glow, (int(150 + 16 * math.sin(self.time * 2)),) * 2)
@@ -2332,27 +2394,32 @@ class App:
             if not (m.is_alive and game.is_visible(m.pos)):
                 continue
             x, y = self.on_screen(*self.monster_px.get(id(m), tile_px(m.pos)))
-            sprite = self.monster_sprite(m.base_kind, 3, m.shadow)
-            if game.player.pos[1] < m.pos[1]:
+            crisp = phase2.map_monster_scale(self, m.base_kind)     # Phase 2: new art fills the whole square
+            sprite = self.monster_sprite(m.base_kind, crisp or 3, m.shadow)
+            if phase2.faces_left(game, m):
                 sprite = pygame.transform.flip(sprite, True, False)
+            edge = 0 if crisp else 8
             if game.tile(m.pos) != "W":
-                surf.blit(self.shadow, (x + 14, y + 52))
-            surf.blit(sprite, (x + 8, y + 8 + math.sin(self.time * 3 + id(m) % 7) * 2))
+                surf.blit(self.shadow, (x + 14, y + (56 if crisp else 52)))
+            surf.blit(sprite, (x + edge, y + edge + math.sin(self.time * 3 + id(m) % 7) * 2))
             if m.health < m.max_health:
                 self.bar(surf, (x + 12, y + 2, 40, 5), m.health / m.max_health, RED)
 
+        phase2.draw_on_map(self, surf)          # Phase 2: the townsfolk
         # The player
         x, y = self.on_screen(*self.player_px)
         name = self.map_facing + (" armor" if game.player.has_armor else "")
-        sprite = self.map_walk[name][self.map_pose()]
+        big = phase2.hero_map(self, name, self.map_pose())      # Phase 2: the Hero at 32 x 32 fills his square
+        sprite = big or self.map_walk[name][self.map_pose()]
         if self.player_hit > 0 and int(self.time * 20) % 2 == 0:
             sprite = whiten(sprite)
+        edge = 0 if big else 8
         if game.here == "W":                # rowing: the Hero sits in his boat
-            surf.blit(sprite, (x + 8, y + 2 + bob * 1.5))
+            surf.blit(sprite, (x + edge, y + (-12 if big else 2) + bob * 1.5))
             surf.blit(self.art["boat"], (x + 8, y + 36 + bob * 1.5))
         else:
-            surf.blit(self.shadow, (x + 14, y + 52))
-            surf.blit(sprite, (x + 8, y + 8 + bob * 1.5))
+            surf.blit(self.shadow, (x + 14, y + (56 if big else 52)))
+            surf.blit(sprite, (x + edge, y + edge + bob * 1.5))
 
         # Arrows flying from skeletons
         for a in self.arrows:
@@ -2378,6 +2445,7 @@ class App:
                 surf.blit(self.wisp_glow, (wx - 34, wy - 34 + bob))
                 pygame.draw.circle(surf, (235, 250, 255), (int(wx), int(wy + bob)), 7)
                 pygame.draw.circle(surf, (255, 255, 255), (int(wx), int(wy + bob)), 3)
+        phase2.draw_map(self, surf)                 # Phase 2: the night sky, and "!" over monsters chasing you
         self.draw_popups(surf)
 
     def map_pose(self):
@@ -3667,19 +3735,23 @@ class App:
         king = room.king
         feet_x, feet_y = self.on_screen((king.x + king.w / 2) * TILE, (king.y + king.h) * TILE)
         under = art_bottom(sprites.SHADOW_KING) * KING_SCALE           # the see-through row under his feet
+        pictures, glows = self.king_pictures, self.king_glows
+        new_look = phase2.king_look(self)               # Phase 2: the new Shadow King (phase2/art.py)
+        if new_look:
+            pictures, glows, under = new_look
         if room.beaten_time is not None:                # beaten: he glows white, then melts away into light
-            image = whiten(self.king_pictures[0])
+            image = whiten(pictures[0])
             image.set_alpha(int(255 * max(0.0, room.beaten_time) / throne.VICTORY_TIME))
             surf.blit(image, image.get_rect(midbottom=(feet_x, feet_y + under)))
             return
-        glow = self.king_glows[1 if king.angry else 0]
+        glow = glows[1 if king.angry else 0]
         surf.blit(glow, glow.get_rect(center=(feet_x, feet_y - king.h * TILE / 2)))
         if king.doing == "aim":                         # a fireball grows at his feet...
             grow = 1 - max(0.0, king.timer) / king.normal_or_angry(throne.THROW_WARNING)
             ball_x = (king.x + king.w / 2 + king.facing * (king.w / 2 + throne.FIREBALL_SIZE / 2)) * TILE
             x, y = self.on_screen(ball_x, (room.floor - throne.FIREBALL_HEIGHT) * TILE)
             self.draw_fireball(surf, x, y, 0.3 + 0.7 * grow)
-        image = self.king_pictures[1 if king.angry else 0]
+        image = pictures[1 if king.angry else 0]
         if king.flash > 0:
             image = whiten(image)
         surf.blit(image, image.get_rect(midbottom=(feet_x, feet_y + under)))
@@ -3902,7 +3974,7 @@ class App:
     def cave_sprite(self, art, flip=False, scale=CAVE_SCALE, shadow=False):
         key = (id(art), flip, scale, shadow)
         if key not in self.cave_art:
-            image = make_sprite(art, scale)
+            image = phase2.cave_picture(art, scale) or make_sprite(art, scale)      # (Phase 2: 32 x 32 art)
             if shadow:                              # a shadow monster: darker, with a purple glow
                 image.fill((120, 96, 160), special_flags=pygame.BLEND_RGB_MULT)
                 image.fill((26, 0, 40), special_flags=pygame.BLEND_RGB_ADD)
@@ -3916,7 +3988,7 @@ class App:
             image = whiten(image)
         x, y = self.on_screen(body.x * TILE, body.y * TILE)
         left = x + body.w * TILE / 2 - image.get_width() / 2
-        top = y + body.h * TILE + art_bottom(art) * CAVE_SCALE - image.get_height() + bob
+        top = y + body.h * TILE + art_bottom(art) * phase2.art_pixel(art, CAVE_SCALE) - image.get_height() + bob
         surf.blit(image, (left, top))
         return left, top
 
@@ -4036,7 +4108,7 @@ class App:
 
         # Monsters
         for m in cave.monsters:
-            art = sprites.MONSTER_ART.get(m.kind, sprites.ZOMBIE)
+            art = phase2.cave_monster_art(self, m.kind) or sprites.MONSTER_ART.get(m.kind, sprites.ZOMBIE)  # (Phase 2)
             flash = m.flash > 0
             if m.fuse is not None:                  # an Ember Skull about to blow - it flashes faster and faster!
                 flash = flash or int(self.time * (6 + 14 * (1 - m.fuse / caves.FUSE_TIME))) % 2 == 0
@@ -4086,7 +4158,8 @@ class App:
         if you.safe_time <= 0 or int(self.time * 16) % 2 == 0:
             if you.climbing:                            # on a ladder we see your back: your arms take turns
                 step = int(self.climbed / CLIMB_STEP) % 2
-                art = (self.climb_view_armored if self.game.player.has_armor else self.climb_view)[step]
+                views = self.hero_views()
+                art = (views.climb_view_armored if self.game.player.has_armor else views.climb_view)[step]
             else:                                       # everywhere else we see you from the side
                 art = self.side_picture(you)
             if you.crawling:
@@ -4127,14 +4200,19 @@ class App:
         low = pygame.transform.scale(image, (w + 10, int(h * 0.58)))
         x, y = self.on_screen((you.x + you.w / 2) * TILE, (you.y + you.h) * TILE)
         wiggle = math.sin(self.time * 16) * 2 if abs(you.vx) > 0.3 else 0
-        surf.blit(low, low.get_rect(midbottom=(x + wiggle, y + art_bottom(art) * CAVE_SCALE * 0.58)))
+        surf.blit(low, low.get_rect(midbottom=(x + wiggle, y + art_bottom(art) * phase2.art_pixel(art, CAVE_SCALE) * 0.58)))
 
     def wall_sliding(self, you):
         """Sliding down a climbing wall (holding toward it while you fall)?"""
         return you.wall_time > 0 and you.vy > 0 and not (you.on_ground or you.on_wall or you.pounding or you.hanging)
 
+    def hero_views(self):
+        """The Hero's side, ladder and wall pictures: the ones load_art made, or Phase 2's 32 x 32 ones."""
+        return phase2.hero_views(self) or self
+
     def side_picture(self, you):
         """Which side-view picture of you to draw: walking, jumping, falling or standing still."""
+        views = self.hero_views()
         if you.pounding:
             name = "jump"                               # a ground pound: knees tucked
         elif you.hanging or getattr(you, "swinging", None) is not None:
@@ -4145,9 +4223,9 @@ class App:
                 name = ["reach 1", "hold", "reach 2", "hold"][step]
             else:
                 name = "hold"                           # holding still
-            return (self.wall_view_armored if self.game.player.has_armor else self.wall_view)[name]
+            return (views.wall_view_armored if self.game.player.has_armor else views.wall_view)[name]
         elif self.wall_sliding(you):                    # sliding down a climbing wall, gripping it
-            return (self.wall_view_armored if self.game.player.has_armor else self.wall_view)["slide"]
+            return (views.wall_view_armored if self.game.player.has_armor else views.wall_view)["slide"]
         elif not you.on_ground:
             name = "jump" if you.vy < 0 else "fall"     # going up: knees tucked. Coming down: legs stretched
         elif abs(you.vx) > 0.5:                         # walking (or crawling): a new picture every WALK_STEP blocks
@@ -4156,8 +4234,8 @@ class App:
         else:
             name = "stand"
         if self.game.player.has_armor:
-            return self.side_view_armored[name]
-        return self.side_view[name]
+            return views.side_view_armored[name]
+        return views.side_view[name]
 
     def draw_motes(self, surf):
         """Embers rising in a lava cave, sparkles drifting in a crystal cave, fireflies in a mossy one."""
@@ -4466,6 +4544,8 @@ class App:
     # ----- drawing: side panel and message log ------------------------------------
 
     def draw_panel(self):
+        if phase2.draw_panel(self):         # Phase 2 has a panel of its own (phase2/draw_hud.py)
+            return
         game, p = self.game, self.game.player
         x0 = VIEW_W
         s = self.screen
@@ -4640,8 +4720,12 @@ class App:
         self.text(s, "help", (end + 6, y + 3), 22)
         end = self.key_box(s, "M", x + 72, y)
         self.text(s, "sound", (end + 6, y + 3), 22)
-        end = self.key_box(s, "Esc", x + 160, y)
-        self.text(s, "title" if IN_BROWSER else "quit", (end + 6, y + 3), 22)   # a web page can't close itself
+        if phase2.is_phase2(self.game):         # Phase 2: P (or Esc) opens the pause menu
+            end = self.key_box(s, "P", x + 160, y)
+            self.text(s, "pause", (end + 6, y + 3), 22)
+        else:
+            end = self.key_box(s, "Esc", x + 160, y)
+            self.text(s, "title" if IN_BROWSER else "quit", (end + 6, y + 3), 22)   # a web page can't close itself
         y += 28
         end = self.key_box(s, "C", x, y)
         self.text(s, "craft", (end + 6, y + 3), 22)
@@ -4712,6 +4796,8 @@ class App:
 
     def draw_minimap(self, x, top, width, bottom, show_view=True):
         """A tiny map of the places you have found. The box shows what's on screen."""
+        if phase2.draw_minimap(self, x, top, width, bottom, show_view):     # Phase 2's big world
+            return
         game, s = self.game, self.screen
         size = min(width // game.cols, (bottom - top - 22) // game.rows)
         if size < 2:
@@ -4746,6 +4832,8 @@ class App:
             surf.fill(fill, (x + i * gap, y, gap - (3 if gap > 6 else 2), 5))
 
     def draw_log(self):
+        if phase2.draw_log(self):           # Phase 2 has a message box of its own (phase2/draw_hud.py)
+            return
         s = self.screen
         s.fill(LOG_BG, (0, VIEW_H, VIEW_W, LOG_H))
         pygame.draw.line(s, (60, 64, 90), (0, VIEW_H), (VIEW_W, VIEW_H), 2)
@@ -4803,8 +4891,9 @@ class App:
 
     def tip_picture(self, name):
         """A tip's bubble, painted once and kept. Also says where "no more tips" is on it, for clicks."""
-        if name not in self.tip_pictures:
-            lines = self.wrap(tutorial.TIPS[name], 28, TIP_W - 40)
+        words = phase2.tip_words(self.game, name, tutorial.TIPS[name])     # (Phase 2 names its own keys)
+        if (name, words) not in self.tip_pictures:
+            lines = self.wrap(words, 28, TIP_W - 40)
             picture = pygame.Surface((TIP_W, 96 + 28 * len(lines)), pygame.SRCALPHA)   # see-through corners
             pygame.draw.rect(picture, TIP_BG, picture.get_rect(), border_radius=16)
             pygame.draw.rect(picture, YELLOW, picture.get_rect(), 3, border_radius=16)
@@ -4819,8 +4908,8 @@ class App:
             said = self.text(picture, "OK", (end + 8, y + 3), 22)
             end = self.key_box(picture, "S", said.right + 36, y)
             said = self.text(picture, "no more tips", (end + 8, y + 3), 22, DIM)
-            self.tip_pictures[name] = (picture, pygame.Rect(end - 30, y - 6, said.right - end + 38, 34))
-        return self.tip_pictures[name]
+            self.tip_pictures[name, words] = (picture, pygame.Rect(end - 30, y - 6, said.right - end + 38, 34))
+        return self.tip_pictures[name, words]
 
     def place_bubble(self, size, hole):
         """Where a bubble goes: above the thing (or below it, if there's no room), or to the left of
@@ -4855,6 +4944,9 @@ class App:
         else:
             angle = resting + math.sin(self.time * 2) * 3
         hand = (left + 10 * 8, top + 11.5 * 8)          # his front hand in the big picture
+        big = phase2.hero_fight(self, p.has_armor)      # (Phase 2: the hand of the 32 x 32 Hero)
+        if big:
+            hand = (left + big[1][0], top + big[1][1])
         turned = pygame.transform.rotate(self.battle_held[tool], angle)
         if p.ring_hits:                                 # the diamond ring makes your sword glow
             surf.blit(self.gem_glow, self.gem_glow.get_rect(center=hand))
@@ -4875,6 +4967,9 @@ class App:
         px, py = self.battle_spot("player")
         px += math.sin(self.lunge / 0.25 * math.pi) * 40 if self.lunge > 0 else 0
         sprite = self.art["player_big_armor" if p.has_armor else "player_big"]
+        big = phase2.hero_fight(self, p.has_armor)      # Phase 2: the Hero at 32 x 32, just as big
+        if big:
+            sprite = big[0]
         if self.player_hit > 0:
             sprite = whiten(sprite)
             px += random.uniform(-6, 6)
@@ -4931,7 +5026,9 @@ class App:
         # Buttons or the result
         self.battle_buttons = []
         if not battle.over:
-            choices = [("attack", "A", "Attack"), ("run", "R", "Run away"), ("eat", "E", "Eat (%d)" % p.food)]
+            choices = [(action, key, words % p.food if "%d" in words else words) for action, key, words in
+                       phase2.battle_buttons(self.game, [("attack", "A", "Attack"), ("run", "R", "Run away"),
+                                                         ("eat", "E", "Eat (%d)")])]
             mouse = pygame.mouse.get_pos()
             ready = self.time >= self.battle_ready_at       # during the pause the buttons are dimmed
             for i, (action, key, label) in enumerate(choices):
@@ -4956,6 +5053,7 @@ class App:
             self.text(s, word, (box.centerx, box.bottom - 66), 52, color, "center", shadow=True)
             alpha = int(160 + 95 * math.sin(self.time * 5))
             self.text(s, "Press SPACE to continue", (box.centerx, box.bottom - 28), 26, DIM, "center", alpha=alpha)
+        phase2.draw_battle(self)                    # Phase 2: the timing bar
 
     def draw_sunfang(self):
         """The forging scene: the anvil, the three diamonds, the hammer, and the key to press."""
@@ -5089,7 +5187,7 @@ class App:
             s.blit(image, image.get_rect(center=center))
         cx, cy = middle
         if picture == "king":
-            show(self.art["king_big"], (cx, cy + bob), self.violet_glow)
+            show(phase2.king_card(self) or self.art["king_big"], (cx, cy + bob), self.violet_glow)   # (Phase 2: new art)
         elif picture == "monsters":
             kinds = [kind for kind in rules.MONSTER_TYPES if kind not in ("Guardian", "Warden")]
             for i, kind in enumerate(kinds):
@@ -5100,7 +5198,7 @@ class App:
             for i in range(3):
                 show(self.art["diamond_big"], (cx + (i - 1) * 70, cy + 105 + math.sin(self.time * 3 + i) * 5))
         elif picture == "portal":
-            show(self.art["player_title"], (cx - 120, cy + bob))
+            show(phase2.hero_card(self) or self.art["player_title"], (cx - 120, cy + bob))
             for i in range(14):                         # the swirling Portal
                 angle = self.time * 3 + i * 2 * math.pi / 14
                 pygame.draw.circle(s, (210, 100, 255) if i % 2 else (100, 230, 255),
@@ -5117,7 +5215,7 @@ class App:
             show(self.sun_glow, (cx, cy - 20))
             pygame.draw.circle(s, (255, 226, 120), (cx, cy - 20), 62)
             pygame.draw.circle(s, (255, 246, 200), (cx, cy - 20), 46)
-            show(self.art["player_title"], (cx, cy + 70 + bob * 0.5))
+            show(phase2.hero_card(self) or self.art["player_title"], (cx, cy + 70 + bob * 0.5))
 
     def craft_problem(self, kind):
         """Why you can't craft this right now - or None if you can."""
@@ -5270,6 +5368,8 @@ class App:
         box.center = (WIDTH // 2, HEIGHT // 2)
         self.panel_box(box)
         self.text(s, "How to Play", (box.centerx, box.y + 22), 52, YELLOW, "midtop", shadow=True)
+        if phase2.is_phase2(self.game):     # Phase 2: the pause menu and the save slots (phase2/pause.py)
+            self.text(s, "P: pause and save  -  3 save slots (Load)", (box.right - 36, box.y + 40), 24, GREEN, "topright")
         lines = [
             ("GOAL", YELLOW),
             ("Defeat %d monsters and mine %d diamonds." % (rules.MONSTERS_TO_DEFEAT, rules.DIAMONDS_NEEDED), TEXT),
@@ -5303,6 +5403,7 @@ class App:
             ("F shoots an arrow (fire arrows in Nightfall!).  Armor soaks up hits.", TEXT),
             ("Sea Serpents live in the lake. Beat them fast - they can smash your boat!", TEXT),
         ]
+        lines = phase2.help_lines(self.game, lines)     # Phase 2: its own GOAL
         y = box.y + 84
         for line, color in lines:
             self.text(s, line, (box.x + 36, y), 24 if color == TEXT else 23, color)
@@ -5328,6 +5429,7 @@ class App:
         for line, color in xp_lines:
             self.text(s, line, (x, y), 24 if color == TEXT else 23, color)
             y += 24
+        tight = phase2.is_phase2(self.game)     # Phase 2 squeezes this column: it ran over the last line
         for name, power in rules.POWERS.items():
             said = self.text(s, name, (x, y), 24, GREEN)
             limit = power["limit"]
@@ -5337,7 +5439,7 @@ class App:
                 self.text(s, "you have it" + (" x%d" % p.power(name) if p.power(name) > 1 else ""),
                           (box.right - 36, y + 2), 20, YELLOW, "topright")
             self.text(s, power["what"], (x + 20, y + 22), 22, TEXT)
-            y += 41
+            y += 37 if tight else 41
         moves = [("CAVE MOVES", YELLOW),
                  ("UP/DOWN at a ladder: climb it.  SPACE: jump off.", TEXT),
                  ("Just miss a ledge? You catch its edge and pull up.", TEXT),
@@ -5346,7 +5448,7 @@ class App:
                  ("Climbing wall: hold UP to climb it. SPACE: wall jump!", TEXT)]
         for line, color in moves:
             self.text(s, line, (x, y), 23 if color == TEXT else 22, color)
-            y += 23
+            y += 22 if tight else 23
         self.text(s, "Press any key to keep playing.     Tip bubbles are %s: S in a bubble turns them off, "
                   "TAB on the title screen turns them on." % ("ON" if self.tips.on else "OFF"),
                   (box.centerx, box.bottom - 36), 24, DIM, "midtop")
@@ -5361,6 +5463,7 @@ class App:
             stats = [("Level", p.level), ("Monsters defeated", p.monsters_defeated),
                      ("Light shards", "%d / %d" % (p.light_shards, len(castle.CASTLE_LEVELS))),
                      ("Knocked out", game.knockouts), ("Shadow King fights", game.king_fights), ("Turns", game.turn)]
+        stats = phase2.end_stats(game, stats)       # Phase 2: Light Stones, not diamonds
         box = pygame.Rect(0, 0, 620, 252 + 32 * len(stats))
         box.center = (WIDTH // 2, HEIGHT // 2)
         self.panel_box(box, GREEN if game.won else RED)
@@ -5396,9 +5499,10 @@ class App:
         self.dim_screen(150)
         top = (HEIGHT - 708) // 2                          # keep the title words in the middle
 
-        self.text(s, "Adventure World", (WIDTH // 2, top + 90), 84, YELLOW, "center", shadow=True)
-        self.text(s, "Explore. Fight monsters. Find diamonds. Escape through the Portal!",
-                  (WIDTH // 2, top + 150), 28, TEXT, "center")
+        if not phase2.draw_title(self, top):        # Phase 2 picked: its own name and goal (phase2/theme.py)
+            self.text(s, "Adventure World", (WIDTH // 2, top + 90), 84, YELLOW, "center", shadow=True)
+            tagline = "Explore. Fight monsters. Find diamonds. Escape through the Portal!"
+            self.text(s, tagline, (WIDTH // 2, top + 150), 28, TEXT, "center")
 
         # The Hero and every monster in the game. Add a monster to MONSTER_TYPES and it shows up here too!
         cast = [(self.art["player_title"], self.name_input.strip() or "You")]
@@ -5419,6 +5523,7 @@ class App:
         if int(self.time * 2) % 2 == 0:
             pygame.draw.line(s, TEXT, (name_rect.right + 4, box.y + 12), (name_rect.right + 4, box.bottom - 12), 3)
 
+        self.draw_mode_choice(top + 482)
         alpha = int(160 + 95 * math.sin(self.time * 4))
         self.text(s, "Press ENTER to start", (WIDTH // 2, top + 520), 40, GREEN, "center", shadow=True, alpha=alpha)
         self.text(s, "Arrow keys to move  -  H for help in the game", (WIDTH // 2, top + 570), 24, DIM, "center")
@@ -5430,6 +5535,21 @@ class App:
         end = self.key_box(s, "TAB", x, y)
         said = self.text(s, words, (end + 10, y + 11), 28, GREEN if self.tips.on else DIM, "midleft")
         self.tips_switch = pygame.Rect(x, y, said.right - x, 22).inflate(16, 16)
+        phase2.draw_slots(self)                             # Phase 2's save slot list, if it's open
+
+    def draw_mode_choice(self, middle_y):
+        """Classic, Phase 2 (and Continue, with a saved Phase 2 game): LEFT and RIGHT or a click picks one."""
+        s, gap, width = self.screen, 16, 150
+        x = WIDTH // 2 - (len(self.modes) * (width + gap) - gap) // 2
+        self.mode_buttons = {}
+        for mode in self.modes:
+            box = pygame.Rect(x, middle_y - 17, width, 34)
+            picked = mode == self.mode
+            pygame.draw.rect(s, (70, 62, 30) if picked else (40, 42, 60), box, border_radius=10)
+            pygame.draw.rect(s, YELLOW if picked else (90, 94, 124), box, 3 if picked else 2, border_radius=10)
+            self.text(s, GAME_MODES[mode], box.center, 28, YELLOW if picked else DIM, "center")
+            self.mode_buttons[mode] = box
+            x += width + gap
 
 
 def main():
@@ -5440,10 +5560,14 @@ def main():
     parser.add_argument("--nightfall", action="store_true", help="play-test: start in Nightfall Hollow, just through the Portal")
     parser.add_argument("--castle", action="store_true", help="play-test: start right next to the Shadow King's castle")
     parser.add_argument("--throne", action="store_true", help="play-test: start in the throne room, fighting the Shadow King")
+    parser.add_argument("--phase2", action="store_true", help="start a new Phase 2 game straight away (the bigger world)")
+    parser.add_argument("--continue", dest="continue_save", action="store_true",
+                        help="carry on with the saved Phase 2 game (a new one if there's no save)")
     args = parser.parse_args()
 
-    app = App(args.name or "", seed=args.seed, sound=not args.mute, castle=args.castle, throne=args.throne,
-              nightfall=args.nightfall)
+    phase2_mode = "continue" if args.continue_save else "phase2" if args.phase2 else None
+    app = App(args.name or "", seed=args.seed, sound=not args.mute, castle=args.castle, throne=args.throne, nightfall=args.nightfall,
+              phase2_mode=phase2_mode)
     app.run()
     pygame.quit()
 

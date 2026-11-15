@@ -580,7 +580,7 @@ def compass(here, there):
 class Game:
     def __init__(self, player_name="Hero", seed=None):
         self.rng = random.Random(seed)
-        self.map = parse_map(WORLD_MAP)
+        self.map = self.world_map()
         self.rows = len(self.map)
         self.cols = len(self.map[0])
         self.world = 1                  # 1 = home, 2 = Nightfall Hollow
@@ -653,6 +653,10 @@ class Game:
         self.log("Welcome, %s! Defeat %d monsters and mine %d diamonds, then reach the Portal."
                  % (player_name, MONSTERS_TO_DEFEAT, DIAMONDS_NEEDED), "quest")
         self.log("Not every cave has a diamond - explore to find them!", "quest")
+
+    def world_map(self):
+        """The home world's map, as rows of letters. (Phase 2 draws a bigger one: phase2/world.py.)"""
+        return parse_map(WORLD_MAP)
 
     # ----- messages and effects ---------------------------------------------
 

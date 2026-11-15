@@ -319,9 +319,15 @@ class ThroneRoom(caves.Cave):
 
     # ----- you fight back ----------------------------------------------------------------
 
-    def use(self, down=False):
-        """R swings Sunfang. If he's in reach, it hits him!"""
+    def attack(self):
+        """Phase 2's R: the same swing as Classic's R."""
+        self.use()
+
+    def use(self, down=False, swing=True):
+        """R swings Sunfang. If he's in reach, it hits him! (swing=False: Phase 2's G, which never swings.)"""
         you, king, p = self.you, self.king, self.game.player
+        if not swing:
+            return super().use(down, swing=False)
         if you.swing > 0:
             return
         reach_x = you.x + you.w if you.facing > 0 else you.x - caves.SWORD_REACH

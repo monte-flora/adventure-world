@@ -73,8 +73,14 @@ def saved():
 # Every tip can show
 # ===========================================================================
 
+def start_phase2(app):
+    app.mode = "phase2"
+    start_game(app)
+
+
 MAP_SETUPS = {
     "walk":     lambda app, world, p: None,
+    "pause":    lambda app, world, p: start_phase2(app),        # (Phase 2 only: it saves)
     "monster":  lambda app, world, p: world.monsters.append(rules.Monster("Zombie", world.neighbors(p.pos)[0])),
     "eat":      lambda app, world, p: (setattr(p, "health", p.max_health // 2), setattr(p, "food", 1)),
     "forest":   lambda app, world, p: stand_on(app, nearest(world, "F")),

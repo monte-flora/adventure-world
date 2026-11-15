@@ -31,6 +31,7 @@ START_WITH_TIPS = True      # tips are on for a new player (until you turn them 
 TIPS = {
     # On the world map
     "walk":     "This is you! Press the ARROW keys to walk around. Press H any time for help.",
+    "pause":    "Press P to pause and save.",                       # (Phase 2 only)
     "monster":  "A monster! Walk into it to start a fight. In a fight, press A to attack!",
     "eat":      "Ouch, you're hurt! Press E to eat some food and feel better.",
     "forest":   "A forest! Press T to chop wood, and SPACE to look for berries to eat.",
@@ -135,6 +136,11 @@ def at_the_start(game):
     return ("you",) if game.turn == 1 else None
 
 
+def phase2_started(game):
+    """Phase 2 only (it saves): the first time you play it, after your first step."""
+    return ("you",) if getattr(game, "phase2", False) and game.world == 1 else None
+
+
 def monster_in_sight(game):
     near = [(rules.distance(m.pos, game.player.pos), m.pos) for m in game.monsters
             if m.is_alive and game.is_visible(m.pos)]
@@ -214,6 +220,7 @@ def in_a_cave(moment):
 # higher one shows first, and the other one waits its turn.
 MOMENTS = [
     ("walk",         on_the_map(at_the_start)),
+    ("pause",        on_the_map(phase2_started)),
     ("cave",         in_a_cave(just_came_in)),
     ("monster",      on_the_map(monster_in_sight)),
     ("cave monster", in_a_cave(cave_monster_nearby)),

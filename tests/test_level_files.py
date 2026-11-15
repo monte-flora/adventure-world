@@ -15,7 +15,7 @@ GAME_FOLDER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_the_game_reads_every_cave_and_castle_level_from_the_levels_folder():
-    ok(len(caves.CAVE_LEVELS) == 12, "12 hand-drawn caves in levels/caves (found %d)" % len(caves.CAVE_LEVELS))
+    ok(len(caves.CAVE_LEVELS) == 17, "17 hand-drawn caves in levels/caves (found %d)" % len(caves.CAVE_LEVELS))
     ok(len(castle.CASTLE_LEVELS) == 5, "5 castle levels in levels/castle (found %d)" % len(castle.CASTLE_LEVELS))
     for path, text in caves.CAVE_LEVEL_FILES + castle.CASTLE_LEVEL_FILES:
         name = os.path.basename(path)

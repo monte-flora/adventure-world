@@ -26,6 +26,7 @@ import pygame  # noqa: E402
 GAME_FILES = ["main.py", "game.py", "rules.py", "caves.py", "castle.py", "throne.py", "story.py", "sprites.py",
               "tutorial.py", "settings.py"]
 GAME_FOLDERS = ["levels"]   # the caves and castle levels, one text file each
+GAME_FOLDERS += ["phase2"]  # and the Phase 2 code (its world map is in levels/world)
 APP = os.path.join(HERE, "build", "adventure")
 OGG_QUALITY = "3"           # 0 = smallest, 10 = best sounding. 3 sounds fine for our math music
 
@@ -66,7 +67,7 @@ def main():
         shutil.copy(os.path.join(GAME_FOLDER, name), APP)
     for name in GAME_FOLDERS:
         shutil.copytree(os.path.join(GAME_FOLDER, name), os.path.join(APP, name),
-                        ignore=shutil.ignore_patterns("*.md"))
+                        ignore=shutil.ignore_patterns("*.md", "__pycache__"))
     print("Making the music...")
     small = make_music(os.path.join(APP, "web_music"))
     print("Making the web page with pygbag...")

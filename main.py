@@ -40,14 +40,16 @@ async def main():
         await play(wanted)
         if not game.IN_BROWSER:
             break                              # on a computer, quitting closes the window
-        wanted.discard("castle")               # in a browser there's nothing to close, so quitting
-        wanted.discard("throne")               # starts over at the title screen
+        for shortcut in ("castle", "throne", "phase2", "continue"):
+            wanted.discard(shortcut)           # in a browser there's nothing to close, so quitting starts over at the title
     pygame.quit()
 
 
 async def play(wanted):
     """Play one game, until you quit."""
-    app = game.App("", sound="mute" not in wanted, castle="castle" in wanted, throne="throne" in wanted)
+    phase2_mode = "continue" if "continue" in wanted else "phase2" if "phase2" in wanted else None    # ?phase2
+    app = game.App("", sound="mute" not in wanted, castle="castle" in wanted, throne="throne" in wanted,
+                   phase2_mode=phase2_mode)
     show_speed = "fps" in wanted               # ?fps prints how smoothly the game runs, every 5 seconds
     frames, seconds, game_time, show_time = 0, 0.0, 0.0, 0.0
     while app.running:

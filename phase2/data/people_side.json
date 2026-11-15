@@ -1,0 +1,369 @@
+{
+  "about": "Side-quest people (stage 3b), written like people.json. They only show up once you've walked in their land ('been_to'), and lost things only while a quest needs them. 'more_talk' adds words to people who live in people.json already: 'start' variants are tried before their own, 'nodes' are new nodes, and 'choices' go in before a node's last choice. phase2/side_steps.py explains it.",
+  "more_talk": {
+    "bram": {
+      "start": [
+        {"if": ["quest_active:bram_great_sword", "has_great"],
+         "say": ["Whoa! Is that a GREAT sword? Let me look... Perfect edge. Not one wobble!",
+                 "You're a real smith, {name}. Here, take this armor. I made it on a very good day."],
+         "do": ["finish_quest:bram_great_sword"],
+         "next": "menu"}
+      ],
+      "choices": {"menu": [{"text": "Any work for me?", "go": "challenge"}]},
+      "nodes": {
+        "challenge": [
+          {"if": ["quest_new:bram_great_sword"],
+           "say": ["Work? Ha! How about a challenge instead.",
+                   "Forge a GREAT sword at my anvil: 2 Perfect strikes and no Miss. Hit the marker right in the middle!",
+                   "Show it to me, and I'll give you a suit of my best armor."],
+           "choices": [{"text": "Challenge accepted!", "do": ["start_quest:bram_great_sword"], "go": "menu"},
+                       {"text": "Maybe later.", "go": "menu"}]},
+          {"if": ["quest_active:bram_great_sword"],
+           "say": ["Still trying? Wait for the marker to reach the middle, then strike. Clang!"],
+           "next": "menu"},
+          {"say": ["No more challenges. You beat my best one! I tell everyone about it."],
+           "next": "menu"}
+        ]
+      }
+    },
+    "mabel": {
+      "start": [
+        {"if": ["quest_step:mabel_letter:1"],
+         "say": ["Finn wrote back? 'Dear sister, I do NOT snore.' Ha! He snores like a walrus.",
+                 "Thank you, {name}. Here's some gold, and two of my best pies."],
+         "do": ["finish_quest:mabel_letter"],
+         "next": "shop"}
+      ],
+      "choices": {"shop": [{"text": "Any errands?", "go": "errand"}]},
+      "nodes": {
+        "errand": [
+          {"if": ["quest_new:mabel_letter"],
+           "say": ["Oh, would you? My brother, Old Finn, fishes in Lakeside, by the Great Lake.",
+                   "Could you take him this letter? He never writes back, the old sea cucumber."],
+           "choices": [{"text": "I'll take it!", "do": ["start_quest:mabel_letter"], "go": "shop"},
+                       {"text": "Not right now.", "go": "shop"}]},
+          {"if": ["quest_active:mabel_letter"],
+           "say": ["The letter goes to Old Finn, in Lakeside. Follow the water!"],
+           "next": "shop"},
+          {"say": ["No errands today, dear. Thank you for the last one!"],
+           "next": "shop"}
+        ]
+      }
+    },
+    "finn": {
+      "start": [
+        {"if": ["quest_step:mabel_letter:0"],
+         "say": ["A letter? From my sister Mabel? Let's see...",
+                 "'Dear Finn, you snore like a walrus.' I DO NOT! Hmph.",
+                 "Here, take my answer back to her. And tell her I said hi."],
+         "do": ["advance_quest:mabel_letter"]},
+        {"if": ["quest_step:lily_boat:0"],
+         "say": ["Lily's toy boat? I saw it go by this morning, bobbing along like a little duck.",
+                 "The wind blew it north, to the shore of the Old Ruins. Look by the water there!"],
+         "do": ["advance_quest:lily_boat"]}
+      ]
+    },
+    "pip": {
+      "start": [
+        {"if": ["quest_step:juno_postcard:0"],
+         "say": ["A postcard? For ME? From Juno in the desert!",
+                 "It says: 'It's so hot here, the lizards wear hats.' Ha ha! Lizards in hats!",
+                 "Tell Juno thank you! And that Whiskers says meow."],
+         "do": ["advance_quest:juno_postcard"]}
+      ]
+    },
+    "juno": {
+      "start": [
+        {"if": ["quest_new:juno_postcard"],
+         "say": ["It's so hot here! Even the lizards wear hats.",
+                 "I made a postcard for my pen pal Pip, in Meadowbrook. Could you take it to him?"],
+         "choices": [{"text": "Sure, I'll take it!", "do": ["start_quest:juno_postcard"]},
+                     {"text": "Not now, sorry."}]},
+        {"if": ["quest_step:juno_postcard:0"],
+         "say": ["Pip lives in Meadowbrook, in Home Meadow. Don't let the postcard melt!"]},
+        {"if": ["quest_step:juno_postcard:1"],
+         "say": ["Pip liked it? And Whiskers said meow? Yay!",
+                 "Here's my allowance. And some dates from the palm tree. Yum!"],
+         "do": ["finish_quest:juno_postcard"]}
+      ]
+    }
+  },
+  "people": [
+    {
+      "id": "granny_hazel",
+      "name": "Granny Hazel",
+      "look": "villager",
+      "pace": true,
+      "place": {"village": "Oakhollow", "row": 0, "col": -1},
+      "show_if": ["been_to:Whispering Woods"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:hazel_pie"],
+           "say": ["Hello, dearie! I want to bake my famous berry pie, but my knees are too creaky for berry picking.",
+                   "Could you bring me 3 food? Press SPACE in a forest to look for berries."],
+           "choices": [{"text": "Yum, I'll help!", "do": ["start_quest:hazel_pie"], "go": "yes"},
+                       {"text": "Maybe later, Granny."}]},
+          {"if": ["quest_active:hazel_pie", "has:food:3"],
+           "say": ["Ooh, those look juicy! Are they for my pie?"],
+           "choices": [{"text": "Here you go! (give 3 food)", "do": ["take:food:3", "finish_quest:hazel_pie"], "go": "thanks"},
+                       {"text": "Not yet, I'm hungry!"}]},
+          {"if": ["quest_active:hazel_pie"],
+           "say": ["I need 3 food for the pie, dearie. You have {food}."]},
+          {"say": ["Mmm, smell that? The whole village came for a slice!"]}
+        ],
+        "yes": {"say": ["Bless you! Mind the spiders in the woods."]},
+        "thanks": {"say": ["Thank you, {name}! I knitted you a lucky scarf while I waited.",
+                           "Wear it, and you'll always get back up. That's one extra life!"]}
+      }
+    },
+    {
+      "id": "ranger_ivy",
+      "name": "Ranger Ivy",
+      "look": "guide",
+      "pace": true,
+      "place": {"village": "Oakhollow", "row": 1, "col": 2},
+      "show_if": ["been_to:Whispering Woods"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:ivy_spiders"],
+           "say": ["Shh! Hear that? Tip-tap-tip-tap. Spiders! Too many spiders!",
+                   "They keep stealing my socks to make webs. Could you beat 4 of them?"],
+           "choices": [{"text": "Leave it to me!", "do": ["start_quest:ivy_spiders"], "go": "yes"},
+                       {"text": "Spiders? No thanks!"}]},
+          {"if": ["quest_step:ivy_spiders:0"],
+           "say": ["4 spiders, {name}. Sneak up behind them for a free first hit!"]},
+          {"if": ["quest_step:ivy_spiders:1"],
+           "say": ["You did it! My socks are safe!",
+                   "Here's a treasure map. A lookout tower in these woods watches over a hidden chest. Now you know where!"],
+           "do": ["finish_quest:ivy_spiders"]},
+          {"say": ["Not a spider in sight. My socks thank you!"]}
+        ],
+        "yes": {"say": ["Brave knight! Come back when you've beaten 4."]}
+      }
+    },
+    {
+      "id": "captain_marla",
+      "name": "Captain Marla",
+      "look": "fisher",
+      "pace": true,
+      "place": {"village": "Lakeside", "row": 0, "col": -1},
+      "show_if": ["been_to:The Great Lake"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:marla_serpents"],
+           "say": ["Arr! Two big Sea Serpents keep splashing my boat, {name}!",
+                   "Row out on the lake and beat 2 of them. I'll give you my old Great sword."],
+           "choices": [{"text": "Aye aye, Captain!", "do": ["start_quest:marla_serpents"], "go": "yes"},
+                       {"text": "I'll stay on land for now."}]},
+          {"if": ["quest_step:marla_serpents:0"],
+           "say": ["Beat 2 Sea Serpents out on the water. Build a boat with C if you need one!"]},
+          {"if": ["quest_step:marla_serpents:1"],
+           "say": ["Arr, the lake is calm again! Here's my Great sword. It's beaten a hundred serpents!",
+                   "Well, eleven. But it's still a GREAT sword."],
+           "do": ["finish_quest:marla_serpents"]},
+          {"say": ["Smooth sailing, thanks to you, {name}!"]}
+        ],
+        "yes": {"say": ["Watch out, they bite!"]}
+      }
+    },
+    {
+      "id": "lily",
+      "name": "Lily",
+      "look": "kid",
+      "pace": true,
+      "place": {"village": "Lakeside", "row": 1, "col": 2},
+      "show_if": ["been_to:The Great Lake"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:lily_boat"],
+           "say": ["My toy boat, Captain Quack, sailed away! The wind took him!",
+                   "Old Finn sees everything on the lake. Could you ask him where Captain Quack went?"],
+           "choices": [{"text": "I'll find him!", "do": ["start_quest:lily_boat"], "go": "yes"},
+                       {"text": "Sorry, not now."}]},
+          {"if": ["quest_step:lily_boat:0"],
+           "say": ["Ask Old Finn! He's right here in Lakeside."]},
+          {"if": ["quest_step:lily_boat:1"],
+           "say": ["The Old Ruins? That's so far! Please find Captain Quack!"]},
+          {"if": ["quest_step:lily_boat:2"],
+           "say": ["CAPTAIN QUACK! You're home! Thank you, {name}!",
+                   "Here, take my pocket money. And these arrows I found. Don't tell my mom."],
+           "do": ["finish_quest:lily_boat"]},
+          {"say": ["Captain Quack and I sail in the bathtub now. It's safer."]}
+        ],
+        "yes": {"say": ["Thank you! Ask Old Finn first!"]}
+      }
+    },
+    {
+      "id": "lily_boat_toy",
+      "name": "Captain Quack",
+      "look": "toy_boat",
+      "place": {"land": "Old Ruins", "row": 12, "col": 2},
+      "show_if": ["quest_step:lily_boat:1"],
+      "talk": {
+        "start": {"say": ["A little red toy boat, stuck in the weeds. Its flag says: CAPTAIN QUACK.",
+                          "You pick it up. Time to take it home to Lily in Lakeside!"],
+                  "do": ["advance_quest:lily_boat"]}
+      }
+    },
+    {
+      "id": "sven",
+      "name": "Shepherd Sven",
+      "look": "farmer",
+      "pace": true,
+      "place": {"village": "Snowcap", "row": 0, "col": -1},
+      "show_if": ["been_to:Frost Peaks"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:sven_wolves"],
+           "say": ["Oh no, oh no! Frost Wolves keep howling at my goats. Now my goats howl too!",
+                   "Could you beat 3 Frost Wolves? Then my goats can go back to saying 'Baaa'."],
+           "choices": [{"text": "I'll do it!", "do": ["start_quest:sven_wolves"], "go": "yes"},
+                       {"text": "Wolves are scary. Later!"}]},
+          {"if": ["quest_step:sven_wolves:0"],
+           "say": ["Arooo! ...Sorry, that was one of my goats. Beat 3 Frost Wolves, please!"]},
+          {"if": ["quest_step:sven_wolves:1"],
+           "say": ["Baaa! Hear that? My goats are goats again! Thank you, {name}!",
+                   "I can give you a warm wool coat to wear like armor, or my bag of gold. Which one?"],
+           "choices": [{"text": "The wool armor, please!", "do": ["finish_quest_with:sven_wolves:armor"], "go": "armor"},
+                       {"text": "The bag of gold, please!", "do": ["finish_quest_with:sven_wolves:gold"], "go": "gold"}]},
+          {"say": ["Baaa! (That means thank you, in goat.)"]}
+        ],
+        "yes": {"say": ["Thank you! Wear something warm. The wolves are fast!"]},
+        "armor": {"say": ["There! Warm and tough. The wolves will bounce right off!"]},
+        "gold": {"say": ["Spend it well! Maybe on a hat. It's cold up here."]}
+      }
+    },
+    {
+      "id": "gus",
+      "name": "Gus the Mapmaker",
+      "look": "guide",
+      "pace": true,
+      "place": {"village": "Snowcap", "row": 1, "col": 2},
+      "show_if": ["been_to:Frost Peaks"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:gus_lookout"],
+           "say": ["I'm making a map of the whole world, but I'm afraid of heights. Eek!",
+                   "Could you climb a lookout tower in Frost Peaks, and dig up the treasure you see from the top?"],
+           "choices": [{"text": "I love climbing!", "do": ["start_quest:gus_lookout"], "go": "yes"},
+                       {"text": "Not today."}]},
+          {"if": ["quest_step:gus_lookout:0"],
+           "say": ["Find a wooden lookout tower in Frost Peaks and press SPACE on it to climb."]},
+          {"if": ["quest_step:gus_lookout:1"],
+           "say": ["You saw a chest from up there? Go and dig it up! Press SPACE on it."]},
+          {"if": ["quest_step:gus_lookout:2"],
+           "say": ["Treasure! And now I can draw it on my map. X marks the spot!",
+                   "Here's some gold, and a copy of my map of the desert. There's a hidden chest on it!"],
+           "do": ["finish_quest:gus_lookout"]},
+          {"say": ["My map is almost done. I drew you on it too! You're the little knight."]}
+        ],
+        "yes": {"say": ["Hooray! Don't look down!"]}
+      }
+    },
+    {
+      "id": "zara",
+      "name": "Zara the Nomad",
+      "look": "villager",
+      "pace": true,
+      "place": {"village": "Sandwell", "row": -1, "col": 2},
+      "show_if": ["been_to:Sunscorch Desert"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:zara_scorpions"],
+           "say": ["Ouch! Ouch! A Scorpion pinched my toe, {name}! And then two more pinched my OTHER toe!",
+                   "Could you beat 3 Scorpions? I'll pay you in gold and arrows."],
+           "choices": [{"text": "Your toes are safe with me!", "do": ["start_quest:zara_scorpions"], "go": "yes"},
+                       {"text": "Maybe later."}]},
+          {"if": ["quest_step:zara_scorpions:0"],
+           "say": ["3 Scorpions! Watch your toes!"]},
+          {"if": ["quest_step:zara_scorpions:1"],
+           "say": ["No more pinching! My toes are doing a happy dance.",
+                   "Here's your gold, and 10 arrows. Shoot straight!"],
+           "do": ["finish_quest:zara_scorpions"]},
+          {"say": ["Wiggle wiggle. Happy toes!"]}
+        ],
+        "yes": {"say": ["Wear shoes. Trust me."]}
+      }
+    },
+    {
+      "id": "bubbles",
+      "name": "Madame Bubbles",
+      "look": "wizard",
+      "pace": true,
+      "place": {"village": "Bogwater", "row": 0, "col": -1},
+      "show_if": ["been_to:Murk Swamp"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:bubbles_potion"],
+           "say": ["Bubble, bubble! I'm Madame Bubbles, the best potion maker in the swamp. The ONLY one, too.",
+                   "Bring me 5 wood for my fire and 2 food for the potion, and I'll brew you something magic!"],
+           "choices": [{"text": "Ooh, magic! Okay!", "do": ["start_quest:bubbles_potion"], "go": "yes"},
+                       {"text": "No thanks."}]},
+          {"if": ["quest_active:bubbles_potion", "has:wood:5", "has:food:2"],
+           "say": ["Wood and food! Into the pot... bubble, bubble, POP!",
+                   "A lucky potion! Will you drink it for an extra life, or sell it to me for 60 gold?"],
+           "choices": [{"text": "Drink it! (an extra life)", "do": ["take:wood:5", "take:food:2", "finish_quest_with:bubbles_potion:drink"], "go": "drink"},
+                       {"text": "Sell it! (60 gold)", "do": ["take:wood:5", "take:food:2", "finish_quest_with:bubbles_potion:sell"], "go": "sell"},
+                       {"text": "Not yet."}]},
+          {"if": ["quest_active:bubbles_potion"],
+           "say": ["I need 5 wood and 2 food. You have {wood} wood and {food} food."]},
+          {"say": ["Bubble, bubble! Come back any time."]}
+        ],
+        "yes": {"say": ["Wonderful! Chop trees with T, and look for berries in forests."]},
+        "drink": {"say": ["Gulp gulp... BURP! You burp a little rainbow. You feel lucky!"]},
+        "sell": {"say": ["A fine potion! I'll sell it to a frog for 61 gold. Hee hee!"]}
+      }
+    },
+    {
+      "id": "wren",
+      "name": "Wren",
+      "look": "kid",
+      "pace": true,
+      "place": {"village": "Bogwater", "row": 1, "col": 2},
+      "show_if": ["been_to:Murk Swamp"],
+      "talk": {
+        "start": [
+          {"if": ["quest_new:wren_frog"],
+           "say": ["Have you seen Sir Hops? He's my frog. He wears a tiny crown.",
+                   "He always leaves me a clue when he goes on an adventure. Last time it was on the lookout tower!"],
+           "choices": [{"text": "I'll find Sir Hops!", "do": ["start_quest:wren_frog"], "go": "yes"},
+                       {"text": "Sorry, not now."}]},
+          {"if": ["quest_step:wren_frog:0"],
+           "say": ["The clue might be on the lookout tower, west of here in the swamp."]},
+          {"if": ["quest_step:wren_frog:1"],
+           "say": ["Home Meadow? He wanted to see the big pond there! Silly frog."]},
+          {"if": ["quest_step:wren_frog:2"],
+           "say": ["Sir Hops is home! He says 'Ribbit.' That means thank you.",
+                   "He also brought you this soggy map. It shows a hidden chest in the swamp!"],
+           "do": ["finish_quest:wren_frog"]},
+          {"say": ["Ribbit! (That was Sir Hops. He likes you.)"]}
+        ],
+        "yes": {"say": ["Thank you! Look for a little bag by the lookout tower."]}
+      }
+    },
+    {
+      "id": "hops_clue",
+      "name": "A Little Bag",
+      "look": "lost_bag",
+      "place": {"land": "Murk Swamp", "row": 10, "col": 14},
+      "show_if": ["quest_step:wren_frog:0"],
+      "talk": {
+        "start": {"say": ["A tiny bag with a note inside, in very wobbly frog writing:",
+                          "'Gone to see the big pond in Home Meadow. Back for supper. Ribbit. - Sir Hops'"],
+                  "do": ["advance_quest:wren_frog"]}
+      }
+    },
+    {
+      "id": "sir_hops",
+      "name": "Sir Hops",
+      "look": "frog",
+      "place": {"land": "Home Meadow", "row": 18, "col": 32},
+      "show_if": ["quest_step:wren_frog:1"],
+      "talk": {
+        "start": {"say": ["Ribbit! A little frog in a tiny crown, sitting by the pond.",
+                          "You tell him Wren misses him. He hops off home to Bogwater, fast as a frog can go!"],
+                  "do": ["advance_quest:wren_frog"]}
+      }
+    }
+  ]
+}

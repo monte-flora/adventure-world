@@ -252,11 +252,11 @@ def plan_cave_files(mines, home):
     """Which cave file goes under which Mine. Returns {mine: number}: 0 is the first file in levels/caves.
 
     THE RULE: every Mine plays a cave from a file in levels/caves, so the editor can open every one.
-    - As many Mines as files (the map today): the nearest Mine gets file 01, the next one 02, and so on.
-    - More Mines than files: the files go round again. Count the Mines from the nearest to the
-      farthest: 01, 02, ... up to the last file, then 01, 02, ... once more.
-    - Fewer Mines than files: the nearest Mine gets file 01, the farthest gets the last file,
-      and the Mines in between get files spread out in between.
+    - Count the Mines from the nearest to home to the farthest: the nearest gets file 01, the next one 02,
+      and so on. Mine number i always plays file number i.
+    - More Mines than files: the files go round again: 01, 02, ... up to the last file, then 01, 02, ... once more.
+    - Fewer Mines than files: the last files are left over (the classic map's 12 Mines play 01 to 12,
+      and the files after that are only under the extra Mines of the big Phase 2 map).
     The game never makes up a cave: to get a new cave, draw a new file."""
     def steps_from_home(mine):
         return abs(mine[0] - home[0]) + abs(mine[1] - home[1])
@@ -264,10 +264,7 @@ def plan_cave_files(mines, home):
     files = len(CAVE_LEVELS)
     if not files:
         raise ValueError("There are no cave files in levels/caves: every Mine needs one")
-    if len(by_distance) >= files:
-        return {mine: i % files for i, mine in enumerate(by_distance)}
-    return {mine: 0 if len(by_distance) == 1 else round(i * (files - 1) / (len(by_distance) - 1))
-            for i, mine in enumerate(by_distance)}
+    return {mine: i % files for i, mine in enumerate(by_distance)}
 
 
 def plan_caves(mines, home):
@@ -724,6 +721,10 @@ class Cave:
             self.you.buffer = JUMP_BUFFER
         if controls.get("use_pressed") and self.you.dizzy <= 0:
             self.use(controls.get("down"))
+        if controls.get("attack_pressed") and self.you.dizzy <= 0:     # (Phase 2: R only fights...)
+            self.attack()
+        if controls.get("grab_pressed") and self.you.dizzy <= 0:       # (...and G digs, opens and pulls)
+            self.use(controls.get("down"), swing=False)
         if controls.get("shoot_pressed") and self.you.dizzy <= 0:
             self.shoot_arrow()
         for spot in self.fountains:                  # the healing springs slowly fill up again
@@ -961,7 +962,7 @@ class Cave:
         seen = getattr(self.game, "tips_seen", self.tips_shown)   # once a game (or once a cave)
         if name not in seen:
             seen.add(name)
-            self.game.log(TIPS[name], "quest")
+            self.game.log(getattr(self.game, "cave_tips", {}).get(name) or TIPS[name], "quest")   # (Phase 2's keys)
 
     # ----- ladders ----------------------------------------------------------------
 
@@ -1333,7 +1334,9 @@ class Cave:
 
     # ----- pressing R: open, dig or swing ------------------------------------------
 
-    def use(self, down=False):
+    def use(self, down=False, swing=True):
+        """R in Classic: pull a lever, open a chest, dig, or else swing your sword.
+        swing=False (Phase 2's G) does all but the swing: there, R is only for fighting (attack)."""
         you, game, p = self.you, self.game, self.game.player
         if you.swing > 0:
             return
@@ -1371,6 +1374,16 @@ class Cave:
             return
 
         # Otherwise, swing your sword
+        if swing:
+            self.swing_sword()
+
+    def attack(self):
+        """Phase 2's R: swing your sword, whatever is next to you."""
+        if self.you.swing <= 0:
+            self.swing_sword()
+
+    def swing_sword(self):
+        you, game, p = self.you, self.game, self.game.player
         you.swing = SWING_TIME
         you.tool = "sunfang" if p.sunfang else "sword" if p.swords else "fist"
         # The sword hits in front of you, and any monster right on top of you too

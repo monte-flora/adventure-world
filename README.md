@@ -30,6 +30,7 @@ folder (in `.pixi/`), so it never touches the Python on your computer.
     pixi run game            # play (add options after: pixi run game --mute)
     pixi run guide           # open the code guide in your web browser
     pixi run game --castle   # play-test: start right next to the Shadow King's castle
+    pixi run game2           # Phase 2: the bigger world, no fog, saves by itself (see PHASE2.md)
     pixi run editor          # the cave editor: draw your own caves, then play them
     pixi run test-editor     # check that the cave editor still works
 

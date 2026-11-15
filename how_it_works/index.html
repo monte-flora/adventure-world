@@ -791,6 +791,30 @@
     </ul>
   </div>
 
+  <h3>Phase 2: pause and save</h3>
+  <p>In Phase 2, press <b>P</b> (or <b>Esc</b>) to pause. Everything freezes: monsters, the clock, the lava.
+    The pause menu can <b>Save game</b>, <b>Save and go to the title</b>, or <b>Quit</b> (it asks "Save first?").
+    There are <b>3 save slots</b>, so 3 adventures can go on at once. On the title screen, <b>Load</b> lists them
+    (name, land, level, Light Stones and play time), and <b>D</b> deletes one. Saving in a cave starts you
+    outside its Mine next time.</p>
+
+  <h3>Phase 2: R is for fighting</h3>
+  <p>In Phase 2, every attack is <b>R</b>. In a fight on the map, <b>R</b> attacks (in the gold = PERFECT!),
+    <b>X</b> runs away and <b>E</b> eats. In a cave, the castle and the throne room, <b>R</b> swings your sword
+    (or Sunfang), and <b>G</b> digs, opens chests and pulls levers (<b>DOWN + G</b> digs the floor).
+    <b>F</b> still shoots your bow. Classic keeps its keys: <b>A</b> attacks and <b>R</b> runs in a fight, and
+    <b>R</b> digs, opens and fights in a cave. The keys are in <b>phase2/keys.py</b>.</p>
+
+  <h3>Phase 2: the side panel and the message box</h3>
+  <p>In Phase 2 the side panel shows only what matters now. The <b>NEXT</b> card says what to do next, with an
+    arrow, how many steps, and the <b>7 Light Stones</b> filling in. The <b>pack</b> has a picture for each thing
+    you have (hold the mouse over one to see what it does). The card at the bottom shows the keys that do
+    something right where you stand, like <b>SPACE talk to Rosa</b>. The newest message is big and glows, and big
+    news pops up over the map. <b>Q</b> opens your quests,
+    <b>L</b> the old messages, <b>B</b> the big map and <b>H</b> every key (<b>Esc</b> goes back).
+    Try changing <code class="inl">FRESH_TIME</code>, <code class="inl">TOAST_TIME</code> or
+    <code class="inl">STONE_COLORS</code> at the top of <b>phase2/hud.py</b>!</p>
+
   <!-- Challenge 1 -->
   <div class="challenge" style="--bg:#fff1e6">
     <h3>Challenge 1: Give the Hero a gold helmet <span class="stars">★</span></h3>

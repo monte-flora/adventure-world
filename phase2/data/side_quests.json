@@ -1,0 +1,92 @@
+{
+  "about": "The side quests (stage 3b): about 2 in every village. Written like quests.json, but a step can be {\"text\": ..., \"goal\": {...}} that the game checks by itself: beat N monsters of a kind, climb a lookout in a land, or open a hidden chest in a land. A reward can also give great_sword, armor, life and treasure (a land: shows a hidden chest there). 'choice_rewards' lets the words pick the reward with finish_quest_with:quest:choice. phase2/side_steps.py explains it all.",
+  "quests": {
+    "bram_great_sword": {
+      "title": "Bram's Challenge",
+      "giver": "bram",
+      "steps": ["Forge a Great sword at Bram's anvil (2 Perfect strikes and no Miss!) and show it to Bram"],
+      "reward": {"armor": 1, "xp": 25, "gold": 15}
+    },
+    "mabel_letter": {
+      "title": "A Letter for Old Finn",
+      "giver": "mabel",
+      "steps": ["Take Mabel's letter to Old Finn in Lakeside",
+                "Go back to Mabel in Meadowbrook"],
+      "reward": {"gold": 20, "xp": 20, "food": 2}
+    },
+    "hazel_pie": {
+      "title": "Granny Hazel's Berry Pie",
+      "giver": "granny_hazel",
+      "steps": ["Bring Granny Hazel 3 food (search forests with SPACE for berries)"],
+      "reward": {"life": 1, "xp": 20}
+    },
+    "ivy_spiders": {
+      "title": "Too Many Spiders!",
+      "giver": "ranger_ivy",
+      "steps": [{"text": "Beat 4 Spiders", "goal": {"kind": "beat", "monster": "Spider", "count": 4}},
+                "Tell Ranger Ivy in Oakhollow"],
+      "reward": {"gold": 25, "xp": 30, "treasure": "Whispering Woods"}
+    },
+    "marla_serpents": {
+      "title": "Sea Serpent Scare",
+      "giver": "captain_marla",
+      "steps": [{"text": "Beat 2 Sea Serpents out on the lake (take a boat)",
+                 "goal": {"kind": "beat", "monster": "Sea Serpent", "count": 2}},
+                "Tell Captain Marla in Lakeside"],
+      "reward": {"great_sword": 1, "xp": 35}
+    },
+    "lily_boat": {
+      "title": "Lily's Toy Boat",
+      "giver": "lily",
+      "steps": ["Ask Old Finn in Lakeside which way the toy boat drifted",
+                "Find Lily's toy boat on the shore of the Old Ruins",
+                "Bring the boat back to Lily in Lakeside"],
+      "reward": {"gold": 20, "xp": 25, "arrows": 5}
+    },
+    "sven_wolves": {
+      "title": "Wolf Watch",
+      "giver": "sven",
+      "steps": [{"text": "Beat 3 Frost Wolves", "goal": {"kind": "beat", "monster": "Frost Wolf", "count": 3}},
+                "Tell Shepherd Sven in Snowcap"],
+      "choice_rewards": {"armor": {"armor": 1, "xp": 30}, "gold": {"gold": 50, "xp": 30}}
+    },
+    "gus_lookout": {
+      "title": "The Top of the World",
+      "giver": "gus",
+      "steps": [{"text": "Climb a lookout tower in Frost Peaks (SPACE on the tower)",
+                 "goal": {"kind": "lookout", "land": "Frost Peaks"}},
+                {"text": "Dig up the hidden chest it shows you in Frost Peaks (SPACE on the chest)",
+                 "goal": {"kind": "chest", "land": "Frost Peaks"}},
+                "Tell Gus the Mapmaker in Snowcap"],
+      "reward": {"gold": 30, "xp": 30, "treasure": "Sunscorch Desert"}
+    },
+    "juno_postcard": {
+      "title": "A Postcard for Pip",
+      "giver": "juno",
+      "steps": ["Take Juno's postcard to Pip in Meadowbrook",
+                "Go back to Juno in Sandwell"],
+      "reward": {"gold": 25, "xp": 25, "food": 2}
+    },
+    "zara_scorpions": {
+      "title": "Ouch! Scorpions!",
+      "giver": "zara",
+      "steps": [{"text": "Beat 3 Scorpions", "goal": {"kind": "beat", "monster": "Scorpion", "count": 3}},
+                "Tell Zara in Sandwell"],
+      "reward": {"gold": 30, "xp": 40, "arrows": 10}
+    },
+    "bubbles_potion": {
+      "title": "Eldon's Bubbly Potion",
+      "giver": "bubbles",
+      "steps": ["Bring Madame Bubbles 5 wood (for the fire) and 2 food (for the potion)"],
+      "choice_rewards": {"drink": {"life": 1, "xp": 20}, "sell": {"gold": 60, "xp": 20}}
+    },
+    "wren_frog": {
+      "title": "Where Is Sir Hops?",
+      "giver": "wren",
+      "steps": ["Find the clue Sir Hops left on the swamp's lookout tower",
+                "Follow the clue: find Sir Hops in Home Meadow",
+                "Tell Wren in Bogwater"],
+      "reward": {"gold": 25, "xp": 30, "treasure": "Murk Swamp"}
+    }
+  }
+}

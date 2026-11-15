@@ -1,0 +1,17 @@
+{
+  "about": "What the shops sell and buy, and for how much gold. 'stock' is how many a shop has (null: as many as you like). A shopkeeper in people.json can sell only some of these ('sells': [...]).",
+  "buy": [
+    {"id": "food",   "name": "Berries",       "says": "+1 food",     "price": 4,  "stock": null},
+    {"id": "arrows", "name": "Arrows",        "says": "+5 arrows",   "price": 6,  "stock": null},
+    {"id": "bow",    "name": "Bow",           "says": "shoots far",  "price": 15, "stock": 1},
+    {"id": "sword",  "name": "Sword",         "says": "16 hits",     "price": 20, "stock": 3},
+    {"id": "armor",  "name": "Armor",         "says": "soaks hits",  "price": 30, "stock": 2}
+  ],
+  "sell": [
+    {"id": "wood",   "name": "Wood",          "says": "1 piece",     "price": 1},
+    {"id": "food",   "name": "Berries",       "says": "1 food",      "price": 2},
+    {"id": "sword",  "name": "A spare sword", "says": "the one with fewest hits left", "price": 5}
+  ],
+  "repair_price": 8,
+  "start_gold": 10
+}

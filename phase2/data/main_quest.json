@@ -1,0 +1,158 @@
+{
+  "about": "THE MAIN QUEST of Phase 2 (phase2/main_quest.py reads this). 'quests' are its chapters, in order: one Light Stone (a relic) for each land, then the Portal. Each chapter is a quest like the ones in quests.json, with \"main\": true, the 'relic' you get when it's done, and the 'next' chapter that starts right after. A step is words, or {\"text\": ..., \"goal\": ..., \"to\": ...}: the goal is done by itself when it happens (cave:LAND, defeat:LAND:KIND:N (KIND any = any monster), lookout:LAND, level:N, portal, castle, king); a step with no goal is done by talking to someone (people.json). 'to' is where to go, for the quest log's arrow (person:ID, village:NAME, land:NAME, mine:LAND, lookout:LAND, portal). 'story' has the story cards: [title, words, picture]; pictures: king, monsters, sunfang, portal, hollow, castle, light. {name} is your name, {relic} the relic, {count} how many you have.",
+  "first": "main_home",
+  "story": {
+    "opening": [
+      ["Two worlds",
+       "There are two worlds, side by side. Ours, with its sun and its seven lands. And Nightfall Hollow, a world that has never seen a sunrise. Between them stands the old Portal. This is the story of {game}.",
+       "hollow"],
+      ["The Shadow King",
+       "Long ago, a young prince of the Hollow slipped through the Portal and saw the sun. He begged to share it. But our people were scared of the dark stranger, and they shut the Portal with seven Light Stones.",
+       "king"],
+      ["A hundred cold years",
+       "Alone in the dark, the prince grew bitter. He made a crown of shadow and named himself the Shadow King. Now the Portal is cracking, and every night he reaches through and steals a little more of our light.",
+       "portal"],
+      ["The monsters come",
+       "As the light fades, monsters creep out of the dark, in every land: the woods, the lake, the snowy peaks, the hot desert and the murky swamp.",
+       "monsters"],
+      ["The seven Light Stones",
+       "The seven Light Stones were hidden, one in every land, and now they are lost. Only all seven together can wake the Portal, so a hero can go through and face the Shadow King.",
+       "light"],
+      ["Rosa the Guide",
+       "Rosa the Guide lives next to your house, {name}. She knows where the first Light Stone is. Go and talk to her! (Press Q any time to see your quests and where to go next.)",
+       "light"]
+    ],
+    "relic": [
+      ["{relic}!",
+       "{name} holds up {relic}. It glows warm and bright, like a little piece of the sun. That makes {count} of the 7 Light Stones! Somewhere in the dark, the Shadow King feels it.",
+       "light"]
+    ],
+    "all_relics": [
+      ["All seven Light Stones!",
+       "The seven Light Stones shine together in your pack. Far out in the Great Lake, on Portal Island, the old Portal wakes up and hums. Build a boat, row out to it and step through. On the other side, the Shadow King is waiting.",
+       "portal"]
+    ],
+    "portal_shut": "The Portal is asleep. It needs all 7 Light Stones to wake up (you have {count}). Press Q to see where the next one is.",
+    "after_the_end": "The Portal is quiet now. Sunlight shines through it into Nightfall Hollow now. There's nothing to fear over there any more!",
+    "ending": [
+      ["One sun for two worlds",
+       "Where the Shadow King stood, there is only his crown, cold and empty. The Portal stays open, and for the first time, sunlight spills into Nightfall Hollow. There was always enough light for both worlds.",
+       "hollow"],
+      ["Home again",
+       "The Portal carries {name} home. Rosa, Farmer Bo, Pip and everyone from every village are waiting in Home Meadow, cheering and waving!",
+       "light"],
+      ["The hero of all the lands",
+       "The seven Light Stones shine over the lands, and the days are long and bright again. People already tell the story of {name} and the Shadow King. But the world is big, and there are still people to help, chests to find and caves to explore...",
+       "light"],
+      ["The adventure goes on",
+       "Your game is saved, {name}. Walk anywhere you like, help the people who still need you, and come back any time. THE END... for now!",
+       "sunfang"]
+    ]
+  },
+  "quests": {
+    "main_home": {
+      "main": true,
+      "title": "Light Stone 1: The Dawn Stone",
+      "giver": "guide_rosa",
+      "relic": "the Dawn Stone",
+      "next": "main_woods",
+      "steps": [
+        {"text": "Beat the cave under a Mine in Home Meadow (walk out of its EXIT door)", "goal": "cave:Home Meadow", "to": "mine:Home Meadow"},
+        {"text": "Go back to Rosa the Guide, next to your house", "to": "person:guide_rosa"}
+      ],
+      "reward": {"gold": 20, "xp": 30, "food": 1}
+    },
+    "main_woods": {
+      "main": true,
+      "title": "Light Stone 2: The Leaf Stone",
+      "giver": "elder_oona",
+      "relic": "the Leaf Stone",
+      "next": "main_lake",
+      "steps": [
+        {"text": "Go north to Oakhollow, the village in the Whispering Woods, and talk to Elder Oona", "to": "person:elder_oona"},
+        {"text": "Defeat 4 monsters in the Whispering Woods", "goal": "defeat:Whispering Woods:any:4", "to": "land:Whispering Woods"},
+        {"text": "Climb the lookout tower in the Whispering Woods (SPACE on it)", "goal": "lookout:Whispering Woods", "to": "lookout:Whispering Woods"},
+        {"text": "Go back to Elder Oona in Oakhollow", "to": "person:elder_oona"}
+      ],
+      "reward": {"gold": 25, "xp": 40, "arrows": 5}
+    },
+    "main_lake": {
+      "main": true,
+      "title": "Light Stone 3: The Tide Stone",
+      "giver": "finn",
+      "relic": "the Tide Stone",
+      "next": "main_ruins",
+      "steps": [
+        {"text": "Go to Lakeside, on the shore of the Great Lake, and talk to Old Finn", "to": "person:finn"},
+        {"text": "Beat the cave under a Mine at the Great Lake", "goal": "cave:The Great Lake", "to": "mine:The Great Lake"},
+        {"text": "Go back to Old Finn in Lakeside", "to": "person:finn"}
+      ],
+      "reward": {"gold": 30, "xp": 50, "food": 2}
+    },
+    "main_ruins": {
+      "main": true,
+      "title": "Light Stone 4: The Crown Stone",
+      "giver": "sir_rowan",
+      "relic": "the Crown Stone",
+      "next": "main_frost",
+      "steps": [
+        {"text": "Go to the Old Ruins in the north and find Sir Rowan, the last knight", "to": "person:sir_rowan"},
+        {"text": "Defeat 3 Skeletons in the Old Ruins (bring your bow!)", "goal": "defeat:Old Ruins:Skeleton:3", "to": "land:Old Ruins"},
+        {"text": "Go back to Sir Rowan in the Old Ruins", "to": "person:sir_rowan"}
+      ],
+      "reward": {"gold": 30, "xp": 60, "arrows": 10}
+    },
+    "main_frost": {
+      "main": true,
+      "title": "Light Stone 5: The Frost Stone",
+      "giver": "hilda",
+      "relic": "the Frost Stone",
+      "next": "main_desert",
+      "steps": [
+        {"text": "Cross the Icy River to Snowcap (fix the old bridge with 5 wood, or row) and talk to Hilda", "to": "person:hilda"},
+        {"text": "Defeat 3 Frost Wolves in the Frost Peaks", "goal": "defeat:Frost Peaks:Frost Wolf:3", "to": "land:Frost Peaks"},
+        {"text": "Climb a lookout tower in the Frost Peaks", "goal": "lookout:Frost Peaks", "to": "lookout:Frost Peaks"},
+        {"text": "Go back to Hilda in Snowcap", "to": "person:hilda"}
+      ],
+      "reward": {"gold": 40, "xp": 80, "food": 2}
+    },
+    "main_desert": {
+      "main": true,
+      "title": "Light Stone 6: The Sun Stone",
+      "giver": "juno",
+      "relic": "the Sun Stone",
+      "next": "main_swamp",
+      "steps": [
+        {"text": "Get to level 3: then the Desert Gate opens for you", "goal": "level:3", "to": "land:Sunscorch Desert"},
+        {"text": "Go through the Desert Gate to Sandwell and talk to Juno", "to": "person:juno"},
+        {"text": "Beat the cave under a Mine in the Sunscorch Desert", "goal": "cave:Sunscorch Desert", "to": "mine:Sunscorch Desert"},
+        {"text": "Go back to Juno in Sandwell", "to": "person:juno"}
+      ],
+      "reward": {"gold": 50, "xp": 100, "food": 2}
+    },
+    "main_swamp": {
+      "main": true,
+      "title": "Light Stone 7: The Moon Stone",
+      "giver": "eldon",
+      "relic": "the Moon Stone",
+      "next": "main_portal",
+      "steps": [
+        {"text": "Cross the Murk River to Bogwater (fix the log bridge with 5 wood, or row) and talk to Eldon the Wizard", "to": "person:eldon"},
+        {"text": "Defeat 3 Bog Lurkers in the Murk Swamp", "goal": "defeat:Murk Swamp:Bog Lurker:3", "to": "land:Murk Swamp"},
+        {"text": "Go back to Eldon in Bogwater", "to": "person:eldon"}
+      ],
+      "reward": {"gold": 60, "xp": 120, "arrows": 10}
+    },
+    "main_portal": {
+      "main": true,
+      "title": "The Shadow King",
+      "giver": "eldon",
+      "steps": [
+        {"text": "Build a boat, row to Portal Island and step into the Portal", "goal": "portal", "to": "portal"},
+        {"text": "Light the 3 dark shrines, forge Sunfang and get into the Shadow King's castle", "goal": "castle"},
+        {"text": "Defeat the Shadow King!", "goal": "king"}
+      ],
+      "reward": {"gold": 100}
+    }
+  }
+}

@@ -1,0 +1,887 @@
+{
+  "about": "Everyone who lives in the Phase 2 world. 'place' is a village (a 'village:' line in levels/world/) and how many rows and columns from its square, or a land's name and a row and column in that land's file (row 0, column 0 is its top-left corner). If that square isn't open ground, they stand on the nearest one that is. 'look' is a picture in sprites.PEOPLE_ART. 'role' (shop or smith) gives them a shop or an anvil. 'show_if' hides them until it's true. 'talk' is how they talk: phase2/dialogue.py explains it.",
+  "people": [
+    {
+      "id": "guide_rosa",
+      "name": "Rosa the Guide",
+      "look": "guide",
+      "place": {
+        "land": "Home Meadow",
+        "row": 12,
+        "col": 12
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_home:1"
+            ],
+            "say": [
+              "You found the way out of that cave! You ARE brave, {name}.",
+              "Here: the Dawn Stone, the first Light Stone. Six more are out there, one in every land.",
+              "Next, go north to Oakhollow in the Whispering Woods. Elder Oona has been waiting for a hero like you."
+            ],
+            "do": [
+              "finish_quest:main_home"
+            ],
+            "next": "menu"
+          },
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "Hello, {name}! I'm Rosa, the guide of Home Meadow.",
+              "Walk with the ARROW keys. To talk to someone, walk into them, or press SPACE next to them.",
+              "Now listen. The Shadow King is stealing our light, and only the 7 Light Stones can wake the Portal so you can stop him.",
+              "The first one, the Dawn Stone, is mine to give. But first, show me you're brave: beat the cave under a Mine. Your first Mine is {first_mine}."
+            ],
+            "next": "menu",
+            "do": [
+              "start_quest:main_home"
+            ]
+          },
+          {
+            "if": [
+              "quest_new:main_home"
+            ],
+            "say": [
+              "Hi again, {name}! Listen: the Shadow King is stealing our light, and only the 7 Light Stones can wake the Portal so you can stop him.",
+              "The first one, the Dawn Stone, is mine to give. But first, show me you're brave: beat the cave under a Mine. Your first Mine is {first_mine}."
+            ],
+            "do": [
+              "start_quest:main_home"
+            ],
+            "next": "menu"
+          },
+          {
+            "say": [
+              "Hi again, {name}!"
+            ],
+            "next": "menu"
+          }
+        ],
+        "menu": {
+          "say": [
+            "What would you like to know?"
+          ],
+          "choices": [
+            {
+              "text": "How do I play?",
+              "go": "keys"
+            },
+            {
+              "text": "Where should I go?",
+              "go": "mine"
+            },
+            {
+              "text": "What is gold for?",
+              "go": "gold"
+            },
+            {
+              "text": "Bye, Rosa!"
+            }
+          ]
+        },
+        "keys": {
+          "say": [
+            "SPACE does the thing where you stand: search a forest for berries, open a chest, climb down a Mine.",
+            "R attacks, in a fight and in a cave. G digs and opens chests in a cave. T chops wood, C crafts, F shoots arrows and E eats. Q shows your quests, and H shows every key."
+          ],
+          "next": "menu"
+        },
+        "mine": [
+          {
+            "if": [
+              "quest_step:main_home:0"
+            ],
+            "say": [
+              "Your first Mine is {first_mine}. Climb down with SPACE and find the EXIT door!",
+              "Beat that cave and come back to me, and I'll give you the Dawn Stone, the first of the 7 Light Stones."
+            ],
+            "next": "menu"
+          },
+          {
+            "say": [
+              "{main_next}.",
+              "You have {relics} of the 7 Light Stones. Press Q any time to see your quests."
+            ],
+            "next": "menu"
+          }
+        ],
+        "gold": {
+          "say": [
+            "In Meadowbrook, Mabel's shop sells food, arrows, swords and armor for gold. Bram the blacksmith fixes swords.",
+            "You get gold from quests, from chests, and by selling wood. You have {gold} gold now."
+          ],
+          "next": "menu"
+        }
+      }
+    },
+    {
+      "id": "farmer_bo",
+      "name": "Farmer Bo",
+      "look": "farmer",
+      "pace": true,
+      "place": {
+        "village": "Meadowbrook",
+        "row": 2,
+        "col": -3
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_new:farmer_wood"
+            ],
+            "say": [
+              "Howdy, {name}! Winter is coming, and my woodpile is empty.",
+              "Could you bring me 10 wood? Chop trees in the forest with T."
+            ],
+            "choices": [
+              {
+                "text": "I'll do it!",
+                "do": [
+                  "start_quest:farmer_wood"
+                ],
+                "go": "yes"
+              },
+              {
+                "text": "Not right now."
+              }
+            ]
+          },
+          {
+            "if": [
+              "quest_active:farmer_wood",
+              "has:wood:10"
+            ],
+            "say": [
+              "Look at all that wood! Is it for me?"
+            ],
+            "choices": [
+              {
+                "text": "Here you go! (give 10 wood)",
+                "do": [
+                  "take:wood:10",
+                  "finish_quest:farmer_wood"
+                ],
+                "go": "thanks"
+              },
+              {
+                "text": "Not yet."
+              }
+            ]
+          },
+          {
+            "if": [
+              "quest_active:farmer_wood"
+            ],
+            "say": [
+              "Any wood yet? I need 10, and you have {wood}."
+            ]
+          },
+          {
+            "say": [
+              "My house will be warm all winter, thanks to you!"
+            ]
+          }
+        ],
+        "yes": {
+          "say": [
+            "Thank you! Come back when you have 10 wood."
+          ]
+        },
+        "thanks": {
+          "say": [
+            "Thank you, {name}! Here's some gold for your trouble."
+          ]
+        }
+      }
+    },
+    {
+      "id": "pip",
+      "name": "Pip",
+      "look": "kid",
+      "pace": true,
+      "place": {
+        "village": "Meadowbrook",
+        "row": 1,
+        "col": 2
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_new:lost_cat"
+            ],
+            "say": [
+              "Waaah! My cat Whiskers ran away into the Whispering Woods!",
+              "Can you find her? She's orange, with a white tummy."
+            ],
+            "choices": [
+              {
+                "text": "Of course I will!",
+                "do": [
+                  "start_quest:lost_cat"
+                ],
+                "go": "yes"
+              },
+              {
+                "text": "Sorry, not now."
+              }
+            ]
+          },
+          {
+            "if": [
+              "quest_step:lost_cat:0"
+            ],
+            "say": [
+              "Did you find Whiskers? She ran north, into the woods."
+            ]
+          },
+          {
+            "if": [
+              "quest_step:lost_cat:1"
+            ],
+            "say": [
+              "WHISKERS! She came home! Thank you, thank you, {name}!",
+              "Here, take the gold from my piggy bank. And a snack!"
+            ],
+            "do": [
+              "finish_quest:lost_cat"
+            ]
+          },
+          {
+            "say": [
+              "Whiskers and I play every day now!"
+            ]
+          }
+        ],
+        "yes": {
+          "say": [
+            "Thank you! Please hurry!"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mabel",
+      "name": "Mabel the Shopkeeper",
+      "look": "shopkeeper",
+      "role": "shop",
+      "place": {
+        "village": "Meadowbrook",
+        "row": -1,
+        "col": -1
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "Hello, {name}! I'm Mabel. I buy and sell all sorts of things."
+            ],
+            "next": "shop"
+          },
+          {
+            "say": [
+              "Welcome back! You have {gold} gold."
+            ],
+            "next": "shop"
+          }
+        ],
+        "shop": {
+          "say": [
+            "What can I do for you?"
+          ],
+          "choices": [
+            {
+              "text": "Let me see your shop!",
+              "do": [
+                "open:shop"
+              ]
+            },
+            {
+              "text": "Bye, Mabel!"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "elder_oona",
+      "name": "Elder Oona",
+      "look": "villager",
+      "place": {
+        "village": "Oakhollow",
+        "row": 1,
+        "col": 2
+      },
+      "show_if": [
+        "not:quest_new:main_woods"
+      ],
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_woods:3"
+            ],
+            "say": [
+              "The forest feels calm again. Thank you, {name}!",
+              "Here is the Leaf Stone. Next, go to Old Finn in Lakeside, on the shore of the Great Lake. He knows where the Tide Stone is."
+            ],
+            "do": [
+              "finish_quest:main_woods"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_woods:0"
+            ],
+            "say": [
+              "Rosa sent you? Then you must be {name}! I'm Oona, the elder of Oakhollow.",
+              "The Leaf Stone sleeps in my oak chest. But the monsters in the woods grow bolder every night.",
+              "Beat 4 of them, then climb the lookout tower to see the whole forest. Then the stone is yours!"
+            ],
+            "do": [
+              "advance_quest:main_woods"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_woods:1"
+            ],
+            "say": [
+              "The woods are still full of danger, {name}.",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_woods:2"
+            ],
+            "say": [
+              "The woods are still full of danger, {name}.",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "say": [
+              "The trees whisper your name now, {name}. They say: hero!",
+              "My grandmother told me about a pale boy who came out of the Portal, long ago. He only wanted to stand in the sun.",
+              "We were afraid of him, so we locked him out. Maybe the dark made him the Shadow King... and maybe we did."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sir_rowan",
+      "name": "Sir Rowan",
+      "look": "villager",
+      "place": {
+        "land": "Old Ruins",
+        "row": 7,
+        "col": 20
+      },
+      "show_if": [
+        "not:quest_new:main_ruins"
+      ],
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_ruins:2"
+            ],
+            "say": [
+              "The skeletons are gone! Ha! You fight like a true knight.",
+              "Take the Crown Stone. Next, cross the Icy River to Snowcap in the Frost Peaks, and find Hilda the Hunter."
+            ],
+            "do": [
+              "finish_quest:main_ruins"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_ruins:0"
+            ],
+            "say": [
+              "Halt! Who goes there? ...A young hero! I'm Sir Rowan, the last knight of the old castle.",
+              "Skeletons took my castle. They shoot arrows from behind the broken walls.",
+              "Beat 3 Skeletons for me, and the Crown Stone of the old kings is yours."
+            ],
+            "do": [
+              "advance_quest:main_ruins"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_ruins:1"
+            ],
+            "say": [
+              "Careful of their arrows, {name}! Hit them hard and fast.",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "say": [
+              "These old walls are safe again, thanks to you, {name}.",
+              "Seven knights carried the seven Light Stones away, one to every land, so no one could open the Portal again.",
+              "I am the last of their order. Now the Stones have found a new keeper: you."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "bram",
+      "name": "Bram the Blacksmith",
+      "look": "blacksmith",
+      "role": "smith",
+      "place": {
+        "village": "Meadowbrook",
+        "row": -1,
+        "col": 3
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "I'm Bram, the blacksmith. My anvil is always hot!"
+            ],
+            "next": "menu"
+          },
+          {
+            "say": [
+              "Back again, {name}?"
+            ],
+            "next": "menu"
+          }
+        ],
+        "menu": {
+          "say": [
+            "What do you need?"
+          ],
+          "choices": [
+            {
+              "text": "Forge a sword at your anvil",
+              "do": [
+                "open:forge"
+              ]
+            },
+            {
+              "text": "Fix my sword ({repair_price} gold)",
+              "go": "repair"
+            },
+            {
+              "text": "Bye, Bram!"
+            }
+          ]
+        },
+        "repair": [
+          {
+            "if": [
+              "can_repair"
+            ],
+            "do": [
+              "repair"
+            ],
+            "say": [
+              "Clang! Clang! There, good as new."
+            ],
+            "next": "menu"
+          },
+          {
+            "say": [
+              "{repair_problem}"
+            ],
+            "next": "menu"
+          }
+        ]
+      }
+    },
+    {
+      "id": "whiskers",
+      "name": "Whiskers",
+      "look": "cat",
+      "place": {
+        "village": "Oakhollow",
+        "row": -4,
+        "col": -6
+      },
+      "show_if": [
+        "not:quest_at_least:lost_cat:1"
+      ],
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:lost_cat:0"
+            ],
+            "say": [
+              "Meow?",
+              "It's Whiskers! You show her the way home. She purrs and runs off to Pip."
+            ],
+            "do": [
+              "advance_quest:lost_cat"
+            ]
+          },
+          {
+            "say": [
+              "A little orange cat. Her collar says: \"I am WHISKERS. If you find me, take me home to Pip in Home Meadow.\""
+            ],
+            "choices": [
+              {
+                "text": "Show her the way home",
+                "do": [
+                  "start_quest:lost_cat",
+                  "advance_quest:lost_cat"
+                ],
+                "go": "home"
+              },
+              {
+                "text": "Leave her be"
+              }
+            ]
+          }
+        ],
+        "home": {
+          "say": [
+            "Whiskers purrs and runs off home, to Pip."
+          ]
+        }
+      }
+    },
+    {
+      "id": "whiskers_home",
+      "name": "Whiskers",
+      "look": "cat",
+      "place": {
+        "village": "Meadowbrook",
+        "row": 2,
+        "col": 4
+      },
+      "show_if": [
+        "quest_at_least:lost_cat:1"
+      ],
+      "talk": {
+        "start": {
+          "say": [
+            "Purrrr... Whiskers is happy to be home."
+          ]
+        }
+      }
+    },
+    {
+      "id": "finn",
+      "name": "Old Finn",
+      "look": "fisher",
+      "pace": true,
+      "place": {
+        "village": "Lakeside",
+        "row": 0,
+        "col": 1
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_lake:2"
+            ],
+            "say": [
+              "You did it! Grandpa would be proud.",
+              "Here's the Tide Stone. Now head north to the Old Ruins. A knight still guards them, they say... Sir Rowan."
+            ],
+            "do": [
+              "finish_quest:main_lake"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_lake:0"
+            ],
+            "say": [
+              "Ahoy! You're the one gathering the Light Stones? I'm Finn. I've fished this lake for fifty years.",
+              "Long ago, my grandpa hid the Tide Stone at the bottom of a Mine by the lake.",
+              "Beat that cave, and I'll give you the stone I keep for the hero who does. Out on the water, look for bubbles: row over them and dive with SPACE!"
+            ],
+            "do": [
+              "advance_quest:main_lake"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_lake:1"
+            ],
+            "say": [
+              "That cave by the lake is a tricky one.",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "Ahoy! I'm Finn. I've fished this lake for fifty years.",
+              "Out on the water, look for bubbles. Row over them and dive with SPACE!"
+            ]
+          },
+          {
+            "say": [
+              "The fish bite best at sunrise, {name}.",
+              "Grandpa said that on clear nights you could see a cold light flicker on Portal Island. Like someone knocking.",
+              "These days it flickers every night. Whoever is behind that Portal is getting stronger."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "hilda",
+      "name": "Hilda the Hunter",
+      "look": "villager",
+      "pace": true,
+      "place": {
+        "village": "Snowcap",
+        "row": 0,
+        "col": 1
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_frost:3"
+            ],
+            "say": [
+              "The signal fire! I saw it from here. The ice is melting already...",
+              "Here is the Frost Stone. Now go south to the Sunscorch Desert. The Desert Gate opens for heroes of level 3. Find Juno in Sandwell."
+            ],
+            "do": [
+              "finish_quest:main_frost"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_frost:0"
+            ],
+            "say": [
+              "Brrr! Welcome to Snowcap, {name}. I'm Hilda. Rosa sent word you were coming.",
+              "The Frost Stone is frozen in the ice of my lodge. Only a brave fire can melt it free.",
+              "Hunt 3 Frost Wolves, then climb a lookout in the Frost Peaks to light my signal. Up here, eat often and wear armor!"
+            ],
+            "do": [
+              "advance_quest:main_frost"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_frost:1"
+            ],
+            "say": [
+              "The wolves are fast. Stand your ground!",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_frost:2"
+            ],
+            "say": [
+              "The wolves are fast. Stand your ground!",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "Brrr! Welcome to Snowcap, {name}. I'm Hilda.",
+              "Up here, eat often and wear armor. The cold bites, and so do the monsters!"
+            ]
+          },
+          {
+            "say": [
+              "Stay warm out there, {name}!"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "eldon",
+      "name": "Eldon the Wizard",
+      "look": "wizard",
+      "place": {
+        "village": "Bogwater",
+        "row": 0,
+        "col": 1
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_swamp:2"
+            ],
+            "say": [
+              "Wonderful! Here is the Moon Stone, the seventh Light Stone.",
+              "Now the Portal will wake. Build a boat, row to Portal Island and step through.",
+              "The Shadow King waits beyond. Only Sunfang, forged from 3 diamonds, can beat him. Good luck, {name}!"
+            ],
+            "do": [
+              "finish_quest:main_swamp"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_swamp:0"
+            ],
+            "say": [
+              "Ah, the young hero with six Light Stones! I am Eldon. I have lived in this murky swamp for 300 years.",
+              "I keep the last one, the Moon Stone. But Bog Lurkers have crept up to my hut.",
+              "Beat 3 Bog Lurkers. Hide in the tall reeds if you need to rest!"
+            ],
+            "do": [
+              "advance_quest:main_swamp"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_swamp:1"
+            ],
+            "say": [
+              "The Bog Lurkers are tough, but you're tougher.",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "quest_active:main_portal"
+            ],
+            "say": [
+              "The Portal on Portal Island is awake, {name}. Go!",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "first_time"
+            ],
+            "say": [
+              "Ah, a young knight. I am Eldon. I have lived in this murky swamp for 300 years.",
+              "The Shadow King waits beyond the Portal. Only Sunfang, forged from 3 diamonds, can beat him."
+            ]
+          },
+          {
+            "say": [
+              "Climb a landmark with SPACE, and the land will show you its secrets."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sandy",
+      "name": "Sandy the Trader",
+      "look": "villager",
+      "role": "shop",
+      "sells": [
+        "food",
+        "arrows",
+        "armor"
+      ],
+      "place": {
+        "village": "Sandwell",
+        "row": 0,
+        "col": -1
+      },
+      "talk": {
+        "start": {
+          "say": [
+            "Hot day, {name}! I trade food, arrows and armor."
+          ],
+          "choices": [
+            {
+              "text": "Let me see what you have",
+              "do": [
+                "open:shop"
+              ]
+            },
+            {
+              "text": "Bye, Sandy!"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "juno",
+      "name": "Juno",
+      "look": "kid",
+      "pace": true,
+      "place": {
+        "village": "Sandwell",
+        "row": 1,
+        "col": 2
+      },
+      "talk": {
+        "start": [
+          {
+            "if": [
+              "quest_step:main_desert:3"
+            ],
+            "say": [
+              "You got it back! Grandma would want you to have it.",
+              "Here's the Sun Stone! Only one more: Eldon the Wizard in Bogwater, in the Murk Swamp, has the last one."
+            ],
+            "do": [
+              "finish_quest:main_desert"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_desert:1"
+            ],
+            "say": [
+              "You made it through the Desert Gate! I'm Juno. Grandma left me the Sun Stone to keep safe.",
+              "But I dropped it down a Mine, and it's full of monsters! Can you get it back?",
+              "Beat the cave under a Mine here in the desert, and the Sun Stone is yours."
+            ],
+            "do": [
+              "advance_quest:main_desert"
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_desert:2"
+            ],
+            "say": [
+              "Did you find the Sun Stone? Watch out for the lava down there!",
+              "Next: {main_next}."
+            ]
+          },
+          {
+            "if": [
+              "quest_step:main_desert:0"
+            ],
+            "say": [
+              "Wow, a hero! Get to level 3 and the Desert Gate will let you in. Then come find me!"
+            ]
+          },
+          {
+            "say": [
+              "It's so hot here! Even the lizards wear hats."
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

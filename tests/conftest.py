@@ -22,6 +22,8 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 # Saved settings go in a temporary folder. It's an environment variable, so a game a test starts
 # with "python game.py" (test_game_starts.py) uses it too.
 os.environ["ADVENTURE_SETTINGS_FILE"] = os.path.join(tempfile.mkdtemp(prefix="settings_test_"), "settings.json")
+# The same for the saved Phase 2 game (phase2/save.py), so no test reads or writes your real save
+os.environ["ADVENTURE_SAVE_FILE"] = os.path.join(tempfile.mkdtemp(prefix="save_test_"), "phase2_save.json")
 
 GAME_FOLDER = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(GAME_FOLDER))
