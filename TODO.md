@@ -3,6 +3,11 @@
 Everything we've asked for and agreed on, in the order it gets built.
 `[ ]` = not started, `[~]` = being built now, `[x]` = done (with the date).
 
+## Phase 3: a 3D game in Godot (asked 2026-11-13, branch `phase-3`, see PHASE3.md)
+
+- [x] 2026-11-13 Install Godot 4.7 on the laptop.
+- [x] 2026-11-13 **First 3D prototype**, cartoony like late-90s 3D platformers: the Hero runs, jumps and swings his sword in a small Home Meadow, one Zombie, a Mine into a tiny cave, hearts and diamonds.
+
 ## Now: being built in parallel sessions (asked 2026-11-08)
 
 - [~] Go public: new repo monte-flora/adventure-world, name removed
