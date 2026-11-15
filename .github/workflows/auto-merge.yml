@@ -1,0 +1,83 @@
+# Merges a pull request by itself once every check on it is green (the tests AND the web
+# version), then deletes its branch and puts the new version on itch.io: a merge into main goes
+# to the Classic page, a merge into phase-2 goes to the Phase 2 page.
+#
+# Don't want a pull request merged yet? Put the "hold" label on it (or make it a draft).
+# Take the label off later and it merges the next time its checks pass
+# (push a commit, or press "Re-run jobs" on one of its checks).
+#
+# Why it runs the web version by hand at the end: a merge made by a GitHub workflow doesn't
+# start other workflows by itself, so the itch.io upload wouldn't happen otherwise.
+name: Auto-merge
+
+on:
+  workflow_run:
+    workflows: [Tests, Web version]   # each time one of these finishes...
+    types: [completed]
+
+permissions:
+  contents: write          # merge, and delete the branch
+  pull-requests: write
+  actions: write           # start the web version on main or phase-2
+  checks: read
+
+# One at a time per branch, so the two finishing checks don't both try to merge
+concurrency:
+  group: auto-merge-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    # ...and it passed, for a pull request from this repository
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Find the pull request and check that everything on it is green
+        id: check
+        run: |
+          pr=$(gh pr list --state open --head "$BRANCH" --json number,headRefOid,isDraft,labels,baseRefName \
+                 --jq ".[] | select(.headRefOid == \"$SHA\" and (.isDraft | not) and ([.labels[].name] | index(\"hold\") | not)) | \"\(.number) \(.baseRefName)\"" | head -1)
+          base=${pr#* }      # the branch it merges into: main or phase-2
+          pr=${pr%% *}
+          if [ -z "$pr" ]; then
+            echo "No open pull request ready for $BRANCH at $SHA (merged already, newer commit, draft, or on hold)."
+            exit 0
+          fi
+          checks=$(gh pr checks "$pr" --json name,bucket)
+          echo "$checks"
+          names=$(echo "$checks" | jq -r '[.[].name] | join(",")')
+          waiting=$(echo "$checks" | jq '[.[] | select(.bucket != "pass" and .bucket != "skipping")] | length')
+          if [ "$waiting" != "0" ]; then
+            echo "Not every check is green yet: waiting for the others."
+            exit 0
+          fi
+          for needed in tests build-web; do
+            if ! echo ",$names," | grep -q ",$needed,"; then
+              echo "The $needed check hasn't run yet: waiting."
+              exit 0
+            fi
+          done
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Merge it and delete its branch
+        if: steps.check.outputs.pr != ''
+        run: |
+          gh pr merge "${{ steps.check.outputs.pr }}" --merge --match-head-commit "$SHA"
+          gh api -X DELETE "repos/$GH_REPO/git/refs/heads/$BRANCH" || echo "Branch already gone."
+
+      # main -> the Classic page, phase-2 -> the Phase 2 page. A merge into any other branch has no page.
+      - name: Put the new version on itch.io
+        if: steps.check.outputs.pr != '' && (steps.check.outputs.base == 'main' || steps.check.outputs.base == 'phase-2')
+        env:
+          BASE: ${{ steps.check.outputs.base }}
+        run: gh workflow run web.yml --ref "$BASE"

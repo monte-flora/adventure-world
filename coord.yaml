@@ -1,0 +1,14 @@
+# adventure-world: only the context-limit keys of the shared kit (grafite-coord kit/context_hooks.py, TD-0111; kit/README.md
+# lists every key). No to-do files here (TODO.md is the list), so `todo` and /start-day have nothing to read.
+project: adventure-world
+root: ~/adventure-world                 # the coordinator's checkout (Orca workspace `main`)
+handoff: HANDOFF.md
+restart:                                 # the 120K/150K note and the 180K deny (user-level hook, every Orca session)
+  main: >-
+    Restart (main, same chat; never a new tab): rewrite HANDOFF.md (where things stand, in flight, the Orca Run id,
+    the user's words verbatim + UTC) on a branch, commit, push and open its PR (auto-merge); then tell the user "Ready.
+    Type /clear, then /coord-main" and stop acting. /coord-main binds the Run, renames the chat and reads HANDOFF.md.
+  worker: >-
+    Restart (worker): write .handoff/<branch>.md in this worktree (done, in flight, next step, the user's words verbatim
+    + UTC) and commit your work on the branch (no push without the user's OK), then `orca orchestration ask` the
+    coordinator for a restart and end your turn; it stops you and starts a fresh worker in this same worktree.

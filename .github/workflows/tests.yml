@@ -1,0 +1,44 @@
+# Runs the tests on GitHub's computers, so a change can't quietly break the game.
+# A green tick next to a commit or pull request means every test passed.
+# The tests are in the tests/ folder. Run them on your own computer with:  pixi run test
+name: Tests
+
+on:
+  push:                        # every time you push to any branch
+  pull_request:                # and for every pull request
+  schedule:
+    - cron: "0 7 * * 1"        # every Monday morning: send the robot into EVERY cave (slow)
+  workflow_dispatch:           # the "Run workflow" button on the Actions tab
+    inputs:
+      all_caves:
+        description: "Send the robot into every cave on the map (slow)"
+        type: boolean
+        default: false
+
+# A newer push to the same branch stops the older run that's still going
+concurrency:
+  group: tests-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install pixi, Python and pygame (the exact versions in pixi.lock)
+        uses: prefix-dev/setup-pixi@v0.11.3
+        with:
+          pixi-version: v0.84.1
+          locked: true           # stop if pixi.lock doesn't match pixi.toml
+          cache: true            # keep the downloads, so the next run starts faster
+
+      - name: Run the tests
+        if: github.event_name != 'schedule' && !inputs.all_caves
+        run: pixi run test --durations=10
+
+      - name: Run the tests, and send the robot into every cave
+        if: github.event_name == 'schedule' || inputs.all_caves
+        run: pixi run test-all-caves --durations=20

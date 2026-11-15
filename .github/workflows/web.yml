@@ -1,0 +1,63 @@
+# Makes the web-browser version of the game on GitHub's computers. Download it from the
+# run's page (under "Artifacts"), or make it on your own computer with:
+#     pixi run -e web build-web
+#
+# Once you've set up itch.io (see web/README.md, "New versions go up by themselves"), every
+# merge into main also puts the new version on your itch.io page. Until then it skips that step.
+name: Web version
+
+on:
+  push:
+    branches: [main]           # every time something is merged into main
+  pull_request:                # and for every pull request, to check it still builds
+  workflow_dispatch:           # the "Run workflow" button on the Actions tab
+
+# A newer push stops the older run that's still going
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}   # your itch.io key (a secret: nobody can read it back)
+      ITCH_GAME: ${{ vars.ITCH_GAME }}                # your itch.io page, like  yourname/adventure-world
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install pixi and the web tools (pygbag, pygame-ce, ffmpeg)
+        uses: prefix-dev/setup-pixi@v0.11.3
+        with:
+          pixi-version: v0.84.1
+          environments: web
+          locked: true           # stop if pixi.lock doesn't match pixi.toml
+          cache: true
+
+      - name: Make the web page
+        run: pixi run -e web build-web
+
+      - name: Keep the web page, ready to download and upload to itch.io
+        uses: actions/upload-artifact@v4
+        with:
+          name: adventure-web
+          path: web/build/adventure/build/web/
+          if-no-files-found: error
+          retention-days: 30
+
+      # butler is itch.io's own tool for uploading games. It only sends the parts that changed.
+      - name: Put the new version on itch.io
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && env.BUTLER_API_KEY != '' && env.ITCH_GAME != ''
+        run: |
+          curl -sSfL -o butler.zip https://broth.itch.zone/butler/linux-amd64/15.32.0/archive/default
+          unzip -q butler.zip -d butler-tool
+          chmod +x butler-tool/butler
+          ./butler-tool/butler -V
+          ./butler-tool/butler push web/build/adventure/build/web "$ITCH_GAME:html5" \
+            --userversion "$(date -u +%Y.%m.%d)-${GITHUB_SHA::7}"
+
+      - name: Say whether it went to itch.io
+        if: github.ref == 'refs/heads/main' && (env.BUTLER_API_KEY == '' || env.ITCH_GAME == '')
+        run: echo "::notice::Not uploaded to itch.io yet - see web/README.md to set up BUTLER_API_KEY and ITCH_GAME."

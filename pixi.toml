@@ -1,0 +1,44 @@
+[workspace]
+authors = ["Montgomery Flora"]
+channels = ['conda-forge']
+name = "adventure-world"
+platforms = ['osx-arm64', "osx-64", "linux-64", "win-64"]
+version = "0.1.0"
+# The web environment mixes conda packages (python, ffmpeg) with PyPI ones (pygbag, pygame-ce).
+# None of them are the same package, so pixi doesn't need to look up which is which online.
+conda-pypi-map = { conda-forge = false }
+
+[tasks]
+game = { cmd = "python game.py", description = "Play Adventure World" }
+nightfall = { cmd = "python game.py --nightfall", description = "Play-test: start in Nightfall Hollow (the second world)" }
+castle = { cmd = "python game.py --castle", description = "Play-test: start next to the Shadow King's castle" }
+throne = { cmd = "python game.py --throne", description = "Play-test: start in the throne room, fighting the Shadow King" }
+editor = { cmd = "python editor.py", description = "The cave editor: draw your own caves, then play them" }
+test-editor = { cmd = "python test_editor.py", description = "Check that the cave editor still works" }
+test = { cmd = "python -m pytest tests -n auto", description = "Check that nothing in the game is broken (every test, a few minutes)" }
+test-all-caves = { cmd = "python -m pytest tests -n auto --all-caves", description = "Every test, and the robot beats every cave on the map (slow)" }
+guide = { cmd = '''python -c "import pathlib, webbrowser; webbrowser.open(pathlib.Path('how_it_works/index.html').resolve().as_uri())"''', description = "Open the how-it-works guide in your web browser" }
+
+[dependencies]
+python = ">=3.13.18,<3.14"
+pygame = ">=2.6.1,<3"
+pytest = ">=8"
+pytest-xdist = ">=3"
+
+# ----- The web-browser version (see web/README.md) -----
+# pygbag turns the game into a web page, pygame-ce is the pygame that runs in a browser,
+# and ffmpeg squeezes the music into small .ogg files. Make the page with:
+#     pixi run -e web build-web
+[feature.web.dependencies]
+python = ">=3.13.18,<3.14"
+ffmpeg = "*"
+
+[feature.web.pypi-dependencies]
+pygbag = ">=0.9.3"
+pygame-ce = ">=2.5"
+
+[feature.web.tasks]
+build-web = { cmd = "python web/build_web.py", description = "Make the web-browser version of the game (it goes in web/build)" }
+
+[environments]
+web = { features = ["web"], no-default-feature = true }

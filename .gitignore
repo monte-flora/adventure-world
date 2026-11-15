@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+web/build/
+# your saved choices, like "tips off" (settings.py writes it)
+settings.json
+.handoff/

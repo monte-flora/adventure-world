@@ -1,0 +1,8 @@
+
+Shared rules for all stage 2 workers (2a world, 2b people, 2c monsters run in parallel, each in its own worktree):
+- Base: branch off `origin/phase-2`; PR into `phase-2` (NOT main). First read AGENTS.md, HANDOFF.md, TODO.md, PHASE2.md, phase2/__init__.py, phase2/world.py and the "Phase 2 world map" section of levels/README.md. Follow AGENTS.md (decide, don't grill; concise; times US Eastern 12-hour).
+- New code goes in phase2/. Classic must play exactly as before: every existing non-phase2 test passes unchanged. Hooks in game.py / rules.py stay small (one-line calls into phase2/, guarded by phase2.is_phase2(game)), so the 3 parallel PRs merge cleanly. Put your drawing code in your own phase2/ module, not inline in game.py.
+- Saving: if your feature needs saving, add it through phase2/save.py in a small, separate block (others may add theirs too).
+- Tests in tests/test_phase2_<yours>.py. Run all: `<main checkout>/.pixi/envs/default/bin/python -m pytest -q -n auto tests`. Must pass. Look at your work: render a few screenshots headless (pygame Surface -> PNG in a scratch dir), view them, iterate; attach 1-2 in the PR body if useful.
+- TODO.md: mark your stage line `[x] 2026-11-13` in your PR. If phase-2 moves and your PR conflicts, rebase onto origin/phase-2, keep both sides, rerun all tests, push.
+- Done = commit, push, PR into phase-2 (body ends with the Claude Code line; commits end with the Co-Authored-By line). Auto-merge merges it when green. Report: PR number, test count, what you assumed, what the next stage should know. A failing suite you can't fix = Task failed: report the output.
