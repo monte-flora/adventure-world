@@ -25,6 +25,17 @@ def draw_dusk(app, surf):
     surf.blit(sky, (0, 0))
 
 
+def draw_map_dusk(app, rect):
+    """The dusk over the little map in the panel, as the world grows dark. (What's drawn on it after this,
+    like you and the waystones, stays bright.)"""
+    alpha = theme.minimap_alpha(app.game)
+    if alpha <= 0:
+        return
+    sky = pygame.Surface(rect.size, pygame.SRCALPHA)
+    sky.fill(theme.DUSK + (alpha,))
+    app.screen.blit(sky, rect)
+
+
 def draw_title(app, top):
     """The name (with a violet glow), the subtitle and the goal, over a darker, violet sky."""
     s = app.screen

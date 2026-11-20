@@ -17,7 +17,7 @@ import pygame
 
 import rules
 import sprites
-from phase2 import ui
+from phase2 import draw_theme, ui
 
 TILE = 64
 
@@ -286,6 +286,7 @@ def draw_minimap(app, x, top, width, bottom, show_view=True):
     app.text(s, "MAP", (x, top), 22, classic.DIM)
     y0 = top + 22
     s.blit(pygame.transform.scale(small, (w, h)), (x, y0))
+    draw_theme.draw_map_dusk(app, pygame.Rect(x, y0, w, h))     # the world grows dark (phase2/gloom.py)
 
     def dot(pos, color, size=3):
         px, py = x + int((pos[1] + 0.5) * scale), y0 + int((pos[0] + 0.5) * scale)

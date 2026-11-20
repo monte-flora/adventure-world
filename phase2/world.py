@@ -18,6 +18,8 @@ class Phase2Game(WorldFeatures, rules.Game):      # WorldFeatures: waystones, lo
     live = False                                     # True once the map runs in real time (smooth.live: the real game)
     hero_xy = None                                   # the Hero's middle on the map, [x, y] in squares (smooth.where)
     bump = None                                      # what he's pushing against: (which way, from which square)
+    gloom = 0.0                                      # how much light the Shadow King has taken, 0.0 to 1.0 (gloom.py)
+    gloom_told = False                               # has the game said "it's getting darker" yet?
 
     def __init__(self, player_name="Hero", seed=None, atlas=None):
         self.atlas = atlas or world_map.load()      # the big map, from the land files in levels/world/

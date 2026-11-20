@@ -7,7 +7,8 @@ Other names we thought of are in NAME_IDEAS.
 
 The dusk: the Phase 2 map is drawn under a thin violet sky (DUSK, at DUSK_ALPHA), so the lands look like
 the last hour before night, while the Hero, people and monsters (drawn on top) stay bright. dusk_alpha(game)
-is the one place to ask how dark it is, so the world can grow darker as the story goes on.
+is the one place to ask how dark it is. The world grows darker, very slowly, as the Shadow King pulls the
+light out of it (game.gloom, phase2/gloom.py), but never darker than DUSK_DARKEST.
 """
 
 GAME_NAME = "Shadowfall"
@@ -46,9 +47,19 @@ DUSK = (26, 16, 64)
 DUSK_ALPHA = 96                     # 0 = bright day, 255 = black. 96: dusky, every path still easy to see
 
 
+DUSK_DARKEST = 150                  # the dusk never gets thicker than this, however long you play
+
+
 def dusk_alpha(game):
-    """How thick the dusk over the Phase 2 map is (0-255). One value for now; the world may darken later."""
-    return DUSK_ALPHA
+    """How thick the dusk over the Phase 2 map is (0-255): DUSK_ALPHA in a new game, up to DUSK_DARKEST
+    when the Shadow King has taken all the light he can (game.gloom is 1.0)."""
+    gloom = min(1.0, max(0.0, getattr(game, "gloom", 0.0)))
+    return round(DUSK_ALPHA + (DUSK_DARKEST - DUSK_ALPHA) * gloom)
+
+
+def minimap_alpha(game):
+    """How thick the dusk over the little map is: none in a new game, then it gets as much darker as the map has."""
+    return round(255 * (1 - (255 - dusk_alpha(game)) / (255 - DUSK_ALPHA)))
 
 
 # ----- music: a darker map tune (game.py adds it to its TUNES) -------------------------------------

@@ -15,6 +15,7 @@ its caves, castle and Shadow King are the classic ones) on a world of its own:
 - draw_fight.py drawing the timing bar, the night sky and what monsters are up to
 - theme.py      the teen look: the game's name (GAME_NAME), every colour, the dusk over the map, the
                 map tune; draw_theme.py draws the dusk and the title's name
+- gloom.py      the world grows dark: the dusk gets thicker, very slowly, and every Light Stone pushes it back
 - waystones.py  waystones (fast travel), lookouts, hidden chests and gates on the big map
 - draw_world.py how the new lands, waystones, lookouts and the travel list look
 - people.py     townsfolk (phase2/data/people.json), what they say (dialogue.py), the shop (shop.py),
@@ -31,7 +32,7 @@ game.py only calls the few functions below. Nothing in phase2/ imports game.py.
 
 import pygame
 
-from phase2 import draw_fight, draw_theme, draw_world, fight, keys, monsters, pause, save, smooth, theme
+from phase2 import draw_fight, draw_theme, draw_world, fight, gloom, keys, monsters, pause, save, smooth, theme
 from phase2.world import Phase2Game
 
 has_save = save.has_save
@@ -168,6 +169,7 @@ def on_event(app, event):
 def update_screens(app, dt):
     if is_phase2(app.game):
         app.game.play_time = getattr(app.game, "play_time", 0.0) + dt     # (not while paused: no update then)
+        gloom.pass_time(app.game, dt)       # the world grows dark, very slowly
         from phase2 import draw_hud, draw_people
         draw_people.update(app, dt)
         draw_hud.update(app, dt)            # new messages glow and pop up
