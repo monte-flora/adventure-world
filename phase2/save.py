@@ -39,6 +39,7 @@ KEEP_MESSAGES = 30              # the message log keeps this many lines in the s
 NOT_SAVED = {"rng", "cave", "battle", "effects", "messages", "power_offer"}   # put back fresh when you load
 NOT_SAVED = NOT_SAVED | {"talk"}   # stage 2b: the talk you're in (phase2/people.py) isn't saved
 NOT_SAVED = NOT_SAVED | {"skip_quit_save"}   # (the pause menu's Quit -> "Save first?" No)
+NOT_SAVED = NOT_SAVED | {"live", "bump"}     # the map in real time (phase2/smooth.py): set again as you play
 CLASSES = {"Player": rules.Player, "Monster": rules.Monster, "Quest": rules.Quest, "Tool": rules.Tool}
 
 

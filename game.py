@@ -1586,7 +1586,8 @@ class App:
         if key in MOVE_KEYS:
             direction = MOVE_KEYS[key]
             self.map_facing = direction         # he turns that way, even if something is in the way
-            game.do(direction)
+            if not phase2.is_phase2(game):      # (Phase 2: he walks while the key is held, in update)
+                game.do(direction)
         elif key in (pygame.K_SPACE, pygame.K_RETURN):
             game.do("act")
         elif key == pygame.K_e:
@@ -1883,17 +1884,20 @@ class App:
             self.apply_effect(effect)
 
         # Slide characters smoothly between tiles
+        if self.state == "play" and phase2.is_phase2(game):    # Phase 2's map runs in real time (phase2/smooth.py):
+            keys = pygame.key.get_pressed()                     # he walks while a move key is held, monsters roam
+            phase2.live_map(self, dt, {way for key, way in MOVE_KEYS.items() if keys[key]})
         if game.player.pos != self.map_last_spot:      # a new step: the next walking picture
             self.map_last_spot = game.player.pos
             self.map_steps += 1
             self.map_step_time = MAP_STEP_TIME
         self.map_step_time = max(0.0, self.map_step_time - dt)
         smooth = min(1.0, dt * 16)
-        target = tile_px(game.player.pos)
+        target = phase2.map_spot(self) or tile_px(game.player.pos)     # (Phase 2: anywhere, not only on a square)
         self.player_px[0] = lerp(self.player_px[0], target[0], smooth)
         self.player_px[1] = lerp(self.player_px[1], target[1], smooth)
         for m in game.monsters:
-            target = tile_px(m.pos)
+            target = phase2.map_spot(self, m) or tile_px(m.pos)
             spot = self.monster_px.setdefault(id(m), list(target))
             spot[0] = lerp(spot[0], target[0], smooth)
             spot[1] = lerp(spot[1], target[1], smooth)
@@ -2453,7 +2457,7 @@ class App:
         In his boat he just sits."""
         if self.game.here == "W":
             return 0
-        target = tile_px(self.game.player.pos)
+        target = phase2.map_spot(self) or tile_px(self.game.player.pos)
         sliding = abs(self.player_px[0] - target[0]) + abs(self.player_px[1] - target[1]) > 1
         if self.map_step_time > 0 or sliding:
             return 1 + self.map_steps % 2

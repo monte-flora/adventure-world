@@ -14,7 +14,7 @@ Asked 2026-11-13. Calls made by the coordinator (change any of them in TODO.md o
 1. **World:** about 3–4× the classic map, in 6–7 lands (Home Meadow, Whispering Forest, the Great Lake, Frost Peaks, Sunscorch Desert, Murk Swamp, then Nightfall Hollow through the Portal). One big scrolling map, each land in its own file in `levels/world/`. Mines and their caves stay.
 2. **No fog:** the whole map is visible. Landmarks become fast-travel waystones (unlock by visiting) and lookouts that point to secret treasure.
 3. **People:** villages with townsfolk, a shopkeeper (spend gold), a blacksmith (the forge), a guide, quest givers. Dialogue boxes with choices; a quest log on Q.
-4. **Monsters:** visible on the map, no hidden random fights. Each land has its own kinds; night brings more. They patrol and chase (like cave monsters), so you can dodge them. Touch one from behind = first strike; weak monsters flee a high-level Hero. Fights add a timing strike (like the forge marker) instead of plain A.
+4. **Monsters:** visible on the map, no hidden random fights. Each land has its own kinds; night brings more. They roam freely in real time, even while you stand still: they patrol near home and chase you (like cave monsters), so you can dodge them. The Hero walks smoothly too: hold a move key, and each square he crosses is one turn (`phase2/smooth.py`, `HERO_SPEED`). Touch one from behind = first strike; weak monsters flee a high-level Hero. Fights add a timing strike (like the forge marker) instead of plain A.
 5. **Length:** a main quest across the lands to the Shadow King, plus 10–15 side quests; **saving and loading** so it can be played over several sittings.
 
 ## Stages (one PR or worker each)

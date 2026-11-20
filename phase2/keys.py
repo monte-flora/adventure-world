@@ -23,6 +23,7 @@ BATTLE_BUTTONS = [("attack", "R", "Attack"), ("run", "X", "Run away"), ("eat", "
 
 # The tip bubbles (tutorial.TIPS) that name a different key in Phase 2
 TIPS = {
+    "walk":    "This is you! Hold the ARROW keys to walk around. Press H any time for help.",
     "monster": "A monster! Walk into it to start a fight. In a fight, press R to attack!",
     "diamond": "A diamond! Stand next to it and press G to dig it out.",
     "dig":     "Cracked rock! Stand next to it and press G to dig. DOWN and G digs the floor.",

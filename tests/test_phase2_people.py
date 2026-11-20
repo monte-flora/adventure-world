@@ -9,7 +9,7 @@ import rules
 import sprites
 from helpers import frames, ok, press
 from phase2 import Phase2Game, dialogue, draw_people, people, quests, save, shop
-from phase2_helpers import own_save_file, new_phase2_app  # noqa: F401  (own_save_file is used by pytest)
+from phase2_helpers import hold, own_save_file, new_phase2_app  # noqa: F401  (own_save_file is used by pytest)
 
 
 def world(seed=1):
@@ -142,13 +142,13 @@ def test_choices_go_where_they_say():
     ok(talk.done, "Bye ends the talk")
 
 
-def test_the_dialogue_box_with_the_keys_and_the_mouse():
+def test_the_dialogue_box_with_the_keys_and_the_mouse(monkeypatch):
     app = new_phase2_app()
     game = app.game
     game.monsters = []
     stand_next_to(game, "guide_rosa")
     frames(app, 5)
-    press(app, pygame.K_RIGHT)
+    hold(app, monkeypatch, pygame.K_RIGHT)          # walk into her
     frames(app, 2)
     ok(app.state == "people" and app.people_screen.kind == "talk", "the dialogue box opens")
     for _ in range(8):
@@ -381,5 +381,5 @@ def test_people_on_open_ground_and_monsters_stay_off_them():
         game.monsters = game.spawn_monsters({})
         assert not any(tuple(m.pos) in spots for m in game.monsters)
         for _ in range(30):
-            monsters.move_all(game)
+            monsters.pass_time(game, 0.5)
             assert not any(tuple(m.pos) in spots for m in game.monsters)
