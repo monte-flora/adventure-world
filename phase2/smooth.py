@@ -107,7 +107,7 @@ def walk(game, dx, dy, dt):
         game.bump = None
         return False
     got = 0.0
-    while dt > 0 and not (game.battle or game.cave or game.over):
+    while dt > 1e-9 and not (game.battle or game.cave or game.over):     # (1e-9: no crumb of time left over)
         far = HERO_SPEED * min(dt, STEP) * (0.7071 if dx and dy else 1.0)
         dt -= STEP
         if dx:

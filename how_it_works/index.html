@@ -798,6 +798,15 @@
     (name, land, level, Light Stones and play time), and <b>D</b> deletes one. Saving in a cave starts you
     outside its Mine next time.</p>
 
+  <h3>Phase 2: smooth walking, and monsters that roam</h3>
+  <p>In Phase 2 the Hero doesn't hop a square at a time. <b>Hold</b> a move key and he walks, a little every
+    frame (hold two keys to walk diagonally). Rock, water and people stop him, and he slides along walls.
+    Each square he crosses is still one <b>turn</b>. The monsters on the map don't wait for you: they wander
+    near home all the time, and one that sees you runs at you. If it <b>touches</b> you, the fight starts (walk
+    into its back for a first strike!). Classic still walks one square for every key press.
+    Try changing <code class="inl">HERO_SPEED</code> at the top of <b>phase2/smooth.py</b>, or
+    <code class="inl">ROAM_SPEED</code> and <code class="inl">RUN_SPEED</code> in <b>phase2/monsters.py</b>!</p>
+
   <h3>Phase 2: R is for fighting</h3>
   <p>In Phase 2, every attack is <b>R</b>. In a fight on the map, <b>R</b> attacks (in the gold = PERFECT!),
     <b>X</b> runs away and <b>E</b> eats. In a cave, the castle and the throne room, <b>R</b> swings your sword

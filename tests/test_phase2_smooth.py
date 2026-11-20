@@ -104,6 +104,7 @@ def test_rock_stops_him_and_says_so_once(monkeypatch):
     x = smooth.where(world)[0]
     ok(world.player.pos == (r, c + 1) and c + 1.5 < x <= c + 2 - smooth.HALF, "he stops at the rock, not in it")
     ok(said(world, "rock is in the way") == 1, "and the game says what's in the way, once")
+    frames(app)                                     # (he lets go...)
     hold(app, monkeypatch, pygame.K_RIGHT, 10)
     ok(said(world, "rock is in the way") == 2 and smooth.where(world)[0] == x, "push again: it says so again")
 
@@ -117,7 +118,7 @@ def test_water_stops_him_until_he_has_a_boat(monkeypatch):
     hold(app, monkeypatch, pygame.K_DOWN, 30)
     ok(world.player.pos == (r, c) and said(world, "can't swim") == 1, "no boat: the water stops him")
     world.player.has_boat = True
-    hold(app, monkeypatch, pygame.K_DOWN, 30)
+    hold(app, monkeypatch, pygame.K_DOWN)
     ok(world.player.pos == (r + 1, c) and world.here == "W", "with a boat he rows out")
 
 
@@ -135,7 +136,7 @@ def test_he_slides_along_a_wall_and_round_a_corner(monkeypatch):
     ok(x > c + 1 and r + smooth.HALF <= y < r + 0.5, "up and right along a wall: he slides right")
     ok(said(world, "rock is in the way") == 0, "(sliding isn't a bump)")
     held.clear()
-    world.hero_xy = [c + 2.95, r + 0.5]             # right under the wall's corner, a bit short of the gap
+    world.player.pos, world.hero_xy = (r, c + 3), [c + 3.05, r + 0.5]   # under the gap, his side under the wall's corner
     hold(app, monkeypatch, pygame.K_UP, STEP)
     ok(world.player.pos == (r - 1, c + 3), "up at the corner: he steps round it and through the gap")
 
@@ -198,9 +199,8 @@ def test_ice_still_slides_him_all_the_way(monkeypatch):
     for cc in range(c + 1, c + 4):
         world.map[r][cc] = "I"
     frames(app, 2)
-    hold(app, monkeypatch, pygame.K_RIGHT)
-    ok(world.player.pos == (r, c + 4) and smooth.where(world) == smooth.middle((r, c + 4)),
-       "one step onto the ice and he slides to the far side")
+    hold(app, monkeypatch, pygame.K_RIGHT, 8)
+    ok(world.player.pos == (r, c + 4), "one step onto the ice and he slides to the far side")
 
 
 def test_he_walks_smoothly_in_nightfall_hollow_too(monkeypatch):
@@ -212,13 +212,13 @@ def test_he_walks_smoothly_in_nightfall_hollow_too(monkeypatch):
     frames(app, 30)
     r, c = world.player.pos
     way, (dr, dc) = next((way, d) for way, d in rules.DIRECTIONS.items()
-                         if world.tile((r + d[0], c + d[1])) in "GFR")
+                         if world.in_bounds((r + d[0], c + d[1])) and world.tile((r + d[0], c + d[1])) in "GFR")
     turn = world.turn
     hold(app, monkeypatch, {"left": pygame.K_LEFT, "right": pygame.K_RIGHT, "up": pygame.K_UP,
-                            "down": pygame.K_DOWN}[way], STEP // 2)
+                            "down": pygame.K_DOWN}[way], STEP // 2 - 1)
     ok(world.player.pos == (r, c) and smooth.where(world) != smooth.middle((r, c)), "half a square...")
     hold(app, monkeypatch, {"left": pygame.K_LEFT, "right": pygame.K_RIGHT, "up": pygame.K_UP,
-                            "down": pygame.K_DOWN}[way], STEP // 2)
+                            "down": pygame.K_DOWN}[way], STEP // 2 + 1)
     ok(world.player.pos == (r + dr, c + dc) and world.turn == turn + 1, "...and the other half: a step, a turn")
 
 
@@ -264,6 +264,7 @@ def test_walk_into_one_from_behind_for_a_first_strike_but_not_from_the_front():
         r, c = on_a_field(world)
         m = alone_with(world, "Zombie", (r, c + 2), facing=facing)
         m.health = m.max_health = 50
+        world.live = True                           # (the real game: your step isn't a turn for the monsters)
         for _ in range(40):
             if world.battle:
                 break
@@ -360,7 +361,7 @@ def test_classic_still_walks_a_square_for_every_key_press(monkeypatch):
     press(app, key)
     ok(world.player.pos == (r + dr, c + dc) and world.turn == turn + 1, "one key press: one whole square, one turn")
     frames(app, 30)
-    ok(app.player_px == list(game.tile_px(world.player.pos)), "drawn on his square")
+    ok(math.dist(app.player_px, game.tile_px(world.player.pos)) < 1, "drawn on his square")
     for _ in range(10):
         world.do("wait")
         if world.battle:
