@@ -24,7 +24,7 @@ import sys
 import pygame
 
 import sprites
-from phase2 import draw_people, draw_world, hud, people, theme, ui
+from phase2 import draw_people, draw_theme, draw_world, hud, people, theme, ui
 
 CARD = theme.CARD             # a card on the panel
 CARD_EDGE = theme.CARD_EDGE
@@ -579,6 +579,7 @@ def draw_little_map(app, area):
     rect.center = area.center
     over = rect.collidepoint(st.mouse)
     s.blit(pygame.transform.scale(small, rect.size), rect)
+    draw_theme.draw_map_dusk(app, rect)                 # the world grows dark (phase2/gloom.py)
     draw_map_marks(app, rect, scale, 3)
     cam = pygame.Rect(rect.x + int(app.cam[0] / draw_world.TILE * scale), rect.y + int(app.cam[1] / draw_world.TILE * scale),
                       int(G.VIEW_W / draw_world.TILE * scale), int(G.VIEW_H / draw_world.TILE * scale))

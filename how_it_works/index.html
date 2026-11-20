@@ -807,6 +807,15 @@
     Try changing <code class="inl">HERO_SPEED</code> at the top of <b>phase2/smooth.py</b>, or
     <code class="inl">ROAM_SPEED</code> and <code class="inl">RUN_SPEED</code> in <b>phase2/monsters.py</b>!</p>
 
+  <h3>Phase 2: the world grows dark</h3>
+  <p>The Shadow King is pulling the light out of the world. In Phase 2 the map (and the little map) gets a
+    tiny bit darker every minute you play: so slowly you can't see it happen, but after a while you notice.
+    Every <b>Light Stone</b> you find pushes the dark back, and when you beat the Shadow King all the light
+    comes back. It never gets too dark to see the paths, and your saved game remembers how dark it is.
+    The number is <code class="inl">game.gloom</code>: 0.0 at the start, 1.0 when it's as dark as it gets.
+    Try changing <code class="inl">FULL_MINUTES</code> and <code class="inl">STONE_PUSH</code> at the top of
+    <b>phase2/gloom.py</b>, or <code class="inl">DUSK_DARKEST</code> in <b>phase2/theme.py</b>!</p>
+
   <h3>Phase 2: R is for fighting</h3>
   <p>In Phase 2, every attack is <b>R</b>. In a fight on the map, <b>R</b> attacks (in the gold = PERFECT!),
     <b>X</b> runs away and <b>E</b> eats. In a cave, the castle and the throne room, <b>R</b> swings your sword

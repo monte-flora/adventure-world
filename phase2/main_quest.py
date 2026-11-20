@@ -8,6 +8,7 @@ like any other quest; this file adds what's special about the main quest:
 - a new game has the Phase 2 story cards (not the classic ones); talking to Rosa starts chapter 1
 - finishing a chapter gives its Light Stone (a story card) and starts the next chapter
 - the Portal stays shut until you have all 7 Light Stones (Classic's diamonds don't open it here)
+- every Light Stone pushes back the dark that slowly falls over the world (phase2/gloom.py)
 - the quest log and Rosa say which way to go next ("north-east, 23 steps away")
 - after the Shadow King, a short ending, and then you're back home, with your game saved, to keep exploring
 
@@ -20,7 +21,7 @@ import os
 
 import rules
 
-from phase2 import quests, theme
+from phase2 import gloom, quests, theme
 
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "main_quest.json")
 RELIC_QUEST = "Find the 7 Light Stones"
@@ -151,6 +152,7 @@ def chapter_done(game, qid):
         game.log("You got %s! (%d of %d Light Stones)" % (quest["relic"], len(have), relics_needed()), "quest")
         game.tell(story("relic", relic=quest["relic"][0].upper() + quest["relic"][1:], count=len(have)))
         game.effect("land", text=quest["relic"].upper(), sub="%d of %d Light Stones" % (len(have), relics_needed()))
+        gloom.stone_found(game, quest["relic"])     # every Light Stone pushes the dark back (phase2/gloom.py)
         if game.world == 1:
             fix_panel_quests(game)
         if len(have) >= relics_needed():
@@ -268,6 +270,7 @@ def the_end(game):
         return
     quests.notice(game, "king")
     game.king_beaten = True
+    gloom.light_returns(game)                   # the light he took comes back
     game.tell(story("ending"))
     come_home(game)
     game.log("The adventure goes on! Explore anywhere, and help the people who still need you.", "quest")
