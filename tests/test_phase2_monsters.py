@@ -2,7 +2,11 @@
 PHASE 2 MONSTERS (phase2/monsters.py, phase2/fight.py): you can see every monster on the map, each land
 has its own, they patrol, chase and give up, never come into houses or onto the path, a sneak attack from
 behind gets a first strike, weak ones run from you, and Attack in a fight is a timing strike.
+
+They roam in real time: monsters.pass_time(world, seconds). (tests/test_phase2_smooth.py has more.)
 """
+
+import math
 
 import pygame
 
@@ -10,7 +14,7 @@ import game
 import phase2
 import rules
 from helpers import DT, frames, new_app, ok, press
-from phase2 import Phase2Game, fight, monsters, save
+from phase2 import Phase2Game, fight, monsters, save, smooth
 from phase2_helpers import own_save_file, new_phase2_app  # noqa: F401  (own_save_file is used by pytest)
 
 PAUSE = int(game.BATTLE_PAUSE / DT) + 1
@@ -90,10 +94,13 @@ def test_a_monster_patrols_near_its_home_when_you_are_far_away():
     world = a_world()
     home = field_spot(world)
     m = alone_with(world, "Spider", home)
+    world.player.pos = open_spot(world, home, 8)     # near enough to see it, too far for it to chase you
+    been = set()
     for _ in range(60):
-        monsters.move_all(world)
+        monsters.pass_time(world, 0.5)
+        been.add(m.pos)
         ok(monsters.steps(m.pos, home) <= monsters.PATROL_RADIUS, "it stays near its home spot")
-    ok(m.state == "patrol", "patrolling")
+    ok(m.state == "patrol" and len(been) > 3, "patrolling: it wanders about")
 
 
 def test_it_chases_you_when_you_come_close_then_gives_up_and_goes_home():
@@ -101,15 +108,16 @@ def test_it_chases_you_when_you_come_close_then_gives_up_and_goes_home():
     home = field_spot(world)
     m = alone_with(world, "Frost Wolf", home, move_chance=1.0)
     world.player.pos = open_spot(world, home, 3)
-    monsters.move_all(world)
+    gap = math.dist(monsters.where(m), smooth.where(world))
+    monsters.pass_time(world, 0.2)
     ok(m.state == "chase", "you're 3 squares away: it chases you")
-    ok(monsters.steps(m.pos, world.player.pos) == 2, "and comes a step closer")
+    closer = gap - math.dist(m.xy, smooth.where(world))
+    ok(abs(closer - monsters.RUN_SPEED * 0.2) < 0.01, "and runs straight at you (not a square at a time)")
     world.player.pos = world.start                   # you run home (far away, and in a house)
-    monsters.move_all(world)
+    monsters.pass_time(world, 0.2)
     ok(m.state != "chase", "it gives up")
     m.pos, m.state = open_spot(world, home, 4), "home"     # (it had wandered off a bit)
-    for _ in range(20):
-        monsters.move_all(world)
+    monsters.pass_time(world, 4.0)
     ok(m.state == "patrol" and monsters.steps(m.pos, home) <= monsters.PATROL_RADIUS, "and walks back home")
 
 
@@ -132,8 +140,8 @@ def test_monsters_never_go_into_houses_villages_or_onto_the_path():
             if world.in_bounds(nxt) and world.tile(nxt) in "GF" and not monsters.is_safe(world, nxt):
                 m = alone_with(world, "Frost Wolf", nxt, move_chance=1.0)
                 world.player.pos = spot
-                for _ in range(5):
-                    monsters.move_all(world)
+                for _ in range(10):
+                    monsters.pass_time(world, 0.2)
                     ok(not monsters.is_safe(world, m.pos), "it never steps on the path or a house")
                 ok(m.state != "chase", "and it doesn't even chase you there")
                 break
@@ -189,11 +197,11 @@ def test_weak_monsters_run_from_a_strong_hero():
     m = alone_with(world, "Slime", home, move_chance=1.0)
     world.player.pos = open_spot(world, home, 2)
     world.player.level = 1 + monsters.FLEE_LEVELS
-    monsters.move_all(world)
-    ok(m.state == "flee" and monsters.steps(m.pos, world.player.pos) == 3, "it runs away from you")
+    monsters.pass_time(world, 0.4)
+    ok(m.state == "flee" and math.dist(m.xy, smooth.where(world)) > 3, "it runs away from you")
     world.player.level = 1
     m.pos, m.state = home, "patrol"
-    monsters.move_all(world)
+    monsters.pass_time(world, 0.2)
     ok(m.state == "chase", "a level 1 Hero: it comes after you")
 
 

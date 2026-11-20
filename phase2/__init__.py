@@ -8,7 +8,9 @@ its caves, castle and Shadow King are the classic ones) on a world of its own:
 - world.py      Phase2Game: rules.Game on that map, with no fog, saving by itself
 - save.py       saving to a JSON file (or the browser's storage) and loading it back, in 3 save slots
 - pause.py      the pause menu (P or ESC: Resume, Save, Save and go to the title, Quit) and the slot list
-- monsters.py   monsters you can see on the map: each land its own, patrol and chase, night and day
+- monsters.py   monsters you can see on the map: each land its own, they roam freely (patrol and chase),
+                night and day
+- smooth.py     the Hero walks smoothly on the map while a move key is held (not a square at a time)
 - fight.py      the timing strike in fights, and the first strike from behind
 - draw_fight.py drawing the timing bar, the night sky and what monsters are up to
 - theme.py      the teen look: the game's name (GAME_NAME), every colour, the dusk over the map, the
@@ -29,7 +31,7 @@ game.py only calls the few functions below. Nothing in phase2/ imports game.py.
 
 import pygame
 
-from phase2 import draw_fight, draw_theme, draw_world, fight, keys, pause, save, theme
+from phase2 import draw_fight, draw_theme, draw_world, fight, keys, monsters, pause, save, smooth, theme
 from phase2.world import Phase2Game
 
 has_save = save.has_save
@@ -102,6 +104,26 @@ def faces_left(game, monster):
     if is_phase2(game):
         return draw_fight.faces_left(game, monster)
     return game.player.pos[1] < monster.pos[1]
+
+
+# ----- the map in real time (phase2/smooth.py): the Hero walks smoothly and monsters roam freely -----
+
+def live_map(app, dt, held):
+    """One frame on a Phase 2 map: he walks the way the held move keys say (`held`: "left", "up"...),
+    and the monsters roam. Returns False in Classic (a key press is a whole step there)."""
+    if not is_phase2(app.game):
+        return False
+    smooth.live(app, dt, held)
+    return True
+
+
+def map_spot(app, monster=None):
+    """Where the Hero (or this monster) is on a Phase 2 map, in pixels: anywhere, not only on a square.
+    None in Classic."""
+    if not is_phase2(app.game):
+        return None
+    x, y = monsters.where(monster) if monster else smooth.where(app.game)
+    return ((x - 0.5) * 64, (y - 0.5) * 64)
 
 
 # ----- drawing the Phase 2 world (draw_world.py). Each does nothing in a classic game. -----

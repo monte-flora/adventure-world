@@ -8,13 +8,16 @@ Later stages add people, quests and visible monsters here, not in rules.py.
 import rules
 import story
 
-from phase2 import fight, keys, main_quest, monsters, people, quests, save, side_steps, world_map
+from phase2 import fight, keys, main_quest, monsters, people, quests, save, side_steps, smooth, world_map
 from phase2.waystones import WorldFeatures
 
 
 class Phase2Game(WorldFeatures, rules.Game):      # WorldFeatures: waystones, lookouts, gates (waystones.py)
     phase2 = True
     cave_tips = keys.CAVE_TIPS                       # caves' first-time messages that name Phase 2's keys (G for levers)
+    live = False                                     # True once the map runs in real time (smooth.live: the real game)
+    hero_xy = None                                   # the Hero's middle on the map, [x, y] in squares (smooth.where)
+    bump = None                                      # what he's pushing against: (which way, from which square)
 
     def __init__(self, player_name="Hero", seed=None, atlas=None):
         self.atlas = atlas or world_map.load()      # the big map, from the land files in levels/world/
@@ -67,14 +70,30 @@ class Phase2Game(WorldFeatures, rules.Game):      # WorldFeatures: waystones, lo
     def move_monsters(self):
         if self.battle:
             return                              # a fight started this turn (you walked into one)
-        if self.world == 1:
-            monsters.move_all(self)
-        else:
+        if self.world != 1:
             super().move_monsters()
+        elif not self.live:                     # a robot or a test playing turn by turn: a turn's worth of time.
+            monsters.pass_time(self, monsters.TURN_SECONDS)     # (The real game: pass_time, every frame.)
 
     def archers_shoot(self):
-        if not self.battle:
+        if not self.battle and self.world != 1:     # (at home Skeletons shoot by the clock: monsters.pass_time)
             super().archers_shoot()
+
+    # ----- the map in real time (smooth.py): the Hero walks smoothly and the monsters roam ----------
+
+    def walk(self, dx, dy, dt):
+        """The Hero walks for dt seconds (dx, dy: -1, 0 or 1). Walk into a monster and the fight starts."""
+        moved = smooth.walk(self, dx, dy, dt)
+        if moved and self.world == 1 and not self.battle:
+            monster = monsters.touch(self)
+            if monster and self.battle and monsters.behind(self, monster):
+                fight.first_strike(self, monster)       # ...from behind: a free hit!
+        return moved
+
+    def pass_time(self, dt):
+        """The home map's monsters roam for dt seconds. (Nightfall Hollow's move when you take a step.)"""
+        if self.world == 1 and not (self.battle or self.cave or self.over):
+            monsters.pass_time(self, dt)
 
     def random_event(self):
         """Phase 2 has no random effects: no thistles that hurt, no random heals, no armor out of nowhere."""
@@ -113,7 +132,7 @@ class Phase2Game(WorldFeatures, rules.Game):      # WorldFeatures: waystones, lo
         b = self.battle
         super().battle_action(action)
         if b and b.result == "fled" and hasattr(b.monster, "calm"):
-            b.monster.calm, b.monster.state = monsters.CALM_TURNS, "home"   # it lets you go for a bit
+            b.monster.calm, b.monster.state = monsters.CALM_SECONDS, "home"   # it lets you go for a bit
 
     def monster_gone(self, monster, give_xp):
         super().monster_gone(monster, give_xp)

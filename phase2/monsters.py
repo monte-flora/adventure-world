@@ -3,8 +3,10 @@ MONSTERS ON THE PHASE 2 MAP - you can see every one of them, so there are no sur
 
 - Every land has its own mix (LAND_MONSTERS): a few weak Slimes in Home Meadow, Scorpions in the
   desert, Frost Wolves up in the peaks, Bog Lurkers in the swamp...
+- Monsters ROAM FREELY, all the time (not a square at a time, and not only when you move): pass_time.
 - A monster PATROLS near its home spot. Get within CHASE_DISTANCE squares and it CHASES you.
   Get GIVE_UP_DISTANCE away (or reach a safe square) and it gives up and walks back home.
+  One that TOUCHES you starts a fight.
 - Safe squares: houses, the path, landmarks, signposts and village squares. Monsters never step on them.
 - Monsters much weaker than you (FLEE_LEVELS levels below you) run away from you.
 - Walk into a monster from BEHIND (it's facing away from you) and you get a FIRST STRIKE.
@@ -17,6 +19,8 @@ This file knows nothing about graphics, so it's easy to test.
 import math
 
 import rules
+
+from phase2 import smooth
 
 # ===========================================================================
 # THE KINDS of monster. The classic ones (rules.MONSTER_TYPES) plus a few that only live in Phase 2.
@@ -54,9 +58,19 @@ PATROL_RADIUS = 3               # a patrolling monster stays this close to its h
 CHASE_DISTANCE = 4              # it chases you when you're this close (steps)...
 GIVE_UP_DISTANCE = 7            # ...and gives up when you get this far away...
 LEASH = 10                      # ...or when it's this far from home
-CHASE_SPEED = 0.85              # a chasing monster moves on this share of turns (at least its usual speed)
 FLEE_LEVELS = 3                 # a monster this many levels below you runs away
-CALM_TURNS = 5                  # after you run from a fight, the monster leaves you alone this long
+CALM_SECONDS = 3.0              # after you run from a fight, the monster leaves you alone this long
+
+RUN_SPEED = 4.25                # a chasing (or fleeing) monster goes this many squares a second: you walk 5, so you can
+                                # just outrun it
+ROAM_SPEED = 2.5                # patrolling or walking home: this many, times its move_chance (a Bog Lurker is slow)
+REST = (0.5, 2.5)               # a patrolling monster stands still this long between walks (seconds: shortest, longest)
+TOUCH = 0.7                     # a monster this close to you (middle to middle, in squares) is touching you: a fight!
+CROWD = 0.6                     # monsters don't walk closer to each other than this
+ARCHER_GAP = 1.5                # a Skeleton stops this far from you (it shoots)...
+ARROW_SECONDS = 1.0             # ...and the Skeletons near you get a chance to shoot this often
+AWAKE = 14                      # only monsters this close to you (steps) patrol: nobody can see the others
+TURN_SECONDS = 0.2              # a robot or a test that plays turn by turn (game.do): monsters get this long a turn
 
 RESPAWN_TURNS = 40              # a beaten monster comes back this many turns later...
 RESPAWN_AWAY = 8                # ...at least this far from you
@@ -90,7 +104,9 @@ def make_monster(kind, pos, land=None, night=False, facing="left"):
     m.facing = facing             # which way it looks: walk into it from behind for a first strike!
     m.looks_left = facing == "left"
     m.state = "patrol"            # "patrol", "chase", "home" (walking back) or "flee"
-    m.calm = 0
+    m.calm = 0                    # seconds left of leaving you alone
+    m.goal = None                 # where it's patrolling to ([x, y] in squares), and
+    m.rest = 0.0                  # how much longer it stands still first (seconds)
     return m
 
 
@@ -101,6 +117,14 @@ def get_ready(m):
         m.looks_left = True
         m.level = LEVELS.get(m.base_kind, 2)
     return m
+
+
+def where(m):
+    """A monster's middle, [x, y] in squares. If something else moved it (m.pos), it's in the middle of that square."""
+    xy = getattr(m, "xy", None)
+    if xy is None or smooth.square(xy) != tuple(m.pos):
+        xy = m.xy = smooth.middle(m.pos)
+    return xy
 
 
 def land_mix(name):
@@ -266,7 +290,7 @@ def dawn(game):
 
 
 # ===========================================================================
-# Every turn
+# All the time (pass_time), and every turn (turn_passed)
 # ===========================================================================
 
 def respawn(game):
@@ -294,13 +318,13 @@ def player_hidden(game):
     return is_safe(game, p) or game.tile(p) == "B"
 
 
-def think(game, m):
-    """What is this monster doing this turn? patrol, chase, flee or walk back home."""
+def think(game, m, dt):
+    """What is this monster doing now? patrol, chase, flee or walk back home. (dt: seconds since last time.)"""
     you = game.player.pos
     near = steps(m.pos, you)
     sees_you = not player_hidden(game) and (m.special != "drowns" or game.here == "W")
     if m.calm > 0:
-        m.calm -= 1
+        m.calm -= dt
         m.state = "home" if m.state in ("chase", "flee") else m.state
         return
     if game.player.level >= m.level + FLEE_LEVELS and near <= CHASE_DISTANCE and sees_you:
@@ -316,46 +340,94 @@ def think(game, m):
         m.state = "patrol"
 
 
-def step_to(game, m, pos):
-    dr, dc = pos[0] - m.pos[0], pos[1] - m.pos[1]
-    m.facing = {(-1, 0): "up", (1, 0): "down", (0, -1): "left", (0, 1): "right"}.get((dr, dc), m.facing)
-    m.pos = pos
-    if dc:
-        m.looks_left = dc < 0                    # (the picture keeps looking this way while it walks up or down)
+def patrol_goal(game, m):
+    """Somewhere near home to wander to: the middle of a square it can stand on (or None)."""
+    r, c = m.home
+    reach = range(-PATROL_RADIUS, PATROL_RADIUS + 1)
+    spots = [(r + dr, c + dc) for dr in reach for dc in reach if abs(dr) + abs(dc) <= PATROL_RADIUS]
+    spots = [s for s in spots if can_stand(game, m, s)]
+    return smooth.middle(game.rng.choice(spots)) if spots else None
 
 
-def move_one(game, m):
-    think(game, m)
-    you = game.player.pos
-    speed = max(m.move_chance, CHASE_SPEED) if m.state in ("chase", "flee") else m.move_chance
-    if game.rng.random() >= speed:
-        return
-    taken = {o.pos for o in game.monsters if o is not m and o.is_alive}
-    options = [s for s in game.neighbors(m.pos, water=m.special == "drowns")
-               if can_stand(game, m, s) and s not in taken]
-    if m.special == "archer" or m.state in ("flee", "home", "patrol"):
-        options = [s for s in options if s != you]      # only a chasing monster steps onto you
-    if not options:
-        return
+def stand_still(game, m):
+    m.goal = None
+    m.rest = REST[0] + game.rng.random() * (REST[1] - REST[0])
+
+
+def roam(game, m, dt, others):
+    """One monster for dt seconds (a short time): it thinks, then walks: straight at you, away from you,
+    home, or to a spot near home. It slides along what it can't stand on."""
+    think(game, m, dt)
+    xy, you = where(m), smooth.where(game)
+    speed = RUN_SPEED
     if m.state == "chase":
-        best = min(steps(s, you) for s in options)
-        options = [s for s in options if steps(s, you) == best]
+        goal = you
     elif m.state == "flee":
-        best = max(steps(s, you) for s in options)
-        options = [s for s in options if steps(s, you) == best]
-    elif m.state == "home":
-        best = min(steps(s, m.home) for s in options)
-        options = [s for s in options if steps(s, m.home) == best]
-    else:                                                # patrol: wander, but stay near home
-        options = [s for s in options if steps(s, m.home) <= PATROL_RADIUS] or options
-    step_to(game, m, game.rng.choice(sorted(options)))
+        goal = [2 * xy[0] - you[0], 2 * xy[1] - you[1]]         # straight away from you
+    else:
+        speed = ROAM_SPEED * m.move_chance
+        if m.state == "home":
+            goal = smooth.middle(m.home)
+        else:                                                    # patrol: wander, but stay near home
+            m.rest = getattr(m, "rest", 0.0) - dt
+            if m.rest > 0:
+                return
+            goal = m.goal = getattr(m, "goal", None) or patrol_goal(game, m)
+    dx, dy = (goal[0] - xy[0], goal[1] - xy[1]) if goal else (0, 0)
+    far = math.hypot(dx, dy)
+    if far < 0.05:                                               # it's there (or has nowhere to go)
+        stand_still(game, m)
+        return
+    go = min(far, speed * dt) / far
+    new = smooth.slide(xy, dx * go, dy * go, lambda pos: can_stand(game, m, pos))
+    gap = math.dist(new, you)
+    keep_off = ARCHER_GAP if m.special == "archer" else 0 if m.state == "chase" else TOUCH
+    if new == xy or (gap < keep_off and gap < math.dist(xy, you)) or any(
+            o is not m and math.dist(new, o.xy) < min(CROWD, math.dist(xy, o.xy)) for o in others):
+        if m.state == "patrol":                                  # something's in the way: try somewhere else
+            stand_still(game, m)
+        return                                   # (only a chasing monster walks into you, and never a Skeleton)
+    if abs(dx) >= abs(dy):
+        m.facing = "left" if dx < 0 else "right"
+        m.looks_left = dx < 0                    # (the picture keeps looking this way while it walks up or down)
+    else:
+        m.facing = "up" if dy < 0 else "down"
+    m.xy, m.pos = new, smooth.square(new)
 
 
-def move_all(game):
+def touch(game):
+    """Is a monster touching you? Then the fight starts (not on a safe square: a house, the path...).
+    Returns the monster. A Sea Serpent only gets you in your boat, and nothing else does there."""
+    if game.battle or game.here in rules.SAFE or is_safe(game, game.player.pos):
+        return None
+    you = smooth.where(game)
+    for m in game.monsters:
+        if m.is_alive and steps(m.pos, game.player.pos) <= 1 and getattr(m, "calm", 0) <= 0 \
+                and (m.special == "drowns") == (game.here == "W") and math.dist(where(m), you) < TOUCH:
+            game.start_battle(m)
+            return m
+    return None
+
+
+def pass_time(game, dt):
+    """The map's monsters live for dt seconds: they roam, chase and flee, one that touches you starts a
+    fight, and Skeletons shoot."""
     get_world_ready(game)
-    for m in list(game.monsters):
-        if m.is_alive:
-            move_one(game, get_ready(m))
+    for m in game.monsters:
+        where(get_ready(m))
+    while dt > 0 and not game.battle and game.player.is_alive:
+        step = min(dt, smooth.STEP)
+        dt -= step
+        awake = [m for m in game.monsters                       # (one far away walks home first, then sleeps)
+                 if m.is_alive and (m.state != "patrol" or steps(m.pos, game.player.pos) <= AWAKE)]
+        for m in awake:
+            roam(game, m, step, awake)
+        if touch(game):
+            return
+        game.arrow_clock = getattr(game, "arrow_clock", 0.0) + step
+        if game.arrow_clock >= ARROW_SECONDS:
+            game.arrow_clock = 0.0
+            rules.Game.archers_shoot(game)
 
 
 def turn_passed(game):
@@ -375,5 +447,13 @@ def turn_passed(game):
 # ===========================================================================
 
 def from_behind(m, direction):
-    """You walked into it going `direction`: it's from behind if it faces (or walked) the same way."""
+    """You walked into it going `direction`: it's from behind if it faces (or walks) the same way."""
     return getattr(m, "facing", None) == direction
+
+
+def behind(game, m):
+    """Are you behind it? (It's looking away from you.)"""
+    you, it = smooth.where(game), where(m)
+    dx, dy = it[0] - you[0], it[1] - you[1]
+    way = ("left" if dx < 0 else "right") if abs(dx) >= abs(dy) else ("up" if dy < 0 else "down")
+    return from_behind(m, way)

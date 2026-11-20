@@ -14,7 +14,7 @@ import phase2
 import rules
 from helpers import click, frames, move_mouse, new_app, ok, press, walk_into_a_mine
 from phase2 import draw_hud, hud, main_quest, people, quests
-from phase2_helpers import own_save_file, new_phase2_app  # noqa: F401  (own_save_file is used by pytest)
+from phase2_helpers import hold, own_save_file, new_phase2_app  # noqa: F401  (own_save_file is used by pytest)
 
 HINTS = {"tiles": game.TILE_HINTS, "cave": game.CAVE_HINTS, "castle": game.CASTLE_HINTS, "throne": game.THRONE_HINTS}
 
@@ -368,19 +368,21 @@ def test_a_full_pack_still_fits():
     ok(app.panel_spots["here"].top >= max(slot.bottom for slot in slots), "and the keys card is under the pack")
 
 
-def test_l_opens_the_message_log():
+def test_l_opens_the_message_log(monkeypatch):
     app = new_phase2_app()
     frames(app, 5)
     press(app, pygame.K_l)
     ok(app.state == "people" and app.hud.screen == "log", "L opens the message log (the game waits under it)")
-    turn = app.game.turn
+    turn, spot = app.game.turn, app.game.player.pos
     press(app, pygame.K_RIGHT)
-    ok(app.game.turn == turn and app.hud.screen == "log", "the arrow keys don't walk while it's open")
+    hold(app, monkeypatch, pygame.K_RIGHT)
+    ok(app.game.turn == turn and app.game.player.pos == spot and app.hud.screen == "log",
+       "the arrow keys don't walk while it's open")
     press(app, pygame.K_UP)
     frames(app, 3)
     press(app, pygame.K_l)
     ok(app.state == "play" and app.hud.screen is None, "L again closes it")
-    press(app, pygame.K_RIGHT)
+    hold(app, monkeypatch, pygame.K_RIGHT)
     ok(app.game.turn == turn + 1, "and you can walk again")
 
 
