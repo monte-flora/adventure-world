@@ -1,0 +1,119 @@
+{
+ "image": "hero_side.png",
+ "kind": "sprite",
+ "cell": [
+  48,
+  64
+ ],
+ "origin": [
+  24,
+  63
+ ],
+ "anims": {
+  "idle": {
+   "row": 0,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "run": {
+   "row": 1,
+   "col": 0,
+   "frames": 6,
+   "fps": 12,
+   "loop": true
+  },
+  "jump": {
+   "row": 2,
+   "col": 0,
+   "frames": 3,
+   "fps": 10,
+   "loop": false
+  },
+  "fall": {
+   "row": 3,
+   "col": 0,
+   "frames": 2,
+   "fps": 8,
+   "loop": true
+  },
+  "land": {
+   "row": 4,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": false
+  },
+  "attack": {
+   "row": 5,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "air_attack": {
+   "row": 6,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "pogo": {
+   "row": 7,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": true
+  },
+  "climb": {
+   "row": 8,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "wall_slide": {
+   "row": 9,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": true
+  },
+  "dash": {
+   "row": 10,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "swim": {
+   "row": 11,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "lantern_raise": {
+   "row": 12,
+   "col": 0,
+   "frames": 3,
+   "fps": 10,
+   "loop": false
+  },
+  "hurt": {
+   "row": 13,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": false
+  },
+  "death": {
+   "row": 14,
+   "col": 0,
+   "frames": 6,
+   "fps": 8,
+   "loop": false
+  }
+ }
+}
