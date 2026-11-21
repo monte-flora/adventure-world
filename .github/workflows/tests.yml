@@ -42,3 +42,18 @@ jobs:
       - name: Run the tests, and send the robot into every cave
         if: github.event_name == 'schedule' || inputs.all_caves
         run: pixi run test-all-caves --durations=20
+
+  # The Godot rebuild of Shadowfall (shadowfall/): its headless tests, then a 2-second boot that
+  # fails on any script error. Run them on your own computer with:  pixi run godot-test
+  godot-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install Godot (the version in shadowfall/GODOT_VERSION)
+        uses: ./.github/actions/setup-godot
+
+      - name: Run the Godot tests and boot the game
+        run: sh shadowfall/tools/run_tests.sh

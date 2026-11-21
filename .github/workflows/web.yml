@@ -65,3 +65,29 @@ jobs:
       - name: Say whether it went to itch.io
         if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase-2') && (env.BUTLER_API_KEY == '' || env.ITCH_GAME == '')
         run: echo "::notice::Not uploaded to itch.io yet - see web/README.md to set up BUTLER_API_KEY and $ITCH_VARIABLE."
+
+  # The Godot rebuild's web version (shadowfall/). Download it from the run's page (under "Artifacts").
+  # It doesn't go to itch.io yet: the pygame build stays there for now.
+  # Make it on your own computer with:  pixi run godot-web
+  godot-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install Godot and its web export templates
+        uses: ./.github/actions/setup-godot
+        with:
+          templates: "true"
+
+      - name: Make the web page
+        run: sh shadowfall/tools/export_web.sh
+
+      - name: Keep the web page, ready to download
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadowfall-godot-web
+          path: shadowfall/build/web/
+          if-no-files-found: error
+          retention-days: 30
