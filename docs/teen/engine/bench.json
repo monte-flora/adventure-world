@@ -1,0 +1,14 @@
+{
+ "_about": "Engine spike frame times, 2026-11-21. MacBook Pro M3 Pro, macOS, 120 Hz ProMotion + 60 Hz external screens. 32-px tiles, 960x540 game, 1920x1080 window. A robot plays 10 s top-down then 10 s side view; the first 30 frames are skipped. ms = time between frames. work = update+draw CPU time (pygame only). Spikes: spikes/engine/.",
+ "desktop": {
+  "pygame 2.6.1, like game.py today (no SCALED, Clock.tick(60))": {"top": {"mean": 16.941, "stdev": 0.447, "p99": 17.773, "late_over_20": 0, "work": 2.165}, "side": {"mean": 16.932, "stdev": 0.469, "p99": 17.843, "late_over_20": 0, "work": 2.312}, "note": "59.0 fps on a 60 Hz screen: one frame shown twice about every second"},
+  "pygame 2.6.1, SCALED + vsync=1, full-res smooth camera": {"top": {"mean": 8.333, "stdev": 0.400, "p99": 8.961, "late_over_20": 0, "work": 2.968}, "side": {"mean": 8.333, "stdev": 0.376, "p99": 9.565, "late_over_20": 0, "work": 3.055}, "note": "window opened on the 120 Hz screen; on the 60 Hz screen (16-px run) mean 16.667, stdev 0.10-1.1"},
+  "pygame 2.6.1, SCALED + vsync=1, 960x540 scaled x2 (whole-pixel camera)": {"top": {"mean": 16.667, "stdev": 0.258, "p99": 17.386, "late_over_20": 0, "work": 1.277}, "side": {"mean": 16.724, "stdev": 1.293, "p99": 19.121, "late_over_20": 4, "work": 1.262}},
+  "godot 4.7.2, vsync, no fps cap": {"top": {"mean": 8.743, "stdev": 4.594, "p99": 16.725, "late_over_20": 2}, "side": {"mean": 8.888, "stdev": 4.626, "p99": 16.775, "late_over_20": 1}, "note": "uneven: frames spread over <7, 7-10 and 10-15 ms (variable-refresh screen)"},
+  "godot 4.7.2, vsync + max_fps 60": {"top": {"mean": 16.667, "stdev": 0.591, "p99": 17.569, "late_over_20": 1}, "side": {"mean": 16.665, "stdev": 0.626, "p99": 17.640, "late_over_20": 1}}
+ },
+ "web (Chrome, same Mac, 120 Hz screen)": {
+  "pygbag 0.9.3 / pygame-ce 2.5.7, full-res smooth camera": {"top": {"mean": 16.00, "stdev": 0.41, "p99": 17.0, "late_over_20": 0, "work": 7.56}, "side": {"mean": 16.00, "stdev": 0.48, "p99": 17.0, "late_over_20": 0, "work": 8.03}, "download_mb_first_load": 23.0, "note": "62.5 fps, not locked to the screen; work is ~3x desktop and half the 16.7 ms budget for just tiles + one light; Python runtime comes from the pygame-web CDN"},
+  "godot 4.7.2 web export (single-thread, Compatibility)": {"top": {"mean": 8.333, "stdev": 0.398, "p99": 9.4, "late_over_20": 0}, "side": {"mean": 8.334, "stdev": 0.487, "p99": 9.4, "late_over_20": 0}, "download_mb_uncompressed": 39.8, "zip_mb": 10.3, "wasm_gzip_mb": 10.1}
+ }
+}
