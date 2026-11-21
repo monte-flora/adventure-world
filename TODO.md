@@ -5,7 +5,8 @@ Everything we've asked for and agreed on, in the order it gets built.
 
 ## Now: being built in parallel sessions (asked 2026-11-08)
 
-- [~] Go public: new repo monte-flora/adventure-world, name removed
+- [x] 2026-11-15 Go public: new repo monte-flora/adventure-world, name removed
+- [x] 2026-11-21 Retire the old private repo: archived on GitHub (read-only), no more commits or pushes; local `old` remotes can't push
 - [x] 2026-11-12 **Cave 4, Cave 9 and the 3 Nightfall caves redrawn in the kid's style** (asked 2026-11-12). 20 rows tall, with twists and turns, up and down, and a few minutes of play each: Cave 4 "The Old Mine Shaft" (up the shaft, back along the middle, dig to the lever, down through a gate in the floor), Cave 9 "The Deep Stone Maze" (the exit is locked: climb the wall, swing on vines, crawl to the lever, ride a steam geyser up to the diamond, ride back over the lava), and The Whisper Hollow, The Hollow Stair and The Shadow Stairs (easy to hard, each with a diamond and a harder Sun Shard). Stone caves get a new back wall: layers of rock, cracks, old bricks and cobbles, wooden mine props, roots and fossils.
 - [x] 2026-11-11 **Lives.** You start with 3 (a heart and "x3" on the panel). Out of health in a cave: lose a life, wake up outside its Mine with full health. On the map or in Nightfall Hollow: wake up at the nearest house (Nightfall: the nearest shrine). In the castle: back to the start of that level. Out of lives: an "Out of lives!" card, then 3 new lives, keeping everything. A LEVEL UP! card can offer "Extra life" (up to 9).
 - [x] 2026-11-11 **The pickaxe lasts forever.** Digging never wears it out or breaks it; the panel says "never breaks". Swords still break. You can still craft one if you somehow have none.
@@ -42,11 +43,11 @@ Everything we've asked for and agreed on, in the order it gets built.
 - [x] 2026-11-11 **Pull requests merge by themselves** once the tests and the web version pass (`.github/workflows/auto-merge.yml`), then the branch is deleted and the new version goes to itch.io. Put the `hold` label on a pull request (or make it a draft) to stop it.
 
 ## Next: a teen version of Phase 2 (asked 2026-11-15, on `phase-2`)
-- [ ] **T1 Teen look and name.** Darker theme across Phase 2 (palette, UI, music mood), a cooler game name (agent picks one, easy to change; note the choice), and a fuller story (Shadow King backstory and motive, lore, darker but kid-safe tone).
-- [ ] **T2 The world grows dark.** The overworld light fades very slowly over the game as the Shadow King pulls light from the world (story-linked; tie to the main quest's Light Stones).
-- [ ] **T3 R attacks everywhere.** Every attack uses R: map fights (Run moves off R, e.g. to X), cave sword swings, castle and throne. Update hints, tips, guide.
-- [ ] **T4 Smooth overworld movement.** The Hero moves smoothly on the Phase 2 map instead of one square per step, and map monsters roam freely (not square by square).
-- [ ] **T5 No random effects.** Remove `random_event` (thistle hurts, random heals, random armor) in Phase 2.
+- [x] 2026-11-14 **T1 Teen look and name.** Darker theme across Phase 2 (palette, UI, music mood), a cooler game name (agent picks one, easy to change; note the choice), and a fuller story (Shadow King backstory and motive, lore, darker but kid-safe tone).
+- [x] 2026-11-20 **T2 The world grows dark.** The overworld light fades very slowly over the game as the Shadow King pulls light from the world (story-linked; tie to the main quest's Light Stones).
+- [x] 2026-11-14 **T3 R attacks everywhere.** Every attack uses R: map fights (Run moves off R, e.g. to X), cave sword swings, castle and throne. Update hints, tips, guide.
+- [x] 2026-11-20 **T4 Smooth overworld movement.** The Hero moves smoothly on the Phase 2 map instead of one square per step, and map monsters roam freely (not square by square).
+- [x] 2026-11-14 **T5 No random effects.** Remove `random_event` (thistle hurts, random heals, random armor) in Phase 2.
 
 ## From the play-test on 2026-11-07
 
