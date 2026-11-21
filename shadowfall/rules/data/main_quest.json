@@ -1,0 +1,92 @@
+{
+  "about": "The main quest (rules/quests.gd reads it). Chapters in order: one Light Stone per land, then the Shadowgate. Like quests.json, plus 'relic' (the stone id you are given when the chapter ends) and 'next'. Goals: cave:LAND, defeat:LAND:KIND:N (KIND any = any foe), lookout:LAND, stones:N, found:ID, has:ITEM:N, portal, castle, king. LAND is a land id (rules/names.gd). 'story' holds the story cards: [title, words, picture]. {hero} is the player's name, {relic} the stone, {count} how many are held.",
+  "first": "main_home",
+  "story": {
+    "opening": [
+      ["Before the dark", "Seven lands once lay under one sun, and the Umbral Reach lay beneath them all, a realm that has never known a dawn. Between them stood the Shadowgate, sealed by seven Light Stones.", "hollow"],
+      ["The Shadow King", "A prince of the Reach crossed the Gate and saw the sun. He asked for a share of it and was driven back with spears. A hundred winters of darkness turned his grief to iron. Now he wears a crown of shadow and calls himself King.", "king"],
+      ["Shadowfall", "The seals are cracking. Each night the King reaches through and drinks a little more of the light. The old folk have a name for it: the Shadowfall. When it is done, no fire will burn again.", "portal"],
+      ["The Stones are scattered", "The seven Light Stones were hidden long ago, one in every land, and the keepers who knew the way are few and old. The things that crawl out of the gloom hunt for them too.", "monsters"],
+      ["Emberhold", "You wake in Emberhold, the last village that still keeps its fires lit. Warden Maera is waiting at the lantern. Take up your blade, {hero}. (Q shows your quests.)", "light"]
+    ],
+    "relic": [
+      ["{relic}", "{hero} raises {relic}, and for a heartbeat the whole land remembers the sun. The gloom draws back. {count} of 7.", "light"]
+    ]
+  },
+  "quests": {
+    "main_home": {
+      "title": "The Dawnstone", "main": true, "giver": "maera", "relic": "dawn", "next": "main_woods",
+      "steps": [
+        {"text": "Go down into the Mine beneath Emberhold and walk out again", "goal": "cave:home", "to": "mine:home"},
+        {"text": "Return to Warden Maera at the lantern", "to": "person:maera"}
+      ],
+      "reward": {"gold": 20}
+    },
+    "main_woods": {
+      "title": "Thornheart", "main": true, "giver": "wenna", "relic": "leaf", "next": "main_lake",
+      "steps": [
+        {"text": "Go north to Thornwick in the Weepingwold and find Old Mother Wenna", "to": "person:wenna"},
+        {"text": "Cut down 4 of the things that haunt the Weepingwold", "goal": "defeat:woods:any:4", "to": "land:woods"},
+        {"text": "Climb the old watchtower in the Weepingwold", "goal": "lookout:woods", "to": "lookout:woods"},
+        {"text": "Return to Old Mother Wenna", "to": "person:wenna"}
+      ],
+      "reward": {"gold": 25, "arrows": 5}
+    },
+    "main_lake": {
+      "title": "The Drowned Pearl", "main": true, "giver": "corran", "relic": "tide", "next": "main_ruins",
+      "steps": [
+        {"text": "Find Corran the Ferryman on the shore of the Drowned Mere", "to": "person:corran"},
+        {"text": "Brave the Mine beneath the Drowned Mere", "goal": "cave:lake", "to": "mine:lake"},
+        {"text": "Return to Corran", "to": "person:corran"}
+      ],
+      "reward": {"gold": 30, "shard": 1}
+    },
+    "main_ruins": {
+      "title": "The Crown of Ash", "main": true, "giver": "aldric", "relic": "crown", "next": "main_frost",
+      "steps": [
+        {"text": "Seek Ser Aldric, last of the Hollow Guard, in Hollowcrown", "to": "person:aldric"},
+        {"text": "Lay 3 of the risen bonewalkers of Hollowcrown back to rest", "goal": "defeat:ruins:skeleton:3", "to": "land:ruins"},
+        {"text": "Return to Ser Aldric", "to": "person:aldric"}
+      ],
+      "reward": {"gold": 30, "arrows": 10}
+    },
+    "main_frost": {
+      "title": "The Wintermark", "main": true, "giver": "hrefna", "relic": "frost", "next": "main_desert",
+      "steps": [
+        {"text": "Cross into the Wintermarch and find Hrefna the Huntress", "to": "person:hrefna"},
+        {"text": "Bring down 3 frost wolves", "goal": "defeat:frost:frost_wolf:3", "to": "land:frost"},
+        {"text": "Climb a watchtower in the Wintermarch", "goal": "lookout:frost", "to": "lookout:frost"},
+        {"text": "Return to Hrefna", "to": "person:hrefna"}
+      ],
+      "reward": {"gold": 40, "sun_ore": 2}
+    },
+    "main_desert": {
+      "title": "The Sunforge Ember", "main": true, "giver": "sefa", "relic": "sun", "next": "main_swamp",
+      "steps": [
+        {"text": "Hold 5 Light Stones, and the Ashen Gate will know you", "goal": "stones:5", "to": "land:desert"},
+        {"text": "Pass the Ashen Gate and find Sefa at the last well", "to": "person:sefa"},
+        {"text": "Survive the Mine beneath the Cinder Wastes", "goal": "cave:desert", "to": "mine:desert"},
+        {"text": "Return to Sefa", "to": "person:sefa"}
+      ],
+      "reward": {"gold": 50}
+    },
+    "main_swamp": {
+      "title": "The Ravenmoon", "main": true, "giver": "morwen", "relic": "moon", "next": "main_gate",
+      "steps": [
+        {"text": "Cross the black water to Morwen's hut in the Mirefen", "to": "person:morwen"},
+        {"text": "Drive off 3 bog lurkers", "goal": "defeat:swamp:bog_lurker:3", "to": "land:swamp"},
+        {"text": "Return to Morwen", "to": "person:morwen"}
+      ],
+      "reward": {"gold": 60, "shard": 1}
+    },
+    "main_gate": {
+      "title": "The Shadow King", "main": true, "giver": "morwen",
+      "steps": [
+        {"text": "Bear all seven Stones to the Shadowgate and step through", "goal": "portal", "to": "portal"},
+        {"text": "Kindle the three dead shrines of the Umbral Reach, forge Sunfang and breach the castle", "goal": "castle"},
+        {"text": "End the Shadow King", "goal": "king"}
+      ],
+      "reward": {"gold": 100}
+    }
+  }
+}
