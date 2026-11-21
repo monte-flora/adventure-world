@@ -48,6 +48,12 @@ Everything we've asked for and agreed on, in the order it gets built.
 - [ ] **T4 Smooth overworld movement.** The Hero moves smoothly on the Phase 2 map instead of one square per step, and map monsters roam freely (not square by square).
 - [ ] **T5 No random effects.** Remove `random_event` (thistle hurts, random heals, random armor) in Phase 2.
 
+## Next: Shadowfall teen refactor (asked 2026-11-21, on `phase-2`)
+User: refactor fully for teens (art, gameplay, music); stay on pygame unless another engine is better for smooth 2D; keep the top-down overworld + side-scrolling caves; study Shovel Knight, A Link to the Past, Hollow Knight (study only, all original); keep the name Shadowfall and the Shadow King. Opus 5.5 medium, cheaper models where possible.
+- [~] **Wave A: research, design and prototypes** (5 parallel workers, each PRs `docs/teen/<area>/`): engine, art, gameplay, levels, audio.
+- [ ] **Gate: the user picks the engine** from Wave A's engine report.
+- [ ] **Wave B: the rebuild**, fanned out from Wave A's task lists (no shared files per worker).
+
 ## From the play-test on 2026-11-07
 
 - [x] 2026-11-07 **Skip the intro.** Press S on a story card to skip the rest of the cards.
