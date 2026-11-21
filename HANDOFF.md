@@ -17,6 +17,7 @@
     - itch.io runs both builds for a while
   - **Main's defaults (user didn't object):** retune caves for the new jump; home = Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera; fix the game.py vsync hitch. All are in TODO.md via PR #12.
   - Summary page shown to the user: chat-scratch `shadowfall-wave-a-3f9b.html`.
+- **Standing direction (user, 2026-11-21):** "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones." Main applies it to every gameplay/naming call: epic, grim high-fantasy tone, but original names (no copied names, places or characters) and teen-safe (no gore or sexual content). Defaults made before this (e.g. "Hearthvale", the 7 ability names) are open to epic renames in Wave B.
 - **Workers running** (all Opus 5.5 medium; start workers with `coord-whoami start [--usage-override "<user words>"] -- <worker-start args> --model claude-opus-5-5 --effort medium`):
   - `ctx_7c8b883462ac` pixel font → `assets/fonts/`, PR into phase-2
   - `ctx_64edfa9c0d1e` **B0** Godot scaffold + CI in `shadowfall/`, PR into phase-2; it writes `shadowfall/WAVE_B.md` (the parallel task list)
