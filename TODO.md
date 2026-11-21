@@ -51,12 +51,17 @@ Everything we've asked for and agreed on, in the order it gets built.
 
 ## Next: Shadowfall teen refactor (asked 2026-11-21, on `phase-2`)
 User: refactor fully for teens (art, gameplay, music); stay on pygame unless another engine is better for smooth 2D; keep the top-down overworld + side-scrolling caves; study Shovel Knight, A Link to the Past, Hollow Knight (study only, all original); keep the name Shadowfall and the Shadow King. Opus 5.5 medium, cheaper models where possible.
-- [~] **Wave A: research, design and prototypes** (5 parallel workers, each PRs `docs/teen/<area>/`): engine, art, gameplay, levels, audio.
+- [x] 2026-11-21 **Wave A: research, design and prototypes** (5 parallel workers, each PRs `docs/teen/<area>/`): engine, art, gameplay, levels, audio.
 - Decided 2026-11-21: **32-px art** (finer tiles, about 4x the art work), not the 16-px default in the art report (PR #8).
 - Decided 2026-11-21: the Hero becomes a **hooded wanderer with a lantern** (blue and red kept); the darkening stages in `docs/teen/art/darkening.png` are right as they are; we **make our own pixel font**.
 - [~] **Shadowfall pixel font** (asked 2026-11-21): our own, sized for the 32-px art; engine-neutral (PNG grid + JSON, and a TTF).
-- [ ] **Gate: the user picks the engine** from Wave A's engine report.
-- [ ] **Wave B: the rebuild**, fanned out from Wave A's task lists (no shared files per worker).
+- [x] 2026-11-21 **Gate: engine = Godot 4.7** (user). Also decided:
+  - cut XP, lives, food and sword wear
+  - Nightfall becomes a 3x3 mirror of the centre of the map
+  - itch.io runs both builds for a while
+  - main's defaults: retune caves for the new jump; the home area is Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera
+- [ ] **Fix the 59 fps hitch in `game.py`** (vsync needs pygame.SCALED; found by the engine worker), PR into `main`.
+- [~] **Wave B: the rebuild in Godot** (B0 scaffold + CI first, then parallel workers),, fanned out from Wave A's task lists (no shared files per worker).
 
 ## From the play-test on 2026-11-07
 
