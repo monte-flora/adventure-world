@@ -61,6 +61,7 @@ User: refactor fully for teens (art, gameplay, music); stay on pygame unless ano
   - itch.io runs both builds for a while
   - main's defaults: retune caves for the new jump; the home area is Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera
 - [ ] **Fix the 59 fps hitch in `game.py`** (vsync needs pygame.SCALED; found by the engine worker), PR into `main`.
+- **Standing direction (user, 2026-11-21):** "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones." Main applies it to every gameplay/naming call: epic, grim high-fantasy tone, but original names (no copied names, places or characters) and teen-safe (no gore or sexual content). Defaults made before this (e.g. "Hearthvale", the 7 ability names) are open to epic renames in Wave B.
 - [~] **Wave B: the rebuild in Godot** (B0 scaffold + CI first, then parallel workers),, fanned out from Wave A's task lists (no shared files per worker).
 
 ## From the play-test on 2026-11-07
