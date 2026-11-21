@@ -53,6 +53,8 @@ Everything we've asked for and agreed on, in the order it gets built.
 User: refactor fully for teens (art, gameplay, music); stay on pygame unless another engine is better for smooth 2D; keep the top-down overworld + side-scrolling caves; study Shovel Knight, A Link to the Past, Hollow Knight (study only, all original); keep the name Shadowfall and the Shadow King. Opus 5.5 medium, cheaper models where possible.
 - [~] **Wave A: research, design and prototypes** (5 parallel workers, each PRs `docs/teen/<area>/`): engine, art, gameplay, levels, audio.
 - Decided 2026-11-21: **32-px art** (finer tiles, about 4x the art work), not the 16-px default in the art report (PR #8).
+- Decided 2026-11-21: the Hero becomes a **hooded wanderer with a lantern** (blue and red kept); the darkening stages in `docs/teen/art/darkening.png` are right as they are; we **make our own pixel font**.
+- [~] **Shadowfall pixel font** (asked 2026-11-21): our own, sized for the 32-px art; engine-neutral (PNG grid + JSON, and a TTF).
 - [ ] **Gate: the user picks the engine** from Wave A's engine report.
 - [ ] **Wave B: the rebuild**, fanned out from Wave A's task lists (no shared files per worker).
 
