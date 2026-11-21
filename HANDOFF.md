@@ -1,25 +1,36 @@
-# Handoff (2026-11-14, 11:20 pm ET; 04:20 UTC 11-15)
+# Handoff (2026-11-21, 6:11 pm ET; 23:11 UTC)
 
 ## 8. Session state (read first)
-- **Orca Run: `run_859805712553`.** No workers running (all settled; finished ones may still show kept-open, release them).
-- **The repo moved.** New PUBLIC repo `monte-flora/adventure-world` (created 2026-11-15 ~04:00 UTC): one fresh commit per branch (main, phase-2, phase-3), no history, author = the user's GitHub noreply address. The old private repo (`old` remote) is the archive: never push to it again (its Actions minutes ran out; overage billed). Don't archive/delete it unless the user says.
-- **Local checkouts now track the new repo:** in the main checkout, `~/try-phase2`, `~/try-phase3`: `origin` = adventure-world, `old` = the private repo. Main checkout is on `main` = origin/main (c26d0b9). Old worktrees under orca/workspaces (teen-*, public-scrub, phase2-*) are on old history: remove them; new workers start fresh off origin/<branch>.
-- **The user's local edits, kept (don't revert):** main checkout `levels/caves/01_the_easy_moss_cave.txt`; `~/try-phase2` `levels/caves/05_green_lvl_1.txt` (cave body = the user's; only the about line was changed to the name-free text). Shared git stash: stash@{0}/{1} = copies of those two edits made during the move (can drop), stash@{2} = old fight-pause backup.
-- **Name rule (public repo):** the hero is "the Hero", Classic = "Adventure World", Phase 2 = "Shadowfall", Phase 3 = "Adventure World 3D". Nothing in the repo may contain the kid's name, local user paths, or emails: check with `git grep -i -E '<name>|<user>|@' ` before every PR (the scrub PR #93 lists the exact pattern in its body on the old repo).
-- **Teen version on phase-2:** T1 look/name/story (#92), T3 R attacks (#91), T5 no random effects (#90) merged. Mark T1/T3/T5 `[x] 2026-11-14` in main's TODO.md if not yet. Also mark "Go public" `[x] 2026-11-15`.
-- The user played nothing yet; told them: `cd ~/try-phase2 && <main checkout>/.pixi/envs/default/bin/python game.py --phase2`.
+- **Orca Run: `run_859805712553`.** Repo: public `monte-flora/adventure-world`. The old private repo is **archived** (2026-11-21, user's call): no commits or pushes; local `old` remotes have push disabled.
+- **Repo-local git identity = the user's GitHub noreply address** (set in the main checkout's .git/config, so all worktrees share it). Every worker checks `git log --format=%ae` before pushing; the T4 leak was fixed by deleting a branch.
+- **Teen T1-T5 all merged into phase-2** (T4 smooth movement PR #2, T2 darkening PR #3).
+- **Teen refactor (user, 2026-11-21):** "completely refactor the game towards a teenage audience including the art style, gameplay mechanics, and music ... explore if another engine would be better for smoother 2D gameplay. I still want a top-down overworld with a side scrolling platformer with caves ... search for images of ... Shovel Knight, A Link to the Past, Hollow Knight. Keep everything at Opus 5.5 medium and leverage cheaper models where possible. Keep the current title of Shadowfall and the general theme of the Shadow King."
+  - **Wave A done.** Reports in `docs/teen/<area>/README.md` on phase-2: audio #6, gameplay #7, art #8, levels #10, engine #11. If 8, 10 or 11 is still open, rerun its pull_request Tests run (the race).
+  - **User decisions:**
+    - engine **Godot 4.7**
+    - **32-px art**
+    - hero = **hooded wanderer with a lantern**
+    - darkening stages as drawn
+    - **our own pixel font**
+    - cut XP, lives, food and sword wear
+    - Nightfall = a 3x3 mirror of the map's centre
+    - itch.io runs both builds for a while
+  - **Main's defaults (user didn't object):** retune caves for the new jump; home = Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera; fix the game.py vsync hitch. All are in TODO.md via PR #12.
+  - Summary page shown to the user: chat-scratch `shadowfall-wave-a-3f9b.html`.
+- **Workers running** (all Opus 5.5 medium; start workers with `coord-whoami start [--usage-override "<user words>"] -- <worker-start args> --model claude-opus-5-5 --effort medium`):
+  - `ctx_7c8b883462ac` pixel font → `assets/fonts/`, PR into phase-2
+  - `ctx_64edfa9c0d1e` **B0** Godot scaffold + CI in `shadowfall/`, PR into phase-2; it writes `shadowfall/WAVE_B.md` (the parallel task list)
+  - `ctx_e9f0e97cae5a` game.py 59 fps vsync fix, PR into **main**
+- Open TODO PR #12 (decisions).
 
 ## Next
-1. **User must do (never us):** on adventure-world, set secret `BUTLER_API_KEY` and variables `ITCH_GAME` (and `ITCH_GAME_PHASE2` when that page exists). Warn: Actions logs are public on a public repo, and the current itch.io page slug contains the kid's name, so suggest a new name-free itch.io page/slug (or rename it) before setting `ITCH_GAME`. Until set, web.yml just skips the upload.
-2. Check the first CI runs on adventure-world pass (tests ×2, build-web) and auto-merge works (workflow token permissions are set in auto-merge.yml).
-3. **T4** smooth overworld movement + free-roaming monsters (big; game.py map loop, phase2/monsters.py, phase2/world.py; turn-based end_of_turn needs a real-time tick). One worker, new worktree off origin/phase-2 of the NEW repo, PR into phase-2.
-4. Then **T2** world slowly darkening (T1 left a hook: `dusk_alpha` in phase2/theme.py; minimap not dimmed yet).
-5. Still open: Stage 4 balance + a robot that plays the main quest.
+1. Wait for mail. When B0 reports: read `shadowfall/WAVE_B.md`, then launch the 6-8 Wave B workers in parallel (one folder each; Opus 5.5 medium; tell them to use haiku/sonnet subagents). The game.py/caves.py hot-file rule doesn't apply inside `shadowfall/`; folder ownership does.
+2. Reference games are for study only: no screenshots or assets in the public repo; everything original.
 
-## The user's words (UTC 2026-11-15)
-- ~02:00: the teen list (T1-T5 in TODO.md): "1. Lets refactor the game to make it more teenager friendly, including a darker theme. Lets give the game a cooler name. Related to this change, lets introduce a mechanism that light in the overworld slowly (very slow) is becoming darker as the Shadow King truly pulls light from the world. Lets flesh out the story more. 2. For all attacks, lets use R 3. Make the movement in the overworld smoothing rather than moving 1 square at a time, have the monsters roaming somewhat freely as well. Remove the random effects."
-- ~03:00: "Once there is a early prototype that I can play, share the python command for me to run" (done).
-- ~03:10, on running out of Actions minutes: "Make the repo public, but remove [the kid]'s name from it"; chose: new public repo (fresh history), hero = "the Hero".
+## Still waiting on the user
+- The main checkout `levels/caves/05_green_lvl_1.txt` has merge-conflict markers (a stash-pop residue); the user's file, not touched.
+- itch.io: secret `BUTLER_API_KEY` + variable `ITCH_GAME` on adventure-world, on a page whose address has no kid's name.
+- Next pygame items after the refactor: Stage 4 balance, a robot that plays the main quest.
 
 ## Gotchas
 - Workers hit the ~120K context hook: restart them in the same worktree pointing at their .handoff/ notes. Tell them to use subagents and push WIP early.
