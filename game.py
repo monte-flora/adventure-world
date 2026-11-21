@@ -895,12 +895,24 @@ class SunfangForge:
 # The app
 # ---------------------------------------------------------------------------
 
+def open_window():
+    """The game window, and whether it waits for the screen (vsync). On a computer we ask for
+    vsync, so every frame shows once: it works only with SCALED, and without it Clock.tick(60)
+    gives 59 fps and a jump about once a second. The browser (pygbag) keeps the plain window."""
+    if not IN_BROWSER:
+        try:
+            return pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED, vsync=1), True
+        except pygame.error:
+            pass                              # no vsync here: Clock.tick keeps it near 60 fps
+    return pygame.display.set_mode((WIDTH, HEIGHT)), False
+
+
 class App:
     def __init__(self, player_name="", seed=None, sound=True, castle=False, throne=False, nightfall=False):
         pygame.mixer.pre_init(22050, -16, 1, 512)
         pygame.init()
         pygame.display.set_caption("Adventure World")
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen, self.vsync = open_window()
         self.clock = pygame.time.Clock()
         self.sounds = Sounds(enabled=sound)
         self.music = Music(enabled=sound)
@@ -1488,7 +1500,10 @@ class App:
 
     def run(self):
         while self.running:
-            dt = self.clock.tick(FPS) / 1000.0
+            # With vsync, flip waits for the screen; tick_busy_loop caps at 60 without tick()'s
+            # oversleep, which pushes a frame past the screen's beat (59 fps).
+            tick = self.clock.tick_busy_loop if self.vsync else self.clock.tick
+            dt = tick(FPS) / 1000.0
             self.step(dt)
             pygame.display.flip()
 
