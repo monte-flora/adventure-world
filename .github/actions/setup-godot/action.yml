@@ -1,0 +1,59 @@
+# Puts the pinned Godot (shadowfall/GODOT_VERSION) on PATH, kept in the cache between runs.
+# With templates: true it also installs the web export templates (taken out of the 1.3 GB
+# templates file once, then cached: about 40 MB).
+name: Set up Godot
+inputs:
+  templates:
+    description: "Also install the web export templates"
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Read the pinned version
+      id: v
+      shell: bash
+      run: echo "version=$(cat shadowfall/GODOT_VERSION)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Godot
+      id: cache-godot
+      uses: actions/cache@v4
+      with:
+        path: ~/godot-bin
+        key: godot-${{ steps.v.outputs.version }}-linux
+
+    - name: Download Godot ${{ steps.v.outputs.version }}
+      if: steps.cache-godot.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        v=${{ steps.v.outputs.version }}
+        mkdir -p ~/godot-bin
+        curl -sSfL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/$v-stable/Godot_v$v-stable_linux.x86_64.zip"
+        unzip -q /tmp/godot.zip -d ~/godot-bin
+        mv ~/godot-bin/Godot_v$v-stable_linux.x86_64 ~/godot-bin/godot
+
+    - name: Put Godot on PATH
+      shell: bash
+      run: |
+        chmod +x ~/godot-bin/godot
+        echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+        ~/godot-bin/godot --version
+
+    - name: Cache the web export templates
+      if: inputs.templates == 'true'
+      id: cache-tpl
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/godot/export_templates/${{ steps.v.outputs.version }}.stable
+        key: godot-${{ steps.v.outputs.version }}-web-templates
+
+    - name: Download the web export templates
+      if: inputs.templates == 'true' && steps.cache-tpl.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        v=${{ steps.v.outputs.version }}
+        dest=~/.local/share/godot/export_templates/$v.stable
+        mkdir -p "$dest"
+        curl -sSfL -o /tmp/tpl.tpz "https://github.com/godotengine/godot/releases/download/$v-stable/Godot_v$v-stable_export_templates.tpz"
+        unzip -q -j /tmp/tpl.tpz 'templates/version.txt' 'templates/web_nothreads_release.zip' 'templates/web_nothreads_debug.zip' -d "$dest"
+        rm /tmp/tpl.tpz
+        ls -la "$dest"

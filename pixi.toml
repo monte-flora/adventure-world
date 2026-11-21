@@ -18,6 +18,9 @@ editor = { cmd = "python editor.py", description = "The cave editor: draw your o
 test-editor = { cmd = "python test_editor.py", description = "Check that the cave editor still works" }
 test = { cmd = "python -m pytest tests -n auto", description = "Check that nothing in the game is broken (every test, a few minutes)" }
 test-all-caves = { cmd = "python -m pytest tests -n auto --all-caves", description = "Every test, and the robot beats every cave on the map (slow)" }
+godot-test = { cmd = "sh shadowfall/tools/run_tests.sh", description = "Shadowfall (Godot): run its tests headless and boot it (needs Godot 4.7.2 on PATH)" }
+godot-web = { cmd = "sh shadowfall/tools/export_web.sh", description = "Shadowfall (Godot): make the web version in shadowfall/build/web" }
+shadowfall = { cmd = "godot --path shadowfall", description = "Play Shadowfall, the Godot rebuild (needs Godot 4.7.2 on PATH)" }
 guide = { cmd = '''python -c "import pathlib, webbrowser; webbrowser.open(pathlib.Path('how_it_works/index.html').resolve().as_uri())"''', description = "Open the how-it-works guide in your web browser" }
 
 [dependencies]

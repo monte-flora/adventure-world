@@ -60,7 +60,12 @@ jobs:
             echo "Not every check is green yet: waiting for the others."
             exit 0
           fi
-          for needed in tests build-web; do
+          required="tests build-web"
+          # The Godot rebuild (shadowfall/) has its own two checks, in the same two workflows
+          if gh api "repos/$GH_REPO/contents/shadowfall/GODOT_VERSION?ref=$SHA" >/dev/null 2>&1; then
+            required="$required godot-test godot-web"
+          fi
+          for needed in $required; do
             if ! echo ",$names," | grep -q ",$needed,"; then
               echo "The $needed check hasn't run yet: waiting."
               exit 0

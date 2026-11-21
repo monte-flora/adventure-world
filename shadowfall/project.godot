@@ -1,0 +1,39 @@
+; Shadowfall (teen rebuild), Godot 4.7. Open with:  godot --path shadowfall
+; Owned by B0 (core). Ask the coordinator before adding an autoload or a setting here.
+config_version=5
+
+[application]
+
+config/name="Shadowfall"
+run/main_scene="res://core/boot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+run/max_fps=60
+
+[autoload]
+
+Game="*res://core/game.gd"
+Controls="*res://core/controls.gd"
+Scenes="*res://core/scenes.gd"
+Audio="*res://audio/audio.gd"
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=1920
+window/size/window_height_override=1080
+window/stretch/mode="canvas_items"
+window/stretch/scale_mode="integer"
+window/vsync/vsync_mode=1
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/physics_interpolation=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.043, 0.039, 0.071, 1)
