@@ -1,5 +1,7 @@
 theme: crystal
 name: The Icy Steps
+land: wintermarch
+needs: climb
 spring check: later
 about: The Icy Steps (medium), drawn with the cave recipe. Slide on the ice, hop little ice blocks over the lava, then take the high road (gems and a chest) or the low road (crawl). Secret: ground pound the crack in the ice!
 #####################################################################

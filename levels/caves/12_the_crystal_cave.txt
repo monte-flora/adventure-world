@@ -1,5 +1,7 @@
 theme: crystal
 name: The Crystal Cave
+land: drowned_mere
+needs: climb
 about: The crystal cave, drawn again in the kid's style: the hardest one, farthest from home
 ############################################################
 #..........................................................#

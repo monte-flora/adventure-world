@@ -1,5 +1,7 @@
 theme: moss
 name: green lvl 1
+land: weepingwold
+needs:
 about: The kid drew this one in the cave editor (my_caves/green_lvl_1.txt)
 ############################################
 #..........................................#

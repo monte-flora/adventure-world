@@ -1,5 +1,7 @@
 theme: moss
 name: green lvl 2
+land: drowned_mere
+needs: climb
 about: The kid drew this one in the cave editor (my_caves/green_lvl_2.txt)
 ############################################################
 #..........................................................#

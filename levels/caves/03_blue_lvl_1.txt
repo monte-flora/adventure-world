@@ -1,5 +1,7 @@
 theme: crystal
 name: blue lvl 1
+land: weepingwold
+needs:
 about: The kid drew this one in the cave editor (my_caves/blue_lvl_1.txt)
 ####################################################
 #................#####.......x.............#.......#

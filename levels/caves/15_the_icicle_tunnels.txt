@@ -1,5 +1,7 @@
 theme: crystal
 name: The Icicle Tunnels
+land: mirefen
+needs: climb
 about: The Icicle Tunnels (hard). Three icy tunnels, one on top of the other. Run over the crumbly bridge, climb the wall, slide along the ice, pull the lever at the far end, then ride the lift to the top tunnel: the iron gate is open now!
 ############################################################
 #........####.................######........#.......###....#

@@ -1,5 +1,8 @@
 theme: shadow
 name: The Hollow Stair
+land: umbral_reach
+needs:
+dark: yes
 about: Medium: climb the hollow stair, cross the top hall, climb down the deep ladder to pull the lever, dig out the diamond, ride the platform over the spikes, then climb back up through the iron gate for the Sun Shard
 #####################################################################################
 #####################################################################################
