@@ -37,3 +37,29 @@ func test_hud_shows_a_taken_stone() -> void:
 	Game.take_stone("dawn")
 	await frames(3)
 	check("1/" in hud.stones.text, "the HUD counts the stone: " + hud.stones.text)
+
+
+func test_checkpoint_and_stone_save() -> void:
+	Scenes.goto("cave", {"text": "theme: stone\nstone: dawn\n########\n#S.C.*E#\n########"})
+	await physics_frames(2)
+	var cave: CaveScene = Scenes.screen
+	check(not Game.has_save(), "no save yet")
+	cave.hero.position = cave._cell_spot(Vector2i(3, 1))
+	await physics_frames(2)
+	check(Game.has_save(), "a checkpoint saves")
+	cave.hero.position = cave._cell_spot(Vector2i(5, 1))
+	await physics_frames(2)
+	Game.reset()
+	check(Game.load_save() and Game.has_ability("dash"), "the Stone is in the save")
+
+
+func test_m_mutes() -> void:
+	var was: bool = Audio.muted
+	var m := InputEventKey.new()
+	m.physical_keycode = KEY_M
+	m.pressed = true
+	check(InputMap.action_has_event("mute", m), "M is the mute key")
+	Scenes._unhandled_input(m)
+	check(Audio.muted != was, "M flips the sound")
+	Audio.toggle_mute()
+	check_eq(Audio.muted, was, "and back")

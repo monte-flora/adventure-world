@@ -28,6 +28,7 @@ const START_HEARTS := 5
 const MAX_HEARTS := 10
 const SAVE_PATH := "user://shadowfall_save.json"
 const SAVE_VERSION := 1
+const TEST_SAVE_PATH := "user://shadowfall_test_save.json"
 
 var stones: Array[String] = []          # Light Stones taken, in the order taken
 var gloom := 0.0                        # 0 (bright) .. 1 (full dark)
@@ -37,6 +38,7 @@ var gold := 0
 var flags := {}                         # free-form story/quest flags: id -> value (rules/ owns their meaning)
 var play_seconds := 0.0
 var gloom_running := false              # true while the clock should darken the world (map and caves)
+var save_path := SAVE_PATH              # the test runner points this at TEST_SAVE_PATH
 
 
 func reset() -> void:
@@ -115,7 +117,8 @@ func from_dict(d: Dictionary) -> void:
 	changed.emit()
 
 
-func save(path := SAVE_PATH) -> bool:
+func save(path := "") -> bool:
+	path = path if path else save_path
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		return false
@@ -124,7 +127,8 @@ func save(path := SAVE_PATH) -> bool:
 
 
 ## Loads a save. Returns false (and changes nothing) if there is none or it can't be read.
-func load_save(path := SAVE_PATH) -> bool:
+func load_save(path := "") -> bool:
+	path = path if path else save_path
 	if not FileAccess.file_exists(path):
 		return false
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -134,5 +138,6 @@ func load_save(path := SAVE_PATH) -> bool:
 	return true
 
 
-func has_save(path := SAVE_PATH) -> bool:
+func has_save(path := "") -> bool:
+	path = path if path else save_path
 	return FileAccess.file_exists(path)

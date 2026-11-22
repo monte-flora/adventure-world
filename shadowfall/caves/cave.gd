@@ -301,6 +301,7 @@ func _touch() -> void:
 					checkpoint = _cell_spot(cell)
 					Game.hearts = Game.max_hearts
 					Game.changed.emit()
+					Game.save()                    # a lantern shrine keeps your journey
 			"$", "T", "*", "s":
 				if inner.intersects(cr):
 					_take(cell, ch)
@@ -385,6 +386,7 @@ func _take(cell: Vector2i, ch: String) -> void:
 			else:
 				Game.gold += DIAMOND_GOLD
 			Game.flags["cave_done:" + file] = true
+			Game.save()
 			if lava_rises:
 				lava_top = level.height * TILE
 		"s":
