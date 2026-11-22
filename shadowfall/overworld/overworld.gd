@@ -17,6 +17,8 @@ var map: TileMapLayer                         # the ground: grass, path, water
 var objects: TileMapLayer                     # trees, rocks, houses, Mines, waystones, gates
 var tiles: RealmTiles
 var canopy: TileMapLayer                      # tree crowns, drawn over the hero
+var entities: Node2D                          # y-sorted: objects, hero, people, monsters
+var dusk: RealmLight                          # CanvasModulate tint + warm PointLight2Ds
 var gates_layer: Node2D
 var hero: HeroTop
 var cam: Camera2D
@@ -56,10 +58,15 @@ func build(w: WorldMap) -> void:
 	tiles = RealmTiles.new(w)
 	tiles.paint(map, objects, canopy)
 	add_child(map)
-	add_child(objects)
 	gates_layer = Node2D.new()
 	gates_layer.draw.connect(_draw_marks)
 	add_child(gates_layer)
+	entities = Node2D.new()
+	entities.name = "Entities"
+	entities.y_sort_enabled = true            # whoever stands lower draws in front
+	objects.y_sort_enabled = true
+	entities.add_child(objects)
+	add_child(entities)
 	Game.changed.connect(_on_game_changed)
 	tiles.refresh(objects, waystone_lit)
 	hero = HeroTop.new()
@@ -72,7 +79,7 @@ func build(w: WorldMap) -> void:
 	hero.place(start)
 	last_cell = hero.cell()
 	respawn = w.home
-	add_child(hero)
+	entities.add_child(hero)
 	_spawn_monsters()
 	_spawn_people()
 	add_child(canopy)
@@ -93,6 +100,10 @@ func build(w: WorldMap) -> void:
 	objects.material = light.world_material
 	canopy.material = light.world_material
 	light.follow(hero)
+	light.tinted = true
+	dusk = RealmLight.new()
+	add_child(dusk)
+	_add_glows()
 	add_child(preload("res://ui/hud.tscn").instantiate())
 	var ui := CanvasLayer.new()
 	ui.layer = GloomLight.HUD_LAYER
@@ -254,7 +265,7 @@ func _spawn_people() -> void:
 		p.setup(d, at, world)
 		p.hero = hero
 		people.append(p)
-		add_child(p)
+		entities.add_child(p)
 	_show_people()
 
 
@@ -392,7 +403,7 @@ func _spawn_monsters() -> void:
 			m.setup(world, hero, kind, pool[rng.randi_range(0, pool.size() - 1)], rng.randi())
 			m.died.connect(func(dead): monsters.erase(dead))
 			monsters.append(m)
-			add_child(m)
+			entities.add_child(m)
 
 
 ## The walkable square next to a Mine (so coming back doesn't walk straight back in).
@@ -421,7 +432,31 @@ func _draw_marks() -> void:
 			gates_layer.draw_circle(Vector2(p) * TILE + Vector2.ONE * TILE / 2.0, 30, Color(1.0, 0.8, 0.4, 0.15))
 
 
+## Warm lights: the hero's lantern and each person's (unless E2's rig already gave them one), the
+## houses' windows and every lit waystone.
+func _add_glows() -> void:
+	if not RealmLight.has_light(hero):
+		RealmLight.glow(hero, Vector2(6, 4), RealmLight.LANTERN, 1.1)
+	for p in people:
+		if not RealmLight.has_light(p):
+			RealmLight.glow(p, Vector2(0, 2), RealmLight.PERSON, 0.8)
+	for c in world.cells:
+		if world.cells[c] == "H":
+			RealmLight.glow(objects, objects.map_to_local(c), RealmLight.WINDOW, 0.7)
+	_waystone_glows()
+
+
+var _waystone_lights := {}
+
+
+func _waystone_glows() -> void:
+	for p in world.waystones:
+		if waystone_lit(p) and not _waystone_lights.has(p):
+			_waystone_lights[p] = RealmLight.glow(objects, objects.map_to_local(p) + Vector2(0, -8), 90.0, 1.0)
+
+
 func _on_game_changed() -> void:
+	_waystone_glows()
 	tiles.refresh(objects, waystone_lit)
 	_show_people()
 	gates_layer.queue_redraw()
