@@ -64,7 +64,7 @@ func _ready() -> void:
 func _start_castle() -> void:
 	level = clampi(level, 1, Castle.LEVELS)
 	if level == 1 and Game.stones.size() == Game.STONES.size() and Castle.forge_sunfang():
-		_say("The seven Light Stones burn together into one blade: %s." % Castle.display("SUNFANG", "", "Sunfang"))
+		_say("The seven Light Stones burn together into one blade: %s." % Names.SUNFANG)
 		_sfx("forge")
 	Scenes.args["file"] = Castle.file(level)      # the cave scene reads its file from here
 	cave = load("res://caves/cave.tscn").instantiate()
@@ -556,12 +556,12 @@ func _draw_hud() -> void:
 		for cut in [0.3, 0.6]:
 			hud.draw_line(Vector2(bar.position.x + bar.size.x * cut, bar.position.y - 3),
 				Vector2(bar.position.x + bar.size.x * cut, bar.end.y + 3), GOLD, 2)
-		var title := Castle.display("BOSS", "", "The Shadow King").to_upper()
+		var title := Names.BOSS.to_upper()
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, LIGHT)
 		var phase_name: String = ["", "I - BLADE", "II - ECLIPSE", "III - FALL"][fight.phase]
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), phase_name, HORIZONTAL_ALIGNMENT_RIGHT, bar.size.x, 14, SHADOW2)
 		if fight.state == "finale" and fight.t < 2.2:
-			var word := Castle.display("SUNFANG", "", "Sunfang").to_upper()
+			var word := Names.SUNFANG.to_upper()
 			hud.draw_string(font, Vector2(0, 250), word, HORIZONTAL_ALIGNMENT_CENTER, ThroneFight.W, 64, Color(GOLD, minf(1.0, fight.t * 2.0)))
 	if caption_t > 0.0:
 		var a := minf(1.0, caption_t)

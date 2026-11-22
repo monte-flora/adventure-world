@@ -36,15 +36,3 @@ static func forge_sunfang() -> bool:
 static func sword_damage() -> int:
 	return SUNFANG_DAMAGE + int(Game.flags.get("light_shards", 0))
 
-
-## A display name from rules/names.gd (B4 owns the names). `key` is a constant there: a String,
-## or a Dictionary looked up by `id`. Falls back when B4 hasn't added it yet.
-static func display(key: String, id := "", fallback := "") -> String:
-	var script: GDScript = load("res://rules/names.gd")
-	var names := script.get_script_constant_map() if script else {}
-	if not names.has(key):
-		return fallback
-	var v = names[key]
-	if typeof(v) == TYPE_DICTIONARY:
-		return v.get(id, fallback)
-	return str(v)
