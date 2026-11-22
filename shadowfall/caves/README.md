@@ -47,3 +47,12 @@ Not cave letters: `K` `D` `+` are the castle's (`boss/`). The README has no wate
 
 Differences from pygame on purpose: 1 heart per hazard (teen hearts), no stomp (the down-strike pogo
 replaces it), touching a chest opens it, bumping ore takes it (pygame needs the pickaxe).
+
+## The cave robot (`robot/cave_robot.gd`)
+
+Plays a cave with real physics: it only presses the Hero's buttons. It plans a route over cells you
+can stand in (walk, drop, jump, ride a mushroom or geyser, climb, sink through a crumbly ledge, dig
+cracked rock on foot), does one move, sees where it really landed, and plans again. It pulls a lever
+when a gate is in the way and waits out the trap clock under spikes and jets.
+`tests/test_cave_robot.gd` has it beat stone 1 and 3 and classic 05, 07 and 12 (about 15 s).
+Not yet: ropes, the dash and `%` wall climbs, so stone 2 and most classic caves are out of its reach.
