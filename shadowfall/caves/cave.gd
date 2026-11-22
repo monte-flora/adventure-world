@@ -704,11 +704,6 @@ func _tileset() -> TileSet:
 		var at := Vector2i(i * TILE, 0)
 		if ch == LADDER_TOP:
 			continue                                  # invisible: the ladder is drawn over it
-		if ch == "n":                                 # shadow thorns: no tile in the sheet yet
-			img.fill_rect(Rect2i(at, Vector2i(TILE, TILE)), Color("3a1a4a"))
-			for k in 4:
-				img.fill_rect(Rect2i(at + Vector2i(3 + k * 8, 4 + (k % 2) * 10), Vector2i(3, 14)), Color("9a7ad0"))
-			continue
 		img.blit_rect(CaveArt.tile_image(art_sheet, CaveArt.MAP_TILE.get(ch, "solid_15")), Rect2i(0, 0, TILE, TILE), at)
 		if ch in "<>":                                # a one-way wall: the marker shows the side it opens from
 			img.fill_rect(Rect2i(at + Vector2i(6 if ch == "<" else 18, 12), Vector2i(8, 8)), Color("f7c64a"))

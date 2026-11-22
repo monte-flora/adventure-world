@@ -98,6 +98,25 @@ def cave_set(name, th):
     sh.add("spikes", [spikes(14)], 1, False)                                    # ^
     sh.add("spike_trap", [spikes(4), spikes(9), spikes(14), spikes(9)], 6)     # A
 
+    def thorns():                                                               # n shadow thorns: a black
+        s = surf(T, T)                                                          # bramble wall, violet barbs
+        rect(s, "ink0", 0, 0, T, T)
+        rng = random.Random(41)
+        for a, b in (((0, 6), (32, 14)), ((0, 24), (32, 18)), ((4, 0), (12, 32)), ((22, 0), (28, 32)),
+                     ((0, 30), (18, 2)), ((14, 32), (32, 4))):
+            line(s, "shadow0", a, b, 3)
+            line(s, "shadow1", a, b, 1)
+        for _ in range(22):                                                     # barbs, tip lit
+            x, y = rng.randrange(1, T - 1), rng.randrange(1, T - 1)
+            dx, dy = rng.choice(((3, -2), (-3, -2), (2, 3), (-2, 3), (3, 1), (-3, 1)))
+            line(s, "ink4", (x, y), (x + dx, y + dy))
+            px(s, "shadow2", x + dx, y + dy)
+        for x, y in ((9, 11), (24, 23), (17, 6)):                               # a faint violet heart-glow
+            px(s, "shadow2", x, y)
+            px(s, "ink7", x, y - 1)
+        return s
+    sh.add("thorns", [thorns()], 1, False)                                      # n
+
     def flame(k, h=22, w=T):
         s = surf(T, T)
         for i, (col, sc) in enumerate((("ember1", 1.0), ("ember2", 0.75), ("ember3", 0.5), ("light1", 0.25))):

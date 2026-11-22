@@ -159,6 +159,54 @@ def side(bob=0, front=(3, 0), back=(-3, 0), sway=0, scarf=0, hand=(9, 38), lamp=
     return s
 
 
+def crawl(i):
+    """A low crawl under a ceiling (frame i of 4): on knees and one hand, head forward, cloak flat over the back,
+    lantern hung low. Everything stays in the bottom 31 px of the frame (rows 33-63)."""
+    s = surf(48, 64)
+    g = 62
+    st = (0, 1, 0, -1)[i]                              # the stride: near hand and far knee move opposite
+    bob = (0, 0, 1, 0)[i]
+    # far leg, knee down behind, boot trailing
+    line(s, "ink2", (17, 49 + bob), (12 - st, g - 1), 4)
+    rect(s, BOOT[0], 3 - st, g - 3, 9, 3)
+    # body: low and long, leather over mail
+    poly(s, MAIL[0], [(15, 46 + bob), (31, 44 + bob), (32, 52 + bob), (16, 54 + bob)])
+    for x in range(17, 31, 2):
+        px(s, MAIL[1], x, 52 + bob)
+    poly(s, LEATHER[1], [(16, 45 + bob), (31, 43 + bob), (31, 49 + bob), (16, 51 + bob)])
+    rect(s, SASH[1], 17, 48 + bob, 4, 4)
+    # the lantern, swinging low under the belly
+    lantern(s, 24 - st, 52 + bob)
+    # near leg: thigh down to the knee on the ground, shin and boot back
+    line(s, "earth1", (18, 50 + bob), (19 + st, g - 1), 5)
+    line(s, "earth1", (19 + st, g - 1), (10 + st, g - 1), 4)
+    rect(s, BOOT[1], 4 + st, g - 4, 8, 4)
+    px(s, "earth2", 7 + st, g - 2)
+    # far arm, on the ground ahead
+    line(s, LEATHER[0], (31, 48 + bob), (36 - st, g - 1), 3)
+    # the cloak flat over the back, torn hem trailing past the boots
+    hem = torn(2, 18, 50 + bob, 4, 3, seed=i)
+    poly(s, CLOAK[1], [(33, 40 + bob), (16, 42 + bob)] + hem + [(30, 47 + bob)])
+    line(s, CLOAK[2], (31, 41 + bob), (14, 44 + bob))
+    line(s, CLOAK[0], (18, 47 + bob), (4, 52 + bob))
+    # hood low and forward, face in shadow, pale eyes
+    ellipse(s, CLOAK[1], 31, 37 + bob, 12, 12)
+    ellipse(s, "ink0", 36, 40 + bob, 7, 8)
+    ellipse(s, "ink1", 38, 42 + bob, 4, 5)
+    px(s, "ink6", 40, 43 + bob)
+    px(s, "ink7", 41, 43 + bob)
+    line(s, CLOAK[2], (32, 38 + bob), (38, 38 + bob))
+    # near arm: pauldron, vambrace, gloved hand flat on the ground
+    sh = (30, 46 + bob)
+    hand = (40 + st * 2, g - 1)
+    line(s, STEEL[1], sh, hand, 4)
+    line(s, STEEL[2], (sh[0] + 1, sh[1] - 1), (hand[0], hand[1] - 2))
+    rect(s, LEATHER[1], hand[0] - 1, hand[1] - 2, 4, 3)
+    poly(s, STEEL[0], [(26, 45 + bob), (29, 42 + bob), (33, 43 + bob), (34, 47 + bob), (27, 48 + bob)])
+    line(s, STEEL[2], (29, 43 + bob), (32, 43 + bob))
+    return outline(s)
+
+
 def side_sheet():
     sh = Sheet("hero_side", 48, 64, origin=[24, 63])
     sh.add("idle", [side(bob=b, sway=w, scarf=w, hand=(9, 38 + b)) for b, w in ((0, 0), (0, 1), (1, 1), (1, 0))], 4)
@@ -195,6 +243,7 @@ def side_sheet():
                          scarf=7, lamp=True, hand=(12, 34)) for i in range(4)], 8)
     sh.add("lantern_raise", [side(hand=(8, 30), lamp_hand=True), side(hand=(7, 20), lamp_hand=True),
                              side(hand=(6, 8), lamp_hand=True)], 10, False)
+    sh.add("crawl", [crawl(i) for i in range(4)], 8)
     base = side()
     sh.add("hurt", [flash(base), side(lean=-3, sway=-3, hand=(8, 40))], 12, False)
     death = [side(crouch=4, lean=-2, hand=(8, 42)), side(crouch=8, front=(6, 0), back=(-6, 0), hand=(9, 46), lamp=True)]

@@ -55,8 +55,8 @@ breaks. Letter -> tile is in `CaveArt.MAP_TILE` (in the TileMap) and `CaveArt.SP
 animated at the sheet's fps). Parallax: `art/parallax/<theme>_{far,back,mid,front}` at 0, 0.25, 0.5 and
 1.4x; the front rocks only scroll sideways and are 60 % see-through so they never hide the floor.
 Monsters: z `barrow_wight`, k `bone_crawler`, c `ember_imp`, x `cave_bat`; hurt = white flash, telegraph =
-attack pose pulsing red. Hero: `hero_side`, animation from its state. Still drawn in code: shadow thorns
-`n`, the `<` `>` markers, geyser steam, ropes, arrows.
+attack pose pulsing red. Hero: `hero_side`, animation from its state; `crawl` on the floor while rock is within a tile above its head. Still
+drawn in code: the `<` `>` markers, geyser steam, ropes, arrows.
 
 ## Juice (`cave_juice.gd`, gameplay §4, same numbers as the realm)
 Sword hit: 3 f stop, shake 1 px/4 f, sparks, white flash. Kill: 6 f, 2/6, the monster's `poof` + light

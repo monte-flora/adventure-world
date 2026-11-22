@@ -133,12 +133,20 @@ func _animate() -> void:
 		anim = "wall_slide"
 	elif not is_on_floor():
 		anim = "jump" if velocity.y < 0.0 else "fall"
+	elif low_ceiling():
+		anim = "crawl"
+		sprite.speed_scale = 1.0 if absf(velocity.x) > 10.0 else 0.0
 	elif absf(velocity.x) > 10.0:
 		anim = "run"
 	if sprite.animation != anim:
 		sprite.play(anim)
 	if anim == "jump":                               # rise, apex, fall by speed
 		sprite.frame = 0 if velocity.y < -APEX_SPEED else 1
+
+
+## On the floor with solid rock within one tile above the hitbox: the Hero crawls (looks only).
+func low_ceiling() -> bool:
+	return is_on_floor() and test_move(global_transform, Vector2(0, -T))
 
 
 func _read_input() -> void:
