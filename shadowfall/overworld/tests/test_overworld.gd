@@ -284,3 +284,17 @@ func test_hits_stop_shake_and_burst() -> void:
 		motes = motes or n is CPUParticles2D
 	check(poof and motes, "a kill plays the poof and lets out motes")
 	check(ow.stop == ow.STOP_KILL, "and stops longer than a hit (%d)" % ow.stop)
+
+
+func test_dusk_lights_and_y_sort() -> void:
+	var ow = await _open()
+	check(ow.entities.y_sort_enabled and ow.objects.y_sort_enabled, "objects and entities are y-sorted")
+	check(ow.hero.get_parent() == ow.entities, "the hero sorts with the objects")
+	check(ow.monsters.is_empty() or ow.monsters[0].get_parent() == ow.entities, "so do monsters")
+	check(ow.people.is_empty() or ow.people[0].get_parent() == ow.entities, "and people")
+	var cm := 0
+	for n in ow.dusk.get_children():
+		cm += 1 if n is CanvasModulate else 0
+	check_eq(cm, 1, "one CanvasModulate tints the realm")
+	check(RealmLight.has_light(ow.hero), "the hero carries a light")
+	check(get_tree().get_nodes_in_group(RealmLight.GROUP).size() > 1, "houses and people glow too")
