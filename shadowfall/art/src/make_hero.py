@@ -4,7 +4,7 @@ on the sword arm, a blood-red sash, muddy boots, and an iron-caged lantern on th
 screen; it swings). Side sheet 48x64 (caves, faces right) and top-down sheet 32x48 (the realm). Original art."""
 import math
 
-from sfart import Sheet, circle, ellipse, flash, line, outline, poly, poof, px, rect, surf
+from sfart import Sheet, circle, ellipse, flash, line, outline, poly, poof, px, rect, save_png, surf
 
 CLOAK = ("water0", "water1", "water2")  # shadow, base, light: deep midnight blue
 SASH = ("ember1", "ember2")
@@ -124,8 +124,9 @@ def side(bob=0, front=(3, 0), back=(-3, 0), sway=0, scarf=0, hand=(9, 38), lamp=
     ellipse(s, "ink1", cx + 3, hy + 8, 6, 8)
     px(s, "ink6", cx + 5, hy + 9)
     px(s, "ink7", cx + 6, hy + 9)
-    px(s, SKIN[0], cx + 7, hy + 12)
-    px(s, SKIN[0], cx + 6, hy + 14)
+    for fx, fy in ((6, 10), (7, 11), (6, 11), (7, 12), (6, 13), (5, 14)):
+        px(s, SKIN[0], cx + fx, hy + fy)
+    px(s, SKIN[1], cx + 7, hy + 10)
     px(s, CLOAK[2], cx - 2, hy + 15)                   # cloak clasp
     # the sword arm: steel pauldron, vambrace, gloved hand
     sh = (cx + 4, top + 6)
@@ -140,10 +141,14 @@ def side(bob=0, front=(3, 0), back=(-3, 0), sway=0, scarf=0, hand=(9, 38), lamp=
     line(s, STEEL[1], el, (hx, hy2), 4)
     line(s, STEEL[2], (el[0] + 1, el[1] - 1), (hx + 1, hy2 - 1))
     rect(s, LEATHER[1], hx - 1, hy2 - 1, 3, 3)
-    ellipse(s, STEEL[0], sh[0] - 4, sh[1] - 3, 8, 7)
-    ellipse(s, STEEL[1], sh[0] - 3, sh[1] - 3, 6, 4)
-    px(s, STEEL[2], sh[0] - 1, sh[1] - 2)
-    px(s, STEEL[2], sh[0], sh[1] - 2)
+    # pauldron: a flat curved shoulder plate capping the arm, two lames below
+    poly(s, STEEL[0], [(sh[0] - 4, sh[1] - 1), (sh[0] - 2, sh[1] - 4), (sh[0] + 2, sh[1] - 4), (sh[0] + 4, sh[1] - 2),
+                       (sh[0] + 4, sh[1] + 1), (sh[0] - 4, sh[1] + 1)])
+    line(s, STEEL[1], (sh[0] - 2, sh[1] - 3), (sh[0] + 2, sh[1] - 3))
+    line(s, STEEL[2], (sh[0] - 1, sh[1] - 3), (sh[0] + 1, sh[1] - 3))
+    line(s, STEEL[1], (sh[0] - 3, sh[1] - 1), (sh[0] + 3, sh[1] - 1))
+    line(s, STEEL[0], (sh[0] - 3, sh[1] + 2), (sh[0] + 3, sh[1] + 2))
+    px(s, STEEL[2], sh[0] + 3, sh[1] - 2)
     if lamp_hand:
         lantern(s, hx, hy2 + 1)
     if sword_ang is not None:
@@ -211,56 +216,91 @@ def lantern_only():
 def top(d, step=0, bob=0, sway=0, hand=0, sword_ang=None, arc=None, roll=None, lamp_up=0):
     s = surf(32, 48)
     cx = 16
-    if roll is not None:  # a tumbling cloak ball
+    if roll is not None:  # a tumbling cloak ball, the lantern glinting as it turns
         y = 26 - [0, 6, 6, 0][roll]
-        ellipse(s, CLOAK[1], 6, y, 20, 18)
-        ellipse(s, CLOAK[2], 9 + roll * 2 % 8, y + 3, 7, 5)
-        rect(s, SCARF[1], 6 + (roll * 5) % 14, y + 8, 6, 3)
+        ellipse(s, CLOAK[0], 6, y, 20, 18)
+        ellipse(s, CLOAK[1], 7, y + 1, 17, 14)
+        ellipse(s, CLOAK[2], 9 + roll * 2 % 8, y + 3, 7, 4)
+        rect(s, SASH[1], 6 + (roll * 5) % 14, y + 8, 6, 3)
+        px(s, "light1", 8 + (roll * 7) % 16, y + 12)
         return outline(s)
-    feet = (step, -step)
-    # feet
-    for i, fx in enumerate((-4, 3)):
-        if d != "side":
-            rect(s, BOOT[1], cx + fx, 42 + bob + (feet[i] if d != "up" else -feet[i]), 4, 4)
+    t, h = 19 + bob, 42 + bob
+    # boots under the cloak hem
+    for i, fx in enumerate((-5, 2)):
+        st = step if i == 0 else -step
+        if d == "side":
+            rect(s, BOOT[1 - i], cx - 3 + st * 2, 42 + bob, 6, 4)
+            px(s, "earth2", cx + 1 + st * 2, 44 + bob)
         else:
-            rect(s, BOOT[i], cx - 2 + feet[i] * 2, 43 + bob, 5, 3)
-    # cloak body
-    t, h = 20 + bob, 43 + bob
-    poly(s, CLOAK[1], [(cx - 7, t), (cx + 7, t), (cx + 10 + sway, h), (cx - 10 + sway, h)])
-    poly(s, CLOAK[0], [(cx - 7, t), (cx - 3, t), (cx - 4 + sway, h), (cx - 10 + sway, h)])
-    line(s, CLOAK[2], (cx + 5, t + 2), (cx + 8 + sway, h - 2), 1)
-    # head / hood
-    hy = 5 + bob
+            fy = 41 + bob + (st if d == "down" else -st)
+            rect(s, BOOT[1], cx + fx, fy, 4, 5)
+            rect(s, BOOT[0], cx + fx, fy, 4, 1)
+    # the long torn cloak
+    hem = torn(cx - 11 + sway, cx + 11 + sway, h - 3, 6, 3, seed=step + sway)
+    poly(s, CLOAK[1], [(cx - 7, t), (cx + 7, t)] + hem[::-1])
+    poly(s, CLOAK[0], [(cx - 7, t), (cx - 4, t)] + [(x, y) for x, y in hem[:3]][::-1])
+    line(s, CLOAK[2], (cx + 5, t + 2), (cx + 8 + sway, h - 4))
+    if d == "down":  # the cloak open at the front: jerkin, mail, sash, the lantern on the hip
+        poly(s, MAIL[0], [(cx - 4, t + 2), (cx + 4, t + 2)] + torn(cx + 4, cx - 4, h - 4, 3, 2))
+        for y in range(t + 10, h - 3, 2):
+            for x in range(cx - 3 + (y // 2) % 2, cx + 4, 2):
+                px(s, MAIL[1], x, y)
+        rect(s, LEATHER[1], cx - 4, t + 2, 8, 8)
+        line(s, LEATHER[0], (cx - 4, t + 2), (cx + 3, t + 9))
+        rect(s, SASH[1], cx - 5, t + 10, 10, 3)
+        rect(s, SASH[0], cx - 5, t + 12, 10, 1)
+        poly(s, SASH[0], [(cx + 1, t + 12), (cx + 3, t + 12), (cx + 4 + sway, t + 18), (cx + 2 + sway, t + 18)])
+        px(s, "ink5", cx - 1, t + 11)
+    elif d == "up":  # the back: hood folds, sash ends
+        line(s, CLOAK[0], (cx, t + 3), (cx + sway, h - 4), 2)
+        poly(s, SASH[0], [(cx - 6, t + 9), (cx - 4, t + 9), (cx - 5 + sway, t + 16), (cx - 7 + sway, t + 15)])
+    else:
+        rect(s, LEATHER[1], cx + 1, t + 3, 5, 9)
+        rect(s, SASH[1], cx, t + 10, 7, 3)
+        poly(s, SASH[0], [(cx - 1, t + 11), (cx - 7 - sway, t + 13), (cx - 6 - sway, t + 16)])
+    # hood: midnight blue, peak, face in shadow with pale eyes
+    hy = 3 + bob
     ellipse(s, CLOAK[1], cx - 8, hy, 16, 17)
-    ellipse(s, CLOAK[2], cx - 5, hy + 1, 8, 4)
+    poly(s, CLOAK[1], [(cx - 3, hy + 1), (cx + 3, hy + 1), (cx, hy - 2)])
+    ellipse(s, CLOAK[2], cx - 5, hy + 1, 8, 3)
     if d == "down":
-        ellipse(s, "ink1", cx - 5, hy + 6, 10, 9)
-        rect(s, "light1", cx - 3, hy + 9, 2, 1)
-        rect(s, "light1", cx + 1, hy + 9, 2, 1)
-        px(s, SKIN[1], cx, hy + 12)
+        ellipse(s, "ink0", cx - 5, hy + 5, 10, 11)
+        ellipse(s, "ink1", cx - 4, hy + 8, 8, 7)
+        px(s, "ink6", cx - 3, hy + 9); px(s, "ink7", cx - 2, hy + 9)
+        px(s, "ink7", cx + 1, hy + 9); px(s, "ink6", cx + 2, hy + 9)
+        for fx, fy in ((-2, 11), (-1, 12), (0, 12), (1, 11), (0, 13), (-1, 13)):
+            px(s, SKIN[0], cx + fx, hy + fy)
     elif d == "side":
-        ellipse(s, "ink1", cx, hy + 5, 8, 9)
-        rect(s, "light1", cx + 4, hy + 8, 2, 1)
-        px(s, SKIN[1], cx + 7, hy + 11)
+        ellipse(s, "ink0", cx + 1, hy + 5, 8, 10)
+        ellipse(s, "ink1", cx + 3, hy + 7, 5, 7)
+        px(s, "ink7", cx + 6, hy + 9)
+        for fx, fy in ((6, 10), (7, 11), (6, 12), (5, 13)):
+            px(s, SKIN[0], cx + fx, hy + fy)
     else:
-        line(s, CLOAK[0], (cx, hy + 6), (cx, hy + 15), 2)
-    # scarf
-    rect(s, SCARF[1], cx - 7, 20 + bob, 14, 3)
-    if d == "up":
-        poly(s, SCARF[0], [(cx - 2, 22 + bob), (cx + 2, 22 + bob), (cx + 1 + sway, 33 + bob), (cx - 2 + sway, 32 + bob)])
-    elif d == "side":
-        poly(s, SCARF[0], [(cx - 6, 21 + bob), (cx - 12 - sway, 24 + bob), (cx - 10 - sway, 27 + bob)])
-    # lantern hand
+        line(s, CLOAK[0], (cx, hy + 5), (cx, hy + 15), 2)
+        line(s, CLOAK[2], (cx - 5, hy + 4), (cx - 3, hy + 13))
+    px(s, CLOAK[2], cx, t)  # clasp
+    # sword shoulder: the steel pauldron, flat plate
+    psx = {"down": cx - 7, "up": cx + 4, "side": cx + 1}[d]
+    rect(s, STEEL[0], psx, t - 1, 5, 4)
+    line(s, STEEL[1], (psx, t - 1), (psx + 4, t - 1))
+    px(s, STEEL[2], psx + 1, t - 1)
+    line(s, STEEL[0], (psx, t + 3), (psx + 4, t + 3))
+    # lantern on the hip (raised in hand for lantern_raise)
     if d == "down":
-        lx, ly = cx + 10, 30 + bob + hand - lamp_up
+        lx, ly = cx + 7, t + 10 + hand - lamp_up
     elif d == "side":
-        lx, ly = cx + 8, 31 + bob + hand - lamp_up
+        lx, ly = cx + 6, t + 11 + hand - lamp_up
     else:
-        lx, ly = cx - 10, 30 + bob + hand - lamp_up
-    rect(s, SKIN[1], lx - 1, ly - 2, 3, 3)
-    lantern(s, lx, ly)
+        lx, ly = cx - 8, t + 10 + hand - lamp_up
+    if lamp_up:
+        rect(s, LEATHER[1], lx - 1, ly - 2, 3, 3)
+    lantern(s, lx, ly, glow=d != "up" or lamp_up > 0)
+    if d == "up" and not lamp_up:
+        px(s, "light0", lx, ly + 6)
     if sword_ang is not None:
-        sx, sy = {"down": (cx - 6, 32), "up": (cx + 6, 22), "side": (cx + 4, 30)}[d]
+        sx, sy = {"down": (cx - 6, 30), "up": (cx + 6, 21), "side": (cx + 4, 28)}[d]
+        rect(s, STEEL[1], sx - 1, sy + bob - 1, 3, 3)
         sword(s, sx, sy + bob, sword_ang, 14)
     s = outline(s)
     if arc:
@@ -290,9 +330,100 @@ def top_sheet():
     sh.save()
 
 
+# --- portrait (128x160): title screen and pause; 3/4 view, the lantern held low on the left ---
+def dither(s, col, x0, y0, x1, y1, step=2):
+    for y in range(y0, y1):
+        for x in range(x0 + (y % step), x1, step):
+            px(s, col, x, y)
+
+
+def portrait():
+    s = surf(128, 160)
+    # cloak over the shoulders, folds falling
+    poly(s, CLOAK[1], [(30, 92), (98, 92), (124, 132), (126, 160), (2, 160), (4, 132)])
+    poly(s, CLOAK[0], [(30, 92), (40, 100), (22, 160), (2, 160), (4, 132)])
+    for a, b in (((20, 120), (12, 160)), ((106, 118), (114, 160)), ((96, 110), (100, 160))):
+        line(s, CLOAK[0], a, b, 2)
+    line(s, CLOAK[2], (100, 100), (122, 136))
+    line(s, CLOAK[2], (30, 98), (16, 130))
+    # chest: chainmail at the collar, leather jerkin, cross strap, blood-red sash
+    poly(s, MAIL[0], [(44, 108), (86, 108), (90, 160), (40, 160)])
+    dither(s, MAIL[1], 44, 108, 90, 124)
+    poly(s, LEATHER[1], [(46, 122), (86, 118), (90, 160), (40, 160)])
+    line(s, LEATHER[2], (84, 120), (88, 158))
+    line(s, LEATHER[0], (46, 124), (88, 152), 4)
+    line(s, LEATHER[2], (48, 124), (88, 150))
+    rect(s, "ink4", 64, 134, 4, 4)
+    rect(s, SASH[1], 38, 150, 56, 7)
+    rect(s, SASH[0], 38, 156, 56, 4)
+    line(s, SASH[0], (50, 151), (60, 156))
+    # hood: midnight blue, tall peak, deep opening
+    ellipse(s, CLOAK[1], 24, 14, 80, 98)
+    poly(s, CLOAK[1], [(46, 22), (58, 2), (72, 18)])
+    poly(s, CLOAK[0], [(24, 60), (30, 100), (44, 112), (40, 70)])
+    line(s, CLOAK[2], (58, 4), (40, 26))
+    line(s, CLOAK[2], (62, 8), (88, 26), 2)
+    line(s, CLOAK[2], (94, 36), (102, 64))
+    line(s, CLOAK[0], (60, 12), (52, 30), 2)
+    ellipse(s, CLOAK[0], 36, 30, 58, 80)
+    ellipse(s, "ink0", 40, 34, 52, 74)
+    # the face, 3/4 to the right, lit low from the lantern; brow in the hood's shadow
+    poly(s, SKIN[0], [(52, 52), (84, 50), (88, 64), (86, 84), (78, 98), (66, 102), (56, 96), (50, 80)])
+    poly(s, SKIN[1], [(74, 60), (84, 58), (86, 70), (82, 86), (76, 82), (78, 68)])
+    poly(s, "earth1", [(50, 78), (56, 96), (66, 102), (60, 86), (54, 72)])
+    dither(s, "earth1", 58, 90, 80, 100)                    # stubble
+    poly(s, "earth1", [(52, 56), (62, 56), (60, 72), (64, 90), (66, 102), (56, 96), (50, 80)])
+    poly(s, "ink1", [(48, 44), (90, 42), (90, 56), (82, 58), (70, 58), (58, 58), (48, 60)])  # hood shadow
+    poly(s, "ink1", [(48, 60), (54, 58), (52, 84), (56, 96), (50, 90)])
+    for ex in (60, 76):                                     # pale eyes
+        rect(s, "ink4", ex - 1, 61, 9, 4)
+        rect(s, "ink6", ex, 62, 7, 2)
+        rect(s, "ink7", ex + 2, 62, 2, 2)
+        line(s, "ink0", (ex - 1, 60), (ex + 7, 59), 2)          # brow
+    line(s, "earth1", (72, 66), (70, 80))                   # nose
+    line(s, SKIN[1], (74, 66), (75, 78))
+    line(s, "earth1", (68, 82), (76, 82))
+    line(s, "earth0", (64, 90), (76, 89))                   # mouth
+    line(s, "earth1", (82, 62), (86, 80))                   # cheekbone
+    # the clasp
+    circle(s, "ink3", 50, 108, 5)
+    circle(s, "ink5", 50, 108, 3)
+    circle(s, "ink3", 50, 108, 1)
+    # steel pauldron on the far shoulder, lames and rivets
+    ellipse(s, STEEL[0], 84, 96, 40, 34)
+    ellipse(s, STEEL[1], 86, 96, 34, 26)
+    ellipse(s, STEEL[0], 88, 108, 34, 18)
+    ellipse(s, STEEL[1], 88, 100, 32, 14)
+    ellipse(s, STEEL[2], 96, 99, 14, 8)
+    px(s, "ink7", 100, 101); px(s, "ink7", 101, 101)
+    for k, y in enumerate((122, 130, 138)):
+        poly(s, STEEL[0], [(88 + k * 2, y), (120 - k, y - 2), (122 - k, y + 6), (90 + k * 2, y + 7)])
+        line(s, STEEL[1], (89 + k * 2, y + 1), (119 - k, y - 1))
+        px(s, "ink3", 92 + k * 2, y + 3)
+        px(s, "ember3", 108, y + 2)                         # rust
+    # the lantern, held low on the left: iron cage, flame, glow on the cloak
+    for y in range(98, 160):
+        for x in range(0, 44):
+            d = ((x - 18) ** 2 + (y - 130) ** 2) ** 0.5
+            if d < 24 and (x + y) % (2 if d < 15 else 4) == 0 and s.get_at((x, y)).a:
+                px(s, "light0" if d < 15 else "ember3", x, y)
+    poly(s, "ink3", [(10, 116), (26, 116), (30, 120), (6, 120)])
+    rect(s, "light0", 8, 120, 20, 22)
+    rect(s, "light1", 12, 124, 12, 14)
+    poly(s, "ink7", [(18, 126), (21, 132), (18, 136), (15, 132)])
+    for bx in (8, 14, 21, 27):
+        line(s, "ink2", (bx, 120), (bx, 141), 2)
+    rect(s, "ink3", 6, 142, 24, 4)
+    line(s, "ink4", (18, 108), (18, 115), 2)
+    for gx, gy in ((32, 116), (36, 124), (34, 136), (4, 104), (38, 108)):
+        px(s, "ember3", gx, gy)
+    return outline(s)
+
+
 def main():
     side_sheet()
     top_sheet()
+    save_png(portrait(), "ui/hero_portrait.png")
 
 
 if __name__ == "__main__":

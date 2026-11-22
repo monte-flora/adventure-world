@@ -4,6 +4,7 @@ extends Control
 ## Applies the player's settings (volume, remapped keys) once per run.
 
 const LOGO := "res://ui/fonts/shadowfall_logo.png"
+const PORTRAIT := "res://art/ui/hero_portrait.png"  # the Lanternbearer (art/src/make_hero.py)
 
 static var _settings_applied := false
 
@@ -30,6 +31,14 @@ func _ready() -> void:
 	logo.scale = Vector2(2, 2)
 	logo.position = Vector2((UiStyle.VIEW.x - logo.size.x * 2) / 2, 96)
 	add_child(logo)
+	var hero := TextureRect.new()
+	hero.name = "Portrait"
+	hero.texture = load(PORTRAIT)
+	hero.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	hero.size = hero.texture.get_size()
+	hero.scale = Vector2(2, 2)
+	hero.position = Vector2(24, UiStyle.VIEW.y - hero.size.y * 2 - 12)
+	add_child(hero)
 	var lore := UiStyle.label("The last light gutters. The Shadow King wakes.", "body", UiStyle.INK5)
 	_center(lore, 96 + logo.size.y * 2 + 24)
 	items = PackedStringArray(["Continue"]) if Game.has_save() else PackedStringArray()

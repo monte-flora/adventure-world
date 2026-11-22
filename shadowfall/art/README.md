@@ -33,6 +33,7 @@ var font: Font = load("res://art/font/body.fnt")
 
 ## Other files
 - `palette.png` (32×1, in index order) and `palette.json` (names `ink0`…`shadow2` → hex): Shadowfall 32. Nothing may use a colour outside it.
+- `ui/hero_portrait.png` (128×160): the Lanternbearer bust from the concept; the title screen (2×) and the pause JOURNEY tab (1×) show it. `make_hero.py` draws it.
 - `gloom_lut.png` (32×4): row = gloom stage 0–3, column = source palette index, and the pixel is the colour it turns into. B3's palette-swap shader reads it. Accents never change.
 - `parallax/<theme>_{far,back,mid,front}.png` (960×540): `far` is opaque and scrolls 0×, `back` 0.25× (`ink1`), `mid` 0.5× (`ink2`), `front` 1.4× (`ink0`, ≤15 % of the screen).
 - `font/body` (5×7 glyphs, 6×10 cell, ASCII 32–126) and `font/num` (3×5 digits and `+ - / : x %`): each is a PNG grid, a JSON and a BMFont `.fnt` that Godot loads as a `Font`. Draw them at a whole-number scale.
