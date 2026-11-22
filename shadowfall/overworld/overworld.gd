@@ -85,7 +85,7 @@ func build(w: WorldMap) -> void:
 	banner.add_theme_font_size_override("font_size", 24)
 	ui.add_child(banner)
 	add_child(ui)
-	_arrive(hero.cell())
+	_arrive(hero.cell(), true)
 
 
 func _physics_process(_dt: float) -> void:
@@ -98,13 +98,15 @@ func _physics_process(_dt: float) -> void:
 		_arrive(c)
 
 
-## The hero just stepped onto square c.
-func _arrive(c: Vector2i) -> void:
+## The hero just stepped onto square c (or starts there: then a Portal or Mine underfoot waits for a step).
+func _arrive(c: Vector2i, starting := false) -> void:
 	var id := world.land(c)
 	if id != "" and not Game.flags.get("seen_land_" + id, false):
 		Game.flags["seen_land_" + id] = true
 		banner.text = world.land_name(id)
 		get_tree().create_timer(3.0).timeout.connect(func(): if is_instance_valid(banner): banner.text = "")
+	if starting and world.at(c) in "MSP":
+		return
 	match world.at(c):
 		"L":
 			light_waystone(c)
