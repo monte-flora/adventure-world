@@ -55,6 +55,7 @@ var _solid_index := {}
 var art_sheet := "tiles_stone"                   # the theme's tile sheet (CaveArt)
 var art_tex: Texture2D
 var parallax: Array[Parallax2D] = []             # far, back, mid, front
+var painting: Sprite2D                           # levels/polish/<cave>/painted.*, in place of far/back/mid
 var cam: Camera2D
 var juice: CaveJuice                             # hit-stop, shake, sparks, dust, hurt edge
 
@@ -83,6 +84,12 @@ func build(lf: LevelFile, from_file := "") -> void:
 		parallax.append(CaveArt.layer(lf.theme(), l[0], l[1]))
 	for i in 3:
 		add_child(parallax[i])
+	var paint := CaveArt.painting(from_file)
+	if paint:
+		painting = CaveArt.backdrop(paint, lf.width, lf.height)
+		add_child(painting)
+		for i in 3:
+			parallax[i].visible = false           # the painting covers the whole cave
 	map = TileMapLayer.new()
 	map.tile_set = _tileset()
 	add_child(map)
@@ -127,6 +134,8 @@ func build(lf: LevelFile, from_file := "") -> void:
 	map.material = light.world_material
 	for p in parallax:
 		p.get_child(0).material = light.world_material
+	if painting:
+		painting.material = light.world_material
 	light.follow(hero)
 	add_child(preload("res://ui/hud.tscn").instantiate())
 
