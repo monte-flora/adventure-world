@@ -5,25 +5,16 @@ extends Node2D
 ##   Scenes.goto("overworld", {"realm": "nightfall"})       the Umbral Reach (Nightfall's mirror)
 ## Walk onto a Mine to play its cave; onto a waystone (L) to light it (heal, respawn point); G on a lit
 ## waystone travels to the next lit one. Ability gates (Y ivy cliff, O rubble, K shadow thorns, water,
-## gate: lines) stay shut until Game.has_ability(). Placeholder colours until art/ has the tilesets.
+## gate: lines) stay shut until Game.has_ability(). Tiles: art/sheets/realm_<land> (RealmTiles).
 
 const TILE := LevelFile.TILE
 const MONSTERS_PER_LAND := 3
-## Placeholder colours per letter: light realm, then Nightfall.
-const COLORS := {
-	"G": "5d8a3c", "F": "2f5a2a", "W": "2c4f7a", "~": "6f97b8", "X": "5b5560", "R": "9a7a4c",
-	"M": "3a2f2a", "S": "3a2f2a", "H": "a0603a", "L": "d9b24a", "T": "7a5a2a", "+": "8a6a3a",
-	"P": "8a5ad0", "=": "7a5030", "B": "7a8a4a", "I": "b8dce8", "V": "a05a4a", ".": "2c4f7a",
-	"O": "7a6a5a", "Y": "3f7a3a", "K": "3a1f3a",
-}
-const NIGHT := {
-	"G": "2e2a3a", "F": "1c1826", "W": "141428", "~": "1e2640", "X": "2a2630", "R": "4a3c40",
-	"H": "5a3a5a", "L": "8a6ad0", "P": "c0a0ff", ".": "141428",
-}
-
 var world: WorldMap
 var realm := "light"
-var map: TileMapLayer
+var map: TileMapLayer                         # the ground: grass, path, water
+var objects: TileMapLayer                     # trees, rocks, houses, Mines, waystones, gates
+var tiles: RealmTiles
+var canopy: TileMapLayer                      # tree crowns, drawn over the hero
 var gates_layer: Node2D
 var hero: HeroTop
 var cam: Camera2D
@@ -43,20 +34,18 @@ func build(w: WorldMap) -> void:
 	world = w
 	for e in w.errors:
 		push_warning("overworld: " + e)
-	var sea := ColorRect.new()                # squares no land draws are open water
-	sea.size = Vector2(w.size * TILE)
-	sea.color = Color(NIGHT["."] if realm == "nightfall" else COLORS["."])
-	add_child(sea)
 	map = TileMapLayer.new()
-	map.tile_set = _tileset()
-	for p in w.cells:
-		var ch: String = w.cells[p]
-		map.set_cell(p, 0, Vector2i(_index(ch), 0))
+	objects = TileMapLayer.new()
+	canopy = TileMapLayer.new()
+	tiles = RealmTiles.new(w)
+	tiles.paint(map, objects, canopy)
 	add_child(map)
+	add_child(objects)
 	gates_layer = Node2D.new()
 	gates_layer.draw.connect(_draw_marks)
 	add_child(gates_layer)
-	Game.changed.connect(gates_layer.queue_redraw)
+	Game.changed.connect(_on_game_changed)
+	tiles.refresh(objects, waystone_lit)
 	hero = HeroTop.new()
 	hero.world = w
 	hero.hurt.connect(_on_hurt)
@@ -69,6 +58,7 @@ func build(w: WorldMap) -> void:
 	respawn = w.home
 	add_child(hero)
 	_spawn_monsters()
+	add_child(canopy)
 	cam = Camera2D.new()
 	cam.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	cam.position_smoothing_enabled = true
@@ -83,6 +73,8 @@ func build(w: WorldMap) -> void:
 	var light := GloomLight.new()
 	add_child(light)
 	map.material = light.world_material
+	objects.material = light.world_material
+	canopy.material = light.world_material
 	light.follow(hero)
 	add_child(preload("res://ui/hud.tscn").instantiate())
 	var ui := CanvasLayer.new()
@@ -91,7 +83,12 @@ func build(w: WorldMap) -> void:
 	banner.position = Vector2(0, 20)          # top middle: the HUD has the corners
 	banner.size.x = 960
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.add_theme_font_size_override("font_size", 24)
+	banner.add_theme_font_override("font", UiStyle.font("body"))
+	banner.add_theme_font_size_override("font_size", UiStyle.BODY * 3)
+	banner.add_theme_color_override("font_color", UiStyle.LIGHT1)
+	banner.add_theme_color_override("font_outline_color", UiStyle.INK0)
+	banner.add_theme_constant_override("outline_size", 6)
+	banner.position.y = 56
 	ui.add_child(banner)
 	add_child(ui)
 	_arrive(hero.cell(), true)
@@ -115,8 +112,7 @@ func _arrive(c: Vector2i, starting := false) -> void:
 	var id := world.land(c)
 	if id != "" and not Game.flags.get("seen_land_" + id, false):
 		Game.flags["seen_land_" + id] = true
-		banner.text = world.land_name(id)
-		get_tree().create_timer(3.0).timeout.connect(func(): if is_instance_valid(banner): banner.text = "")
+		show_banner(world.land_name(id))
 	if starting and world.at(c) in "MSP":
 		return
 	match world.at(c):
@@ -130,6 +126,17 @@ func _arrive(c: Vector2i, starting := false) -> void:
 				Scenes.goto("overworld", {"realm": "light", "at": _portal_in_light()})
 			elif Game.stones.size() >= Game.STONES.size():
 				Scenes.goto("overworld", {"realm": "nightfall"})
+
+
+## A land's name across the top the first time you enter it: fades in, holds, fades out.
+func show_banner(text: String) -> void:
+	banner.text = text.to_upper()
+	banner.modulate.a = 0.0
+	var t := banner.create_tween()
+	t.tween_property(banner, "modulate:a", 1.0, 0.6)
+	t.tween_interval(2.2)
+	t.tween_property(banner, "modulate:a", 0.0, 0.8)
+	t.tween_callback(func(): banner.text = "")
 
 
 ## A waystone is a lantern: lights for good, heals fully, and is where you wake after a fall.
@@ -210,7 +217,7 @@ func _spawn_monsters() -> void:
 	for id in lands:
 		var pool: Array = by_land[id]
 		for i in mini(MONSTERS_PER_LAND, pool.size()):
-			var kind: String = "shade" if realm == "nightfall" else ("slime" if id == "home" else ["slime", "zombie"][i % 2])
+			var kind := MapMonster.kind_for("umbral_reach" if realm == "nightfall" else id, i)
 			var m := MapMonster.new()
 			m.setup(world, hero, kind, pool[rng.randi_range(0, pool.size() - 1)], rng.randi())
 			m.died.connect(func(dead): monsters.erase(dead))
@@ -239,54 +246,11 @@ func _draw_marks() -> void:
 		var at := Vector2(ll) * TILE + Vector2.ONE * TILE / 2.0
 		gates_layer.draw_circle(at, 12, Color(1.0, 0.85, 0.4, 0.35))
 		gates_layer.draw_circle(at, 5, Color("ffe08a"))
-	for p in world.waystones:                 # lanterns: dim until lit
-		var lit := waystone_lit(p)
-		var mid := Vector2(p) * TILE + Vector2.ONE * TILE / 2.0
-		if lit:
-			gates_layer.draw_circle(mid, 30, Color(1.0, 0.8, 0.4, 0.15))
-		gates_layer.draw_rect(Rect2(mid - Vector2(5, 10), Vector2(10, 20)), Color("2a2430"))
-		gates_layer.draw_circle(mid - Vector2(0, 2), 4, Color("ffd36a") if lit else Color("5a5060"))
-	for p in world.cells:                     # ability gates: a bright edge while shut
-		var ch: String = world.cells[p]
-		var shut: bool = (WorldMap.GATE_LETTERS.has(ch) or world.gates.has(p)) and not world.walkable(p)
-		if shut:
-			gates_layer.draw_rect(Rect2(Vector2(p) * TILE + Vector2(2, 2), Vector2(TILE - 4, TILE - 4)),
-				Color("e0c060"), false, 2.0)
+	for p in world.waystones:                 # a lit lantern's warm pool
+		if waystone_lit(p):
+			gates_layer.draw_circle(Vector2(p) * TILE + Vector2.ONE * TILE / 2.0, 30, Color(1.0, 0.8, 0.4, 0.15))
 
 
-func _letters() -> String:
-	var s := ""
-	for k in COLORS:
-		s += k
-	return s
-
-
-func _index(ch: String) -> int:
-	var i := _letters().find(ch)
-	return i if i >= 0 else _letters().find("G")
-
-
-func _tileset() -> TileSet:
-	var letters := _letters()
-	var img := Image.create(TILE * letters.length(), TILE, false, Image.FORMAT_RGBA8)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1
-	for i in letters.length():
-		var ch := letters[i]
-		var base := Color(NIGHT.get(ch, COLORS[ch])) if realm == "nightfall" else Color(COLORS[ch])
-		img.fill_rect(Rect2i(i * TILE, 0, TILE, TILE), base)
-		for n in 10:                          # a little texture so movement reads
-			img.set_pixel(i * TILE + rng.randi_range(0, TILE - 1), rng.randi_range(0, TILE - 1), base.darkened(0.15))
-		if ch in "MS":                        # a Mine mouth
-			img.fill_rect(Rect2i(i * TILE + 8, 10, 16, 18), Color("0c0a10"))
-		elif ch == "H":
-			img.fill_rect(Rect2i(i * TILE + 6, 12, 20, 16), base.lightened(0.2))
-	var src := TileSetAtlasSource.new()
-	src.texture = ImageTexture.create_from_image(img)
-	src.texture_region_size = Vector2i(TILE, TILE)
-	for i in letters.length():
-		src.create_tile(Vector2i(i, 0))
-	var ts := TileSet.new()
-	ts.tile_size = Vector2i(TILE, TILE)
-	ts.add_source(src, 0)
-	return ts
+func _on_game_changed() -> void:
+	tiles.refresh(objects, waystone_lit)
+	gates_layer.queue_redraw()
