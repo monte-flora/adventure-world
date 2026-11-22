@@ -64,10 +64,15 @@ User: refactor fully for teens (art, gameplay, music); stay on pygame unless ano
 - **Standing direction (user, 2026-11-21):** "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones." Main applies it to every gameplay/naming call: epic, grim high-fantasy tone, but original names (no copied names, places or characters) and teen-safe (no gore or sexual content). Defaults made before this (e.g. "Hearthvale", the 7 ability names) are open to epic renames in Wave B.
 - [x] 2026-11-22 **Wave B: the rebuild in Godot** (PRs #15-#35): scaffold, overworld, caves, light, rules, UI, audio, editor+robot, castle+boss, art, levels, integration. **MVP playable end to end** (title, realm, Mine, cave, Dawnstone, back; hurt/death). Names decided by main: home Emberhold, lands Weepingwold, Hollowcrown, Drowned Mere, Wintermarch, Cinder Wastes, Mirefen, Shadowgate, the Umbral Reach; abilities Wraithstep, Ironclaw, Kingsfall, Tidebinder, Stormwing, Dawnbrand, Veilsight.
 - [x] 2026-11-22 **Music: rhythmic variety** (user: "add some rythmic variations (just 8th notes the whole way through)"), PR #29.
-- [~] **Wave C: graphics in place and polished gameplay** (user, 2026-11-22: "much more interested in playing once all the new graphics are in place and the gameplay is more polished. I had some issues navigating the caves because things like the steam blasting you up is not quite in place."):
-  - [ ] C1 caves: every cave letter works as in pygame (steam, springs, crumbling floors, platforms, ladders, water...), cave art, juice, a Godot cave robot that really jumps.
-  - [ ] C2 realm + boss: art/tilesets/sprites in place of placeholders, weak monsters redrawn, juice.
-  - [ ] Later: people + dialogue in the realm, shop, balance; boss/Sunfang/lieutenant names; castle door/key; real boss SFX/tunes; Godot itch.io page (user sets secrets).
+- [x] 2026-11-22 **Wave C: graphics in place and polished gameplay** (user, 2026-11-22: "much more interested in playing once all the new graphics are in place and the gameplay is more polished. I had some issues navigating the caves because things like the steam blasting you up is not quite in place."):
+  - [x] 2026-11-22 C1 caves (#39, #45, #47, #48): every cave letter works as in pygame (steam, springs, crumbling floors, platforms, ladders, water...), cave art, juice, a Godot cave robot that really jumps.
+  - [x] 2026-11-22 C2 realm + boss (#38, #41, #43, #44, #46): art/tilesets/sprites in place of placeholders, weak monsters redrawn, juice.
+  - [x] 2026-11-22 C3 music on real sampled instruments (user: "Does the music have to be 8-bit? Could we make it sound more authentic?"), #40, #42.
+  - [x] 2026-11-22 Hero = the Lanternbearer and a new Shadow King, from the user's concept art ("as close to this as we can get"), #49, #50; hero crawls under 1-tile ceilings + thorn tile, #51. Boss/Sunfang/lieutenant names, #46.
+- [~] **Wave D: people, dialogue and the shop** (user, 2026-11-22: "Go ahead with people, dialogue and the shop next."):
+  - [x] 2026-11-22 D1 people in the realm (#52), dialogue with choices and quests, shop + forge (#53), CI robot that shops and takes a quest (#54).
+  - [~] caves use the forged sword's damage and the Sunfang anims.
+- [ ] Later: balance; castle door/key; real boss SFX/tunes; Shadow King second pass (bigger cloak and sword) if the user wants it; Godot itch.io page (user sets secrets).
 
 ## From the play-test on 2026-11-07
 
