@@ -1,0 +1,22 @@
+{
+ "name": "dead_tree",
+ "size": [
+  62,
+  112
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  22,
+  99,
+  17,
+  13
+ ],
+ "anchor": [
+  30,
+  112
+ ],
+ "base": 112
+}

@@ -1,0 +1,22 @@
+{
+ "name": "waystone",
+ "size": [
+  26,
+  72
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  3,
+  58,
+  21,
+  14
+ ],
+ "anchor": [
+  13,
+  72
+ ],
+ "base": 72
+}

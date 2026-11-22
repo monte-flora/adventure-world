@@ -1,0 +1,22 @@
+{
+ "name": "ruined_wall",
+ "size": [
+  112,
+  53
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  0,
+  32,
+  112,
+  21
+ ],
+ "anchor": [
+  56,
+  53
+ ],
+ "base": 53
+}

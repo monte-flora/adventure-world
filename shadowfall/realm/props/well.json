@@ -1,0 +1,22 @@
+{
+ "name": "well",
+ "size": [
+  55,
+  64
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  3,
+  38,
+  50,
+  26
+ ],
+ "anchor": [
+  28,
+  64
+ ],
+ "base": 64
+}

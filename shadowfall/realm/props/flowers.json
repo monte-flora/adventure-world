@@ -1,0 +1,17 @@
+{
+ "name": "flowers",
+ "size": [
+  40,
+  15
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  20,
+  15
+ ],
+ "base": 15
+}

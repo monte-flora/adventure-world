@@ -1,0 +1,22 @@
+{
+ "name": "rocks",
+ "size": [
+  64,
+  43
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  3,
+  19,
+  58,
+  24
+ ],
+ "anchor": [
+  32,
+  43
+ ],
+ "base": 43
+}

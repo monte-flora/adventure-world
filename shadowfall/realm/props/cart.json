@@ -1,0 +1,22 @@
+{
+ "name": "cart",
+ "size": [
+  80,
+  54
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  4,
+  30,
+  72,
+  24
+ ],
+ "anchor": [
+  40,
+  54
+ ],
+ "base": 54
+}

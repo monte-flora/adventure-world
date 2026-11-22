@@ -1,0 +1,28 @@
+{
+ "name": "smithy",
+ "size": [
+  176,
+  144
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   79,
+   104,
+   70
+  ]
+ ],
+ "foot": [
+  7,
+  72,
+  162,
+  72
+ ],
+ "anchor": [
+  88,
+  144
+ ],
+ "base": 144
+}

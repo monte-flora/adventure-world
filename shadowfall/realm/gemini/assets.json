@@ -1,0 +1,25 @@
+{
+ "about": "What the import makes from each picture. size = the biggest it may be in game pixels (32 = one square); it keeps its shape. foot = the part you bump into, as shares of the picture [x, y, w, h] (none = walk through). lights = warm lights [x share, y share, radius px]. front = rows from the top always drawn over the hero. ground textures become 256x256 seamless tiles.",
+ "ground": ["grass", "dirt_road", "cobblestone", "mud", "shallow_water", "rocky_ground"],
+ "props": {
+  "oak":         {"size": [112, 128], "foot": [0.36, 0.86, 0.28, 0.14]},
+  "pine":        {"size": [80, 136],  "foot": [0.34, 0.88, 0.32, 0.12]},
+  "dead_tree":   {"size": [88, 112],  "foot": [0.36, 0.88, 0.28, 0.12]},
+  "bush":        {"size": [48, 36],   "foot": [0.1, 0.55, 0.8, 0.45]},
+  "cottage_a":   {"size": [144, 128], "foot": [0.04, 0.5, 0.92, 0.5], "lights": [[0.3, 0.72, 44], [0.7, 0.72, 44]]},
+  "cottage_b":   {"size": [144, 128], "foot": [0.04, 0.5, 0.92, 0.5], "lights": [[0.62, 0.72, 44]]},
+  "tavern":      {"size": [208, 168], "foot": [0.03, 0.5, 0.94, 0.5], "lights": [[0.25, 0.75, 52], [0.75, 0.75, 52], [0.5, 0.55, 40]]},
+  "smithy":      {"size": [176, 144], "foot": [0.04, 0.5, 0.92, 0.5], "lights": [[0.45, 0.72, 70]]},
+  "lamppost":    {"size": [24, 80],   "foot": [0.2, 0.9, 0.6, 0.1], "lights": [[0.5, 0.12, 96]]},
+  "fence":       {"size": [64, 40],   "foot": [0.0, 0.7, 1.0, 0.3]},
+  "well":        {"size": [56, 64],   "foot": [0.05, 0.6, 0.9, 0.4]},
+  "cart":        {"size": [80, 56],   "foot": [0.05, 0.55, 0.9, 0.45]},
+  "rocks":       {"size": [64, 44],   "foot": [0.05, 0.45, 0.9, 0.55]},
+  "flowers":     {"size": [40, 24]},
+  "fallen_log":  {"size": [80, 32],   "foot": [0.0, 0.4, 1.0, 0.6]},
+  "ruined_wall": {"size": [112, 72],  "foot": [0.0, 0.6, 1.0, 0.4]},
+  "waystone":    {"size": [40, 72],   "foot": [0.1, 0.8, 0.8, 0.2]},
+  "mine_mouth":  {"size": [128, 104], "foot": [0.0, 0.55, 1.0, 0.45]},
+  "campfire":    {"size": [40, 40],   "foot": [0.15, 0.55, 0.7, 0.45], "lights": [[0.5, 0.5, 110]]}
+ }
+}

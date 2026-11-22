@@ -1,0 +1,28 @@
+{
+ "name": "lamppost",
+ "size": [
+  17,
+  80
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   9,
+   10,
+   96
+  ]
+ ],
+ "foot": [
+  3,
+  72,
+  10,
+  8
+ ],
+ "anchor": [
+  8,
+  80
+ ],
+ "base": 80
+}
