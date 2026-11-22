@@ -1,7 +1,8 @@
 __pycache__/
 *.pyc
 .DS_Store
-.claude/
+.claude/*
+!.claude/settings.json
 # pixi environments
 .pixi/*
 !.pixi/config.toml

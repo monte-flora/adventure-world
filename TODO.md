@@ -54,15 +54,20 @@ User: refactor fully for teens (art, gameplay, music); stay on pygame unless ano
 - [x] 2026-11-21 **Wave A: research, design and prototypes** (5 parallel workers, each PRs `docs/teen/<area>/`): engine, art, gameplay, levels, audio.
 - Decided 2026-11-21: **32-px art** (finer tiles, about 4x the art work), not the 16-px default in the art report (PR #8).
 - Decided 2026-11-21: the Hero becomes a **hooded wanderer with a lantern** (blue and red kept); the darkening stages in `docs/teen/art/darkening.png` are right as they are; we **make our own pixel font**.
-- [~] **Shadowfall pixel font** (asked 2026-11-21): our own, sized for the 32-px art; engine-neutral (PNG grid + JSON, and a TTF).
+- [x] 2026-11-21 **Shadowfall pixel font** (PR #14) (asked 2026-11-21): our own, sized for the 32-px art; engine-neutral (PNG grid + JSON, and a TTF).
 - [x] 2026-11-21 **Gate: engine = Godot 4.7** (user). Also decided:
   - cut XP, lives, food and sword wear
   - Nightfall becomes a 3x3 mirror of the centre of the map
   - itch.io runs both builds for a while
   - main's defaults: retune caves for the new jump; the home area is Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera
-- [ ] **Fix the 59 fps hitch in `game.py`** (vsync needs pygame.SCALED; found by the engine worker), PR into `main`.
+- [x] 2026-11-21 **Fix the 59 fps hitch in `game.py`** (PR #16; 120 Hz screens not locked) (vsync needs pygame.SCALED; found by the engine worker), PR into `main`.
 - **Standing direction (user, 2026-11-21):** "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones." Main applies it to every gameplay/naming call: epic, grim high-fantasy tone, but original names (no copied names, places or characters) and teen-safe (no gore or sexual content). Defaults made before this (e.g. "Hearthvale", the 7 ability names) are open to epic renames in Wave B.
-- [~] **Wave B: the rebuild in Godot** (B0 scaffold + CI first, then parallel workers),, fanned out from Wave A's task lists (no shared files per worker).
+- [x] 2026-11-22 **Wave B: the rebuild in Godot** (PRs #15-#35): scaffold, overworld, caves, light, rules, UI, audio, editor+robot, castle+boss, art, levels, integration. **MVP playable end to end** (title, realm, Mine, cave, Dawnstone, back; hurt/death). Names decided by main: home Emberhold, lands Weepingwold, Hollowcrown, Drowned Mere, Wintermarch, Cinder Wastes, Mirefen, Shadowgate, the Umbral Reach; abilities Wraithstep, Ironclaw, Kingsfall, Tidebinder, Stormwing, Dawnbrand, Veilsight.
+- [x] 2026-11-22 **Music: rhythmic variety** (user: "add some rythmic variations (just 8th notes the whole way through)"), PR #29.
+- [~] **Wave C: graphics in place and polished gameplay** (user, 2026-11-22: "much more interested in playing once all the new graphics are in place and the gameplay is more polished. I had some issues navigating the caves because things like the steam blasting you up is not quite in place."):
+  - [ ] C1 caves: every cave letter works as in pygame (steam, springs, crumbling floors, platforms, ladders, water...), cave art, juice, a Godot cave robot that really jumps.
+  - [ ] C2 realm + boss: art/tilesets/sprites in place of placeholders, weak monsters redrawn, juice.
+  - [ ] Later: people + dialogue in the realm, shop, balance; boss/Sunfang/lieutenant names; castle door/key; real boss SFX/tunes; Godot itch.io page (user sets secrets).
 
 ## From the play-test on 2026-11-07
 
