@@ -46,6 +46,8 @@ const HURT_LOCK := 12                            # frames with no control
 const IFRAMES := 60
 # --- ladders ---
 const CLIMB_SPEED := 4.0 * T
+const WALL_CLIMB_SPEED := 3.0 * T                # hold UP on a climbing wall (%) to climb it
+const LADDER_LAYER := 4                          # ladder tops (CaveScene.LADDER_LAYER): a climber passes them
 const SIZE := Vector2(20, 28)
 
 enum { NORMAL, CLIMB, ROPE, DASH, POUND }
@@ -89,7 +91,7 @@ func _ready() -> void:
 	box.shape = rect
 	add_child(box)
 	collision_layer = 2
-	collision_mask = 1
+	collision_mask = 1 | LADDER_LAYER
 	floor_snap_length = 6.0
 	floor_constant_speed = true
 	safe_spot = position
@@ -175,10 +177,10 @@ func _normal_step(steer: float, dt: float) -> void:
 		dash_used = false
 		if cave and cave.is_safe_ground(self):
 			safe_spot = position
-	# ladders and vines: UP or DOWN grabs them
-	if cave and absf(iy) > 0.5 and cave.ladder_at(self) and hurt_lock == 0:
-		state = CLIMB
-		velocity = Vector2.ZERO
+	# ladders and vines: UP grabs one you touch; DOWN grabs it in the air, or climbs down from its top
+	if cave and hurt_lock == 0 and ((iy < -0.5 and cave.ladder_at(self))
+			or (iy > 0.5 and ((on_floor and cave.ladder_below(self)) or (not on_floor and cave.ladder_at(self))))):
+		_grab_ladder()
 		return
 	# dash (Wraithstep), and the heavy slam (Kingsfall) as DOWN+dash in the air
 	if dash_pressed and hurt_lock == 0:
@@ -236,6 +238,11 @@ func _normal_step(steer: float, dt: float) -> void:
 	velocity.y = minf(MAX_FALL, velocity.y + GRAVITY * g * dt)
 	if wall_dir != 0:
 		velocity.y = minf(velocity.y, WALL_SLIDE)
+	# climbing wall (%): hold UP (and toward it) to climb
+	if iy < -0.5 and absf(steer) > 0.1 and is_on_wall() and cave and buffer == 0:
+		var d := -int(signf(get_wall_normal().x))
+		if d == int(signf(steer)) and cave.wall_letter(self, d) == "%":
+			velocity.y = -WALL_CLIMB_SPEED
 	move_and_slide()
 	if not is_on_floor():
 		coyote = maxi(0, coyote - 1)
@@ -264,9 +271,20 @@ func _wall_ok(d: int) -> bool:
 	return ch == "%" or (_has("climb") and CaveTiles.is_solid(ch))
 
 
+func _grab_ladder() -> void:
+	state = CLIMB
+	velocity = Vector2.ZERO
+	buffer = 0
+	collision_mask = 1                           # pass through the ladder's top rung
+	position.x = cave.ladder_x(self)
+	if iy > 0.5 and not cave.ladder_at(self):
+		position.y += 6.0                         # from the top: step down onto the rungs
+
+
 func _climb_step(steer: float) -> void:
-	if buffer > 0 or not cave.ladder_at(self):
+	if buffer > 0 or not cave.ladder_at(self) or (iy > 0.5 and is_on_floor() and not cave.ladder_below(self)):
 		state = NORMAL
+		collision_mask = 1 | LADDER_LAYER
 		if buffer > 0:
 			velocity.x = steer * RUN_SPEED
 			_jump(JUMP_SPEED * 0.8)
@@ -365,6 +383,7 @@ func hurt(from: Vector2, amount := 1) -> bool:
 		rope = null
 		rope_grab_cool = 30
 	state = NORMAL
+	collision_mask = 1 | LADDER_LAYER
 	var away := 1.0 if position.x >= from.x else -1.0
 	velocity = Vector2(away * HURT_KNOCK_X, -HURT_KNOCK_Y)
 	Vitals.hurt(amount >= Vitals.BOSS_HIT)

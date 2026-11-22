@@ -8,18 +8,21 @@ extends Node2D
 
 const TILE := LevelFile.TILE
 const DEFAULT_FILE := "caves/01_the_easy_moss_cave.txt"
-# --- the cave's toys, in frames at 60 fps ---
-const SPIKE_TRAP_UP := 60                        # A: up this long, then down as long
-const JET_OFF := 90                              # J: quiet, then fire 3 tiles up
-const JET_ON := 60
-const JET_HEIGHT := 3
-const GEYSER_EVERY := 150                        # M: a puff every 2.5 s
-const GEYSER_PUFF := 30
-const GEYSER_HEIGHT := 7.0                       # tiles it throws you
-const MUSHROOM_HEIGHT := 5.0                     # tiles a mushroom bounces you
-const CRUMBLE_SHAKE := 30                        # -: shakes, falls, comes back
+const LADDER_LAYER := 4                          # physics layer bit of ladder tops
+const LADDER_TOP := "h"                          # tile only: the top rung of H or V, a one-way ledge
+# --- the cave's toys, in frames at 60 fps (the pygame game's numbers, caves.py) ---
+# Spike traps (A), flame jets (J) and steam geysers (M) all go off together, on one clock:
+const TRAP_DOWN := 78                            # quiet this long (1.3 s)...
+const TRAP_UP := 54                              # ...then on this long (0.9 s)
+const TRAP_WARN := 24                            # jets and geysers fizzle this long before they go off
+const JET_HEIGHT := 3                            # J: fire from its own block and 2 above
+const GEYSER_HEIGHT := 7.4                       # M: tiles it throws you (you rise about 7)
+const MUSHROOM_HEIGHT := 6.3                     # o: tiles a mushroom bounces you (about 6)
+const CRUMBLE_SHAKE := 54                        # -: shakes 0.9 s, falls, comes back after 3 s
 const CRUMBLE_BACK := 180
-const LAVA_RISE := 0.6 * TILE                    # pixels a second, after the diamond (lava rises: yes)
+const LAVA_WAIT := 120                           # lava rises: yes: 2 s after the diamond...
+const LAVA_RISE := 1.0 * TILE                    # ...then a tile a second, and stops just below E
+const SPRING_REFILL := 3600                      # u: a healing spring fills up again after 60 s
 const FLARE_REACH := 4.0 * TILE                  # Dawnbrand burns shadow thorns this close
 const GEM_GOLD := 1
 const CHEST_GOLD := 10
@@ -43,6 +46,9 @@ var traps: Array[Vector2i] = []                  # A
 var jets: Array[Vector2i] = []                   # J
 var lava_rises := false
 var lava_top := INF                              # top of the rising lava, in pixels
+var lava_wait := 0
+var lava_stop := 0.0                             # the lava never rises above this
+var springs := {}                                # Vector2i -> frames until a used spring is full again
 var leaving := false
 var heal := LumenHeal.new()                      # Q, standing still: a Lumen charge becomes a heart
 var _solid_index := {}
@@ -142,6 +148,8 @@ func set_letter(cell: Vector2i, ch: String) -> void:
 func _set_tile(cell: Vector2i, ch: String) -> void:
 	if _solid_index.has(ch):
 		map.set_cell(cell, 0, Vector2i(_solid_index[ch], 0))
+	elif ch in CaveTiles.CLIMB and letter(cell + Vector2i.UP) not in CaveTiles.CLIMB:
+		map.set_cell(cell, 0, Vector2i(_solid_index[LADDER_TOP], 0))   # stand on a ladder's top
 	else:
 		map.erase_cell(cell)
 
@@ -157,16 +165,33 @@ func cells_in(r: Rect2) -> Array[Vector2i]:
 	return out
 
 
+## Spike traps, flame jets and geysers: are they on right now? (all together, like pygame)
 func trap_up() -> bool:
-	return (clock / SPIKE_TRAP_UP) % 2 == 0
+	return clock % (TRAP_DOWN + TRAP_UP) >= TRAP_DOWN
+
+
+## Jets and geysers fizzle just before they go off, so you can see it coming.
+func about_to_go_off() -> bool:
+	var t := clock % (TRAP_DOWN + TRAP_UP)
+	return t >= TRAP_DOWN - TRAP_WARN and t < TRAP_DOWN
 
 
 func jet_on() -> bool:
-	return clock % (JET_OFF + JET_ON) >= JET_OFF
+	return trap_up()
 
 
 func geyser_puffing() -> bool:
-	return clock % GEYSER_EVERY < GEYSER_PUFF
+	return trap_up()
+
+
+## A flame jet's fire: its own block and the 2 above it.
+func jet_fire(j: Vector2i) -> Rect2:
+	return Rect2(Vector2(j.x * TILE + 6, (j.y - JET_HEIGHT + 1) * TILE), Vector2(TILE - 12, JET_HEIGHT * TILE))
+
+
+## The top rung of a ladder (or the top of a vine) works like a ledge: you can stand on it.
+func ladder_top(cell: Vector2i) -> bool:
+	return letter(cell) in CaveTiles.CLIMB and letter(cell + Vector2i.UP) not in CaveTiles.CLIMB
 
 
 # ---------------------------------------------------------------- what the Hero asks
@@ -183,11 +208,21 @@ func ladder_at(h: HeroSide) -> bool:
 	return letter_at(h.position) in CaveTiles.CLIMB or letter_at(h.position + Vector2(0, HeroSide.SIZE.y / 2.0 - 2)) in CaveTiles.CLIMB
 
 
+## Standing on the top of a ladder: DOWN climbs down it.
+func ladder_below(h: HeroSide) -> bool:
+	return letter_at(h.position + Vector2(0, HeroSide.SIZE.y / 2.0 + 4)) in CaveTiles.CLIMB
+
+
+## The middle of the ladder the Hero is on (hands on the middle, like pygame).
+func ladder_x(h: HeroSide) -> float:
+	return (floorf(h.position.x / TILE) + 0.5) * TILE
+
+
 func is_safe_ground(h: HeroSide) -> bool:
 	var y := h.position.y + HeroSide.SIZE.y / 2.0 + 2
 	for x in [h.position.x - HeroSide.SIZE.x / 2.0, h.position.x + HeroSide.SIZE.x / 2.0]:
 		var under := letter_at(Vector2(x, y))
-		if not CaveTiles.is_solid(under) and under != "=":
+		if not CaveTiles.is_solid(under) and under != "=" and under not in CaveTiles.CLIMB:
 			return false
 	for cell in cells_in(h.rect().grow(TILE)):
 		if letter(cell) in CaveTiles.HAZARD:
@@ -276,8 +311,15 @@ func _physics_process(_dt: float) -> void:
 	if hero == null or leaving:
 		return
 	_tick_crumbles()
+	for cell in springs.keys():
+		springs[cell] -= 1
+		if springs[cell] <= 0:
+			springs.erase(cell)
 	if lava_top < INF:
-		lava_top -= LAVA_RISE / 60.0
+		if lava_wait > 0:
+			lava_wait -= 1
+		else:
+			lava_top = maxf(lava_stop, lava_top - LAVA_RISE / 60.0)
 	_attack()
 	heal.step(Input.is_action_pressed("heal"), hero.is_on_floor() and absf(hero.velocity.x) < 1.0)
 	_touch()
@@ -310,12 +352,16 @@ func _touch() -> void:
 					Game.hearts = Game.max_hearts
 					Game.changed.emit()
 					Game.save()                    # a lantern shrine keeps your journey
-			"$", "T", "*", "s":
+			"$", "T":
 				if inner.intersects(cr):
 					_take(cell, ch)
+			"*", "s":                                   # solid ore: bump it (or strike it, or dig it)
+				if r.grow(1.0).intersects(cr):
+					_take(cell, ch)
 			"u":
-				if inner.intersects(cr) and Game.hearts < Game.max_hearts:
+				if inner.intersects(cr) and Game.hearts < Game.max_hearts and not springs.has(cell):
 					Game.hearts = Game.max_hearts
+					springs[cell] = SPRING_REFILL
 					Game.changed.emit()
 			"^", "~":
 				if inner.intersects(Rect2(cr.position + Vector2(4, TILE * 0.5), Vector2(TILE - 8, TILE * 0.5))):
@@ -338,7 +384,7 @@ func _touch() -> void:
 					set_letter(cell, ".")
 	if jet_on():
 		for j in jets:
-			var fire := Rect2(Vector2(j.x * TILE + 6, (j.y - JET_HEIGHT) * TILE), Vector2(TILE - 12, JET_HEIGHT * TILE))
+			var fire := jet_fire(j)
 			if inner.intersects(fire):
 				_hazard(fire.get_center())
 				return
@@ -378,7 +424,7 @@ func _wake_at_checkpoint() -> void:
 	hero.velocity = Vector2.ZERO
 	hero.safe_spot = checkpoint
 	if lava_top < INF:
-		lava_top = level.height * TILE
+		_start_lava()
 	for m in monsters.get_children():
 		m.queue_free()
 	_spawn_monsters()
@@ -401,7 +447,7 @@ func _take(cell: Vector2i, ch: String) -> void:
 		"T":
 			Game.gold += CHEST_GOLD
 			if lava_rises and level.find("*").is_empty():
-				lava_top = level.height * TILE
+				_start_lava()
 		"*":
 			var stone := stone_id()
 			if stone != "":
@@ -411,10 +457,18 @@ func _take(cell: Vector2i, ch: String) -> void:
 			Game.flags["cave_done:" + file] = true
 			Game.save()
 			if lava_rises:
-				lava_top = level.height * TILE
+				_start_lava()
 		"s":
 			Game.flags["sun_ore"] = int(Game.flags.get("sun_ore", 0)) + 1
 	Game.changed.emit()
+
+
+## The treasure woke the lava: it waits a moment, then rises from the floor (never above the exit).
+func _start_lava() -> void:
+	lava_top = level.height * TILE
+	lava_wait = LAVA_WAIT
+	var exits := level.find("E")
+	lava_stop = (exits.map(func(e): return e.y).min() + 1) * TILE if not exits.is_empty() else 0.0
 
 
 ## Which Light Stone this cave's diamond holds (the "stone:" line), as an id, or "".
@@ -452,6 +506,9 @@ func _attack() -> void:
 		if ch == "L" and cell not in hero.attack_hits:
 			hero.attack_hits.append(cell)
 			pull_lever()
+		elif ch in "B*s" and cell not in hero.attack_hits:
+			hero.attack_hits.append(cell)
+			_break(cell)
 		elif ch in "^n" or (ch == "A" and trap_up()):
 			bounced = true
 	if down and bounced and hero.attack_hits.find("pogo") == -1:
@@ -473,12 +530,21 @@ func dig() -> void:
 			p + Vector2(hero.facing * (HeroSide.SIZE.x / 2.0 + 8), HeroSide.SIZE.y / 2.0 - 4),
 			p + Vector2(0, HeroSide.SIZE.y / 2.0 + 8)]:
 		var cell := cell_of(spot)
-		if letter(cell) == "B":
-			set_letter(cell, ".")
+		if letter(cell) in "B*s":
+			_break(cell)
 			return
 		if letter(cell) == "L":
 			pull_lever()
 			return
+
+
+## Dig (or strike) cracked rock, diamond ore or Sun Shard ore: the ore gives its treasure.
+func _break(cell: Vector2i) -> void:
+	var ch := letter(cell)
+	if ch == "B":
+		set_letter(cell, ".")
+	elif ch in "*s":
+		_take(cell, ch)
 
 
 ## Dawnbrand: the lantern flares and burns the shadow thorns near you.
@@ -585,16 +651,17 @@ func _add_ropes() -> void:
 
 
 func _tileset(pal: Array) -> TileSet:
-	var letters := CaveTiles.SOLID + CaveTiles.LEDGE
+	var letters := CaveTiles.SOLID + CaveTiles.LEDGE + LADDER_TOP
 	var rock := Color(pal[0])
 	var colors := {"#": rock, "B": Color(pal[1]), "M": rock.lightened(0.15), "G": Color("6b6187"),
 		"%": Color("2f6142"), "I": Color("8fd0e0"), "o": Color("c0506a"), "<": Color("7a5a3a"),
-		">": Color("7a5a3a"), "n": Color("3a1a4a"), "F": rock, "=": Color(pal[2]), "-": Color(pal[2]).darkened(0.3)}
+		">": Color("7a5a3a"), "n": Color("3a1a4a"), "F": rock, "=": Color(pal[2]), "-": Color(pal[2]).darkened(0.3),
+		"*": rock, "s": rock, LADDER_TOP: Color(0, 0, 0, 0)}
 	var img := Image.create(TILE * letters.length(), TILE, false, Image.FORMAT_RGBA8)
 	for i in letters.length():
 		var ch := letters[i]
 		var x := i * TILE
-		if ch in CaveTiles.LEDGE:
+		if ch in CaveTiles.LEDGE or ch == LADDER_TOP:
 			img.fill_rect(Rect2i(x, 0, TILE, 8), colors[ch])
 			continue
 		img.fill_rect(Rect2i(x, 0, TILE, TILE), colors[ch])
@@ -613,6 +680,8 @@ func _tileset(pal: Array) -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(TILE, TILE)
 	ts.add_physics_layer()
+	ts.add_physics_layer()
+	ts.set_physics_layer_collision_layer(1, LADDER_LAYER)
 	var src := TileSetAtlasSource.new()
 	src.texture = ImageTexture.create_from_image(img)
 	src.texture_region_size = Vector2i(TILE, TILE)
@@ -625,6 +694,11 @@ func _tileset(pal: Array) -> TileSet:
 		if ch == "F":
 			continue                                  # a secret wall: you walk right through
 		var td := src.get_tile_data(Vector2i(i, 0), 0)
+		if ch == LADDER_TOP:                          # its own physics layer: a climbing Hero passes it
+			td.add_collision_polygon(1)
+			td.set_collision_polygon_points(1, 0, PackedVector2Array([Vector2(-h, -h), Vector2(h, -h), Vector2(h, -h + 8), Vector2(-h, -h + 8)]))
+			td.set_collision_polygon_one_way(1, 0, true)
+			continue
 		td.add_collision_polygon(0)
 		if ch in CaveTiles.LEDGE:
 			td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-h, -h), Vector2(h, -h), Vector2(h, -h + 8), Vector2(-h, -h + 8)]))
@@ -660,7 +734,16 @@ func _draw_overlay() -> void:
 			"J":
 				overlay.draw_rect(Rect2(p + Vector2(8, TILE - 10), Vector2(TILE - 16, 10)), Color("6a6a7a"))
 				if jet_on():
-					overlay.draw_rect(Rect2(p + Vector2(8, -JET_HEIGHT * TILE + TILE - 10), Vector2(TILE - 16, JET_HEIGHT * TILE)), Color(1, 0.55, 0.15, 0.85))
+					overlay.draw_rect(jet_fire(cell), Color(1, 0.55, 0.15, 0.85))
+				elif about_to_go_off():
+					overlay.draw_circle(p + Vector2(16 + randf_range(-3, 3), TILE - 14), 3.0, Color("ffb040"))
+			"M":                                       # the vent's steam: a column while it puffs
+				if geyser_puffing():
+					for k in 6:
+						var y := -((clock * 4 + k * 37) % int(GEYSER_HEIGHT * TILE))
+						overlay.draw_circle(p + Vector2(16 + sin((clock + k * 20) * 0.2) * 5, y), 7.0 + k % 3 * 2, Color(0.9, 0.95, 1.0, 0.55))
+				elif about_to_go_off():
+					overlay.draw_circle(p + Vector2(16 + randf_range(-3, 3), -4), 4.0, Color(0.9, 0.95, 1.0, 0.5))
 			"$":
 				overlay.draw_colored_polygon(PackedVector2Array([mid + Vector2(0, -7), mid + Vector2(6, 0), mid + Vector2(0, 7), mid + Vector2(-6, 0)]), Color("5ae0c0"))
 			"*":
@@ -671,7 +754,7 @@ func _draw_overlay() -> void:
 				overlay.draw_rect(Rect2(p + Vector2(4, 12), Vector2(TILE - 8, TILE - 12)), Color("8a5a2a"))
 				overlay.draw_rect(Rect2(p + Vector2(4, 16), Vector2(TILE - 8, 3)), Color("f7c64a"))
 			"u":
-				overlay.draw_rect(Rect2(p + Vector2(4, TILE - 10), Vector2(TILE - 8, 10)), Color("4aa0e0"))
+				overlay.draw_rect(Rect2(p + Vector2(4, TILE - 10), Vector2(TILE - 8, 10)), Color("4aa0e0") if not springs.has(cell) else Color("3a4a5a"))
 			"E":
 				overlay.draw_rect(Rect2(p + Vector2(4, 0), Vector2(TILE - 8, TILE)), Color("1a1020"))
 				overlay.draw_rect(Rect2(p + Vector2(4, 0), Vector2(TILE - 8, TILE)), Color("c9a66b"), false, 2.0)
@@ -699,7 +782,7 @@ func _draw_overlay() -> void:
 			"-":
 				if crumbling.has(cell):
 					overlay.draw_rect(Rect2(p + Vector2(randf_range(-1, 1), 0), Vector2(TILE, 8)), Color(1, 1, 1, 0.25))
-			"P", "U", "R", "S", "z", "k", "c", "x", "=", "B", "M", "G", "%", "I", "o", "<", ">", "n":
+			"P", "U", "R", "S", "z", "k", "c", "x", "=", "B", "G", "%", "I", "o", "<", ">", "n":
 				pass
 			_:
 				overlay.draw_rect(Rect2(p + Vector2(4, 4), Vector2(24, 24)), Color.MAGENTA)  # an unknown letter

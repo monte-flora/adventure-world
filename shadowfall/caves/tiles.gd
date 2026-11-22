@@ -3,7 +3,7 @@ class_name CaveTiles
 ## The cave scene (cave.gd) builds from this table, and tests check no cave uses a letter missing here.
 
 ## Letters drawn as a solid tile in the TileMap (atlas column = index in this string).
-const SOLID := "#BMG%Io<>nF"       # F is drawn like rock but has no collision (secret wall)
+const SOLID := "#BMG%Io<>nF*s"     # F is drawn like rock but has no collision (secret wall); * s: ore you dig
 const LEDGE := "=-"                # one-way: jump up through it; - crumbles
 const HAZARD := "^A!~Jn"           # hurt you (A and J only while they are up / on)
 const PICKUP := "$*sTu"
