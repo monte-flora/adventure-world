@@ -33,6 +33,9 @@ Or start the editor (`pixi run editor`), press **Open** and pick one under "Cave
 Paint your changes, then press **Save**. The editor asks once, "Save over it?", and then the
 game has your new version. **Save as** makes your own copy in `my_caves` instead.
 
+To play one in Shadowfall (the Godot rebuild): `pixi run godot-cave levels/caves/03_blue_lvl_1.txt`
+(a cave in `my_caves/` works too).
+
 Then run the tests: `pixi run test` sends a robot through every cave and castle level here.
 If it can't get through one, the test says which, before it goes on GitHub (and itch.io).
 
@@ -45,6 +48,20 @@ The first lines are settings, then the drawing. Every row must be the same lengt
     lava rises: yes                  the lava rises when you grab the diamond (or the chest instead)
     about: ...                       a note for people about the cave (the game ignores it)
     locked door says: Locked! ...    castle levels only: what the locked door says without the key
+
+Shadowfall (the Godot rebuild, `shadowfall/`) reads these too. The pygame game skips them.
+
+    stone: Dawnstone                 which Light Stone the diamond (*) holds, so which power it gives
+    land: the Weepingwold            which land's Mines play this cave
+    needs: climb, pound              the powers the robot may use to beat it (see below)
+    dark: yes                        pitch dark: you need your lantern
+
+**needs:** lists powers by their ids: `dash`, `climb`, `pound`, `swim`, `double_jump`, `flare`,
+`truesight` (`needs: none` = no powers). The robot (`cave_solver.py`, and `pixi run test`) then only uses
+those: without `pound`, cracked rock `B` is plain rock to it; without `climb`, climbing walls `%` are;
+without `truesight`, secret walls `F` are; without `flare`, shadow thorns `n` hurt like spikes. With no
+`needs:` line it may use every power. The pygame game has no dash, swim or double jump, so the robot never
+uses those: it has to beat the cave without them. The editor keeps all these lines when it saves.
 
 ## The letters
 
@@ -84,6 +101,9 @@ The first lines are settings, then the drawing. Every row must be the same lengt
 | `D` | castle: the locked door to the next level (in level 5, the throne room's great door) |
 | `+` | castle: a light shard |
 | `i` `w` `f` | castle: torch, moonlit window, banner (just for looks) |
+| `C` | Shadowfall: a checkpoint (lantern shrine). You wake up here after a fall. The pygame game plays it as air |
+| `>` `<` | Shadowfall: a one-way door. Shut until you touch it from the side the arrow points to (the right for `>`), then open for good: a shortcut back at the end of a loop. The pygame game plays it as air |
+| `n` | Shadowfall: shadow thorns. They hurt, until the flare (the Sun stone's power) burns them. The pygame game plays it as air |
 
 ## Moving platform tracks
 
