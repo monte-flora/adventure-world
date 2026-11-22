@@ -148,7 +148,7 @@ func test_sword_kills_a_zombie() -> void:
 	h.facing = 1
 	for i in 3:
 		h.attack_pressed = true
-		await physics_frames(16)
+		await physics_frames(16 + CaveJuice.STOP_HIT)     # a swing, plus the hit-stop
 	check(not is_instance_valid(z), "3 hits kill a zombie")
 
 

@@ -49,6 +49,7 @@ const CLIMB_SPEED := 4.0 * T
 const WALL_CLIMB_SPEED := 3.0 * T                # hold UP on a climbing wall (%) to climb it
 const LADDER_LAYER := 4                          # ladder tops (CaveScene.LADDER_LAYER): a climber passes them
 const SIZE := Vector2(20, 28)
+const DUST_SPEED := 8.0 * T                      # landing faster than this kicks up dust
 
 enum { NORMAL, CLIMB, ROPE, DASH, POUND }
 
@@ -82,6 +83,7 @@ var attack_pressed := false
 var dash_pressed := false
 var tool_pressed := false
 var interact_pressed := false
+var sprite: AnimatedSprite2D
 
 
 func _ready() -> void:
@@ -95,21 +97,48 @@ func _ready() -> void:
 	floor_snap_length = 6.0
 	floor_constant_speed = true
 	safe_spot = position
+	sprite = AnimatedSprite2D.new()
+	sprite.sprite_frames = ArtSheet.frames("hero_side")
+	sprite.offset = ArtSheet.offset("hero_side")
+	sprite.position = Vector2(0, SIZE.y / 2.0)       # the sheet's feet on the bottom of the box
+	add_child(sprite)
+	sprite.play("idle")
 
 
 func rect() -> Rect2:
 	return Rect2(position - SIZE / 2.0, SIZE)
 
 
-func _draw() -> void:
-	if iframes > 0 and (iframes / 4) % 2 == 0:
+## Picks the sheet animation for what the Hero is doing; flickers while hurt.
+func _animate() -> void:
+	if sprite == null:
 		return
-	draw_rect(Rect2(-SIZE / 2.0, SIZE), Color("3a2f4a"))                       # hooded cloak
-	draw_rect(Rect2(Vector2(-6 + 3 * facing, -11), Vector2(8, 5)), Color("e6c878"))  # face in the hood
-	draw_circle(Vector2(9 * facing, 2), 4.0, Color("f7c64a"))                   # the lantern
-	if attack_t >= ATTACK_STARTUP and attack_t < ATTACK_STARTUP + ATTACK_ACTIVE:
-		var r := attack_rect()
-		draw_rect(Rect2(r.position - position, r.size), Color(1, 1, 1, 0.5))
+	sprite.visible = iframes == 0 or (iframes / 4) % 2 == 1
+	sprite.flip_h = facing < 0
+	sprite.modulate = Color(2.0, 0.6, 0.6) if hurt_lock > HURT_LOCK - 4 else Color.WHITE   # hurt flash
+	var anim := "idle"
+	sprite.speed_scale = 1.0
+	if hurt_lock > 0:
+		anim = "hurt"
+	elif state == DASH:
+		anim = "dash"
+	elif state == POUND:
+		anim = "pogo"
+	elif state == CLIMB or state == ROPE:
+		anim = "climb"
+		sprite.speed_scale = 1.0 if velocity.length() > 1.0 or state == ROPE else 0.0
+	elif attack_t >= 0:
+		anim = "attack" if is_on_floor() else ("pogo" if attack_dir.y > 0 else "air_attack")
+	elif wall_dir != 0:
+		anim = "wall_slide"
+	elif not is_on_floor():
+		anim = "jump" if velocity.y < 0.0 else "fall"
+	elif absf(velocity.x) > 10.0:
+		anim = "run"
+	if sprite.animation != anim:
+		sprite.play(anim)
+	if anim == "jump":                               # rise, apex, fall by speed
+		sprite.frame = 0 if velocity.y < -APEX_SPEED else 1
 
 
 func _read_input() -> void:
@@ -132,7 +161,7 @@ func _physics_process(dt: float) -> void:
 	dash_pressed = false
 	tool_pressed = false
 	interact_pressed = false
-	queue_redraw()
+	_animate()
 
 
 func _has(ability: String) -> bool:
@@ -243,10 +272,13 @@ func _normal_step(steer: float, dt: float) -> void:
 		var d := -int(signf(get_wall_normal().x))
 		if d == int(signf(steer)) and cave.wall_letter(self, d) == "%":
 			velocity.y = -WALL_CLIMB_SPEED
+	var fall_speed := velocity.y
 	move_and_slide()
 	if not is_on_floor():
 		coyote = maxi(0, coyote - 1)
 	elif cave:
+		if not on_floor and fall_speed > DUST_SPEED:
+			cave.landed_hard(self)
 		cave.landed_on(self)
 	if cave and rope_grab_cool == 0:
 		var r = cave.rope_at(self)
