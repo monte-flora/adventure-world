@@ -35,6 +35,7 @@ func goto(scene_name: String, scene_args := {}) -> void:
 	args = scene_args
 	if host:
 		for c in host.get_children():
+			host.remove_child(c)       # gone this frame, not the next
 			c.queue_free()
 		screen = load(SCENES[scene_name]).instantiate()
 		host.add_child(screen)

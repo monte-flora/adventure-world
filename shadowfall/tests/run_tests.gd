@@ -2,12 +2,34 @@ extends Node
 ## Runs every test in the project, headless:
 ##   godot --headless --fixed-fps 60 --path shadowfall res://tests/run_tests.tscn [-- --only=caves]
 ## Finds every tests/test_*.gd under res://, runs each func test_*(), prints one line per test,
-## and quits with exit code 1 if any failed. Owned by core (B0).
+## and quits with exit code 1 if any failed. A test that prints an error (SCRIPT ERROR, push_error) fails. Owned by core (B0).
 
 const SKIP_DIRS := [".godot", "build", "levels", "addons"]
 
 var passed := 0
 var failed := 0
+var _errors := _ErrorLog.new()
+
+
+## Catches every engine/script error (SCRIPT ERROR, push_error) so a test that hits one fails.
+class _ErrorLog extends Logger:
+	var lines: PackedStringArray = []
+	var _lock := Mutex.new()
+
+	func _log_error(function: String, file: String, line: int, code: String, rationale: String,
+			_editor_notify: bool, error_type: int, _backtraces: Array[ScriptBacktrace]) -> void:
+		if error_type == ERROR_TYPE_WARNING:
+			return
+		_lock.lock()
+		lines.append("%s (%s:%d %s)" % [rationale if rationale else code, file, line, function])
+		_lock.unlock()
+
+	func take() -> PackedStringArray:
+		_lock.lock()
+		var out := lines.duplicate()
+		lines.clear()
+		_lock.unlock()
+		return out
 
 
 func _ready() -> void:
@@ -15,6 +37,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	OS.add_logger(_errors)
 	var want := Engine.get_version_info()
 	var pinned := FileAccess.get_file_as_string("res://GODOT_VERSION").strip_edges()
 	print("Godot %s (pinned %s)" % [want.string, pinned])
@@ -56,7 +79,10 @@ func _run_file(path: String) -> void:
 		var t: TestCase = script.new()
 		add_child(t)
 		Scenes.host = t
+		_errors.take()
 		await t.call(name)
+		for e in _errors.take():
+			t.failures.append("error: " + e)
 		if t.failures.is_empty():
 			passed += 1
 			print("  ok    ", name)

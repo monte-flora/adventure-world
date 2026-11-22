@@ -28,7 +28,10 @@ func _walk(ow: Node, route: Array[Vector2i], max_frames := 3000) -> void:
 
 
 func test_every_land_loads() -> void:
-	var files := Paths.level_files("world")
+	var files := PackedStringArray()
+	for f in Paths.level_files(WorldMap.land_folder()):
+		if LevelFile.load_file(Paths.level(f)).setting("world") == "":   # not the Umbral Reach's own file
+			files.append(f)
 	check(files.size() >= 8, "8 or more land files (%d)" % files.size())
 	for f in files:
 		var lf := LevelFile.load_file(Paths.level(f))
