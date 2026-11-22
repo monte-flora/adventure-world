@@ -5,8 +5,11 @@ extends CanvasLayer
 ##   await box.finished
 ## Long text is split into pages of 3 lines; JUMP / INTERACT / ATTACK shows the next page (or
 ## the rest of a page still typing). *Word* marks the important word in light0.
+##   await box.talk(Conversation.new("maera"))     a whole talk from rules/data/people.json: its pages,
+##                                                 then its choices (UP/DOWN picks, JUMP/INTERACT/ATTACK takes)
 
 signal finished
+signal chosen(i: int)
 
 const LAYER := GloomLight.HUD_LAYER + 10
 const LINES := 3
@@ -19,6 +22,8 @@ var speaker_label: Label
 var text: RichTextLabel
 var _panel: PanelContainer
 var _shown_chars := 0.0
+var choices: PackedStringArray = []    # shown instead of the text while you pick one
+var cursor := 0
 
 
 func _ready() -> void:
@@ -62,6 +67,46 @@ func is_open() -> bool:
 	return visible
 
 
+## Runs a Conversation to its end. Returns what it opens after ("shop", "forge" or "").
+func talk(c) -> String:
+	while not c.done:
+		say(c.name(), c.page())
+		await finished
+		var cs: PackedStringArray = c.choice_texts()
+		if cs.is_empty():
+			c.next_page()
+		else:
+			c.choose(await ask(c.name(), cs))
+	return c.then
+
+
+## Shows `options` to pick from; returns the index picked.
+func ask(speaker: String, options: PackedStringArray) -> int:
+	speaker_label.text = speaker
+	speaker_label.visible = speaker != ""
+	choices = options
+	cursor = 0
+	visible = true
+	_show_choices()
+	var i: int = await chosen
+	return i
+
+
+func _show_choices() -> void:
+	var lines := PackedStringArray()
+	for i in choices.size():
+		var t := choices[i].replace("[", "[lb]")
+		lines.append(("[color=#%s]> %s[/color]" % [UiStyle.LIGHT0.to_html(false), t]) if i == cursor else "  " + t)
+	text.text = "\n".join(lines)
+	text.visible_characters = -1
+
+
+func _pick(i: int) -> void:
+	choices = []
+	visible = false
+	chosen.emit(i)
+
+
 ## The next page, or close. A page still typing finishes first.
 func advance() -> void:
 	if not visible:
@@ -84,6 +129,7 @@ func _show_page() -> void:
 
 
 func _process(delta: float) -> void:
+	_panel.position.y = UiStyle.VIEW.y - 24 - _panel.size.y      # grows up when there are 4+ choices
 	if visible and text.visible_characters >= 0:
 		_shown_chars += delta * CHARS_PER_SECOND
 		text.visible_characters = int(_shown_chars)
@@ -92,7 +138,14 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and (event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("attack")):
+	if visible and not choices.is_empty():
+		if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
+			cursor = wrapi(cursor + (1 if event.is_action_pressed("move_down") else -1), 0, choices.size())
+			_show_choices()
+		elif event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("attack"):
+			_pick(cursor)
+		get_viewport().set_input_as_handled()
+	elif visible and (event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("attack")):
 		advance()
 		get_viewport().set_input_as_handled()
 

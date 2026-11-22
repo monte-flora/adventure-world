@@ -6,6 +6,7 @@ import make_font
 import make_hero
 import make_king
 import make_monsters
+import make_people
 import make_tiles
 from sfart import ART, HEX, NAMES, P, gloom_lut, px, save_png, surf
 
@@ -32,6 +33,7 @@ def main():
     make_hero.main()
     make_king.main()
     make_monsters.main()
+    make_people.main()
     make_tiles.main()
     make_font.main()
 
