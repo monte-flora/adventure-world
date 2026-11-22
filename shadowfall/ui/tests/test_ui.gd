@@ -90,8 +90,10 @@ func test_dialogue_box_three_lines_and_pages() -> void:
 
 func test_pause_opens_every_tab() -> void:
 	_before()
-	Game.flags["quests"] = {"the_drowned_bell": "active", "warden_oath": "done"}
-	Game.flags["sigils"] = ["keen_edge"]
+	Quests.start_main()
+	Sigils.gain("keen_edge")
+	Sigils.gain("hardy")
+	Sigils.wear("hardy")
 	Game.flags["map_screen"] = [2, 1]
 	Game.take_stone("dawn")
 	var p = await _open_pause()
@@ -102,8 +104,13 @@ func test_pause_opens_every_tab() -> void:
 		check(p._content.get_child_count() > 0, p.TABS[i] + " has content")
 		_fits(p, "pause " + p.TABS[i])
 	p.show_tab(0)
-	check_eq(p.quest_entries().size(), 2, "quest log lists 2 quests")
+	var log: Array = p.quest_entries()
+	check_eq(log.size(), 1, "quest log lists the main quest")
+	if log.size() == 1:
+		check_eq(log[0].title, "The Dawnstone", "by its title")
+		check(log[0].text != "", "with the step you're on")
 	check_eq(p.sigil_slots(), 3, "3 sigil slots with 1 stone")
+	check_eq(p.sigils_equipped(), ["hardy"], "the worn sigil")
 	p.press("map")
 	check_eq(p.TABS[p.tab], "MAP", "TAB opens the map")
 	p.press("tool")
