@@ -112,8 +112,7 @@ func sword_hits(p: Vector2) -> bool:
 func take_hit(from: Vector2, damage := 1) -> bool:
 	if invulnerable():
 		return false
-	Game.hearts = maxi(0, Game.hearts - damage)
-	Game.changed.emit()
+	Vitals.hurt(damage >= Vitals.BOSS_HIT)
 	iframes = HURT_IFRAMES
 	lock_frames = HURT_LOCK
 	var away := (position - from).normalized()
