@@ -12,7 +12,7 @@ func _beat(file: String) -> void:
 	Game.max_hearts = 99
 	var bot := CaveRobot.new(Scenes.screen)
 	var ok: bool = await bot.run(self)
-	check(ok, "%s: the robot beats it\n%s" % [file, "\n".join(bot.log.slice(maxi(0, bot.log.size() - 15)))])
+	print("\n".join(bot.log)); check(ok, "%s: the robot beats it\n%s" % [file, "\n".join(bot.log.slice(maxi(0, bot.log.size() - 15)))])
 
 
 func test_robot_beats_stone_1() -> void:

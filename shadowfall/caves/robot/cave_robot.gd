@@ -14,12 +14,15 @@ var h: HeroSide
 var log := PackedStringArray()                   # what it did, for a failing test's message
 var _tc                                           # the TestCase (for physics_frames)
 var _dig_ok := false                             # may plan through cracked rock (it strikes it)
+var _left := false                               # it walked out through E
+var _star_left := true                           # the diamond was still there when it left
 
 
 func _init(c: CaveScene) -> void:
 	cave = c
 	h = c.hero
 	h.set_meta("test", true)
+	c.left_cave.connect(func(_f): _left = true; _star_left = _has("*"))
 
 
 # ------------------------------------------------------------------ the map as the robot sees it
@@ -102,11 +105,15 @@ func moves(c: Vector2i) -> Array:
 			u += Vector2i.UP
 			if standable(u) and u != c:
 				out.append(["climb", u])
-		var dn := c
-		while _l(dn + Vector2i.DOWN) in CaveTiles.CLIMB:
-			dn += Vector2i.DOWN
+		var dn := c                                  # down the ladder (through a gap a gate left)
+		for k in 16:
+			var nx := dn + Vector2i.DOWN
+			if not (_l(nx) in CaveTiles.CLIMB or (k > 0 and _free(nx))):
+				break
+			dn = nx
 			if standable(dn) and _support(dn + Vector2i.DOWN):
 				out.append(["climb", dn])
+				break
 	return out
 
 
@@ -128,6 +135,23 @@ func _arc_clear(a: Vector2i, b: Vector2i, up: int) -> bool:
 		if x == b.x:
 			col = range(rows.min(), b.y + 1)
 		for y in col:
+			if not _pass(Vector2i(x, y)):
+				return false
+			if x == b.x and y < b.y and cave.ladder_top(Vector2i(x, y)):
+				return false                              # you'd land on the ladder top
+	return true
+
+
+## Nothing in the box between a and b (an up-jump; minus a's column): you may steer from the take-off.
+func _box_clear(a: Vector2i, b: Vector2i) -> bool:
+	var step := signi(b.x - a.x)
+	if step == 0:
+		return false
+	var x := a.x
+	while x != b.x:
+		x += step
+		var lo := a.y + 1 if x == a.x + step else a.y   # past the first step you're off the floor row
+		for y in range(b.y, lo):
 			if not _pass(Vector2i(x, y)):
 				return false
 	return true
@@ -168,7 +192,7 @@ func _cx(c: Vector2i) -> float:
 
 
 func _done() -> bool:
-	return cave.leaving or not is_instance_valid(h)
+	return _left or not is_instance_valid(cave) or not is_instance_valid(h) or cave.leaving
 
 
 func _wait_trap_safe() -> void:
@@ -176,6 +200,8 @@ func _wait_trap_safe() -> void:
 		if (cave.clock % (CaveScene.TRAP_DOWN + CaveScene.TRAP_UP)) < 8:
 			return
 		await _frames()
+		if _done():
+			return
 
 
 func _center_on(c: Vector2i) -> void:
@@ -185,6 +211,8 @@ func _center_on(c: Vector2i) -> void:
 			break
 		h.ix = clampf(dx / 12.0, -1.0, 1.0)
 		await _frames()
+		if _done():
+			return
 	h.ix = 0.0
 
 
@@ -202,10 +230,14 @@ func do_move(kind: String, t: Vector2i) -> void:
 		for y in range(mini(from.y, t.y) - 1, maxi(from.y, t.y) + 2):
 			if _l(Vector2i(x, y)) in "AJ":
 				crosses = true
-	if kind in ["jump", "launch", "climb"]:
+	if kind in ["jump", "launch", "climb"] and _l(from + Vector2i.DOWN) != "-":   # no time on a crumbly ledge
 		await _center_on(from)
+		if _done():
+			return
 	if crosses:
 		await _wait_trap_safe()
+		if _done():
+			return
 	var tx := _cx(t)
 	var floor_y := (t.y + 1) * T
 	match kind:
@@ -219,6 +251,8 @@ func do_move(kind: String, t: Vector2i) -> void:
 					break
 				if kind == "walk" and i > 30 and absf(h.velocity.x) < 1.0:
 					await _clear_ahead(signf(dx))
+					if _done():
+						return
 		"climb":
 			h.iy = -1.0 if t.y < from.y else 1.0
 			for i in 240:
@@ -237,10 +271,12 @@ func do_move(kind: String, t: Vector2i) -> void:
 					if not h.is_on_floor():
 						break
 					await _frames()
+					if _done():
+						return
 			else:
 				h.jump_pressed = true
 			h.jump_held = true
-			var wide := absi(t.x - from.x) >= 2 or t.y >= from.y
+			var wide := t.y >= from.y or _box_clear(from, t)   # else rise first, then steer over the lip
 			for i in 150:
 				await _frames()
 				if _done():
@@ -251,7 +287,9 @@ func do_move(kind: String, t: Vector2i) -> void:
 					h.ix = clampf(dx / 10.0, -1.0, 1.0) if absf(dx) > 3.0 else 0.0
 				if i > 3 and h.is_on_floor():
 					break
-			h.jump_held = false
+	if _done():
+		return
+	h.jump_held = false
 	h.ix = 0.0
 	h.iy = 0.0
 
@@ -261,8 +299,12 @@ func _clear_ahead(d: float) -> void:
 	h.facing = 1 if d > 0 else -1
 	h.attack_pressed = true
 	await _frames(16)
+	if _done():
+		return
 	h.interact_pressed = true
 	await _frames(2)
+	if _done():
+		return
 
 
 # ------------------------------------------------------------------ the whole cave
@@ -297,10 +339,14 @@ func _use(letters: String) -> void:
 			h.ix = float(d.x)
 			h.attack_pressed = true
 			await _frames(16)
+			if _done():
+				return
 			h.iy = 0.0
 			h.ix = 0.0
 			h.interact_pressed = true
 			await _frames(4)
+			if _done():
+				return
 			return
 
 
@@ -308,6 +354,8 @@ func _use(letters: String) -> void:
 func run(tc, max_moves := 400) -> bool:
 	_tc = tc
 	await _frames(20)
+	if _done():
+		return _left and not _star_left
 	var stuck := 0
 	for n in max_moves:
 		if _done():
@@ -325,6 +373,8 @@ func run(tc, max_moves := 400) -> bool:
 			path = []
 		if here() in goals:
 			await _use("*" if _has("*") else "E")
+			if _done():
+				break
 			if not _has("*"):
 				log.append("took the diamond")
 			stuck += 1
@@ -335,6 +385,8 @@ func run(tc, max_moves := 400) -> bool:
 			var lever := route(_goals_next_to("L"))
 			if here() in _goals_next_to("L") and _has("G"):
 				await _use("L")
+				if _done():
+					break
 				log.append("pulled a lever")
 				continue
 			if lever.is_empty():
@@ -343,18 +395,24 @@ func run(tc, max_moves := 400) -> bool:
 				if stuck > 12:
 					return false
 				await _frames(60)
+				if _done():
+					break
 				continue
 			path = lever
 		var before := here()
 		var m: Array = path[0]
-		log.append("%s %s" % [m[0], str(m[1])])
+		log.append("%s %s>%s" % [str(before), m[0], str(m[1])])
 		if log.size() > 60:
 			log = log.slice(log.size() - 60)
 		await do_move(m[0], m[1])
+		if _done():
+			break
 		stuck = stuck + 1 if here() == before else 0
 		if stuck > 6:
 			await _clear_ahead(1.0 if m[1].x > before.x else -1.0)
+			if _done():
+				break
 		if stuck > 12:
 			log.append("stuck at %s" % str(here()))
 			return false
-	return cave.leaving and (cave.level.find("*").is_empty() or not _has("*"))
+	return _left and not _star_left
