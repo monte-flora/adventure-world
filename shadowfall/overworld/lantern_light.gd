@@ -5,7 +5,8 @@ extends PointLight2D
 ## carried by people use NPC, so the hero stays the focal point.
 ##   add_child(LanternLight.new(LanternLight.HERO))
 ## In full daylight (no CanvasModulate, or a bright one) it fades to a faint glow; the darker the
-## dusk, the stronger it burns. The flicker is a stand-in until E1's Flicker script lands.
+## dusk (RealmLight's CanvasModulate), the stronger it burns: that scales the colour, and light/flicker.gd
+## (Flicker) wobbles the energy like fire.
 
 const HERO := {"radius": 176.0, "energy": 1.4, "color": Color("f7b24a")}
 const NPC := {"radius": 72.0, "energy": 0.5, "color": Color("f0904a")}
@@ -16,20 +17,21 @@ static var _tex: GradientTexture2D
 
 var base_energy := 1.0
 var radius := 100.0
+var base_color := Color.WHITE
 var dusk: CanvasModulate
-var _t := 0.0
 var _look := 0.0
 
 
 func _init(kind: Dictionary = NPC) -> void:
 	radius = kind.radius
 	base_energy = kind.energy
-	color = kind.color
+	base_color = kind.color
+	color = base_color
 	texture = glow()
 	texture_scale = radius * 2.0 / TEX
 	energy = base_energy
 	blend_mode = Light2D.BLEND_MODE_ADD
-	_t = randf() * 10.0
+	add_child(Flicker.new())
 
 
 ## A soft round falloff, made once.
@@ -55,17 +57,16 @@ func darkness() -> float:
 	return clampf(1.0 - dusk.color.get_luminance(), 0.0, 1.0)
 
 
-## The energy before the flicker: the base, cut down in daylight.
+## How strong the light is before the flicker: the base energy, cut down in daylight.
 func steady_energy() -> float:
 	return base_energy * lerpf(DAY_SHARE, 1.0, darkness())
 
 
 func _process(dt: float) -> void:
-	_t += dt
 	_look -= dt
-	if _look <= 0.0 and is_inside_tree():     # E1 may add the dusk after us: look again now and then
+	if _look <= 0.0 and is_inside_tree():     # the dusk may be added after us: look again now and then
 		_look = 1.0
 		var found := get_tree().root.find_children("*", "CanvasModulate", true, false)
 		dusk = found[0] if not found.is_empty() else null
-	var flicker := 1.0 + 0.05 * sin(_t * 9.0) + 0.03 * sin(_t * 23.0 + 1.3)
-	energy = steady_energy() * flicker
+	var k := lerpf(DAY_SHARE, 1.0, darkness())
+	color = Color(base_color.r * k, base_color.g * k, base_color.b * k)
