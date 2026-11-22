@@ -113,6 +113,12 @@ BLOCKS = {
     "i": ("Torch", "Castle look only. A flickering torch on the wall, just for looks."),
     "w": ("Window", "Castle look only. A moonlit window, just for looks."),
     "f": ("Banner", "Castle look only. A purple banner, just for looks."),
+    # Shadowfall's new blocks (the pygame game plays them as air; the robot knows them)
+    "C": ("Checkpoint", "A lantern shrine. Walk past it to light it: you wake up here after a fall."),
+    ">": ("One-way door >", "Shut until you touch it from the right (where the arrow points). Then it stays open: "
+                            "a shortcut back at the end of a loop."),
+    "<": ("One-way door <", "Shut until you touch it from the left (where the arrow points). Then it stays open."),
+    "n": ("Shadow thorns", "Black thorns that hurt. The flare (the Sun stone's power) burns them away."),
 }
 MONSTER_HELP = {
     "z": "Walks at you and bites. Hit it with your sword (R), or jump on its head!",
@@ -126,13 +132,33 @@ for _letter, _name in caves.CAVE_MONSTERS.items():      # monster names come fro
 # The palette: groups of blocks, 5 to a row
 PALETTE = [
     ("Air and rock", ".#B*IF"),
-    ("Ledges and climbing", "=-HV%oPUR"),
-    ("Danger!", "^A~!J"),
-    ("Gates and geysers", "LGM"),
+    ("Ledges and climbing", "=-HV%oPURM"),
+    ("Danger!", "^A~!J" + cave_files.THORNS),
+    ("Gates, doors and lanterns", "LG" + cave_files.DOORS + cave_files.CHECKPOINT),
     ("Treasure, start and exit", "$TSEu"),
     ("Monsters", "".join(caves.CAVE_MONSTERS)),
     ("Castle things", cave_files.CASTLE_ONLY),
 ]
+SHADOWFALL_BLOCKS = cave_files.CHECKPOINT + cave_files.DOORS + cave_files.THORNS
+
+
+def draw_shadowfall_block(surface, letter, rect):
+    """The game draws Shadowfall's new blocks as air, so the editor draws its own picture of them."""
+    x, y, w, h = rect
+    if letter == cave_files.CHECKPOINT:          # a lantern on a post
+        pygame.draw.rect(surface, (70, 56, 44), (x + w * 0.45, y + h * 0.45, w * 0.1, h * 0.55))
+        pygame.draw.circle(surface, (255, 200, 90), (x + w / 2, y + h * 0.35), w * 0.22)
+        pygame.draw.circle(surface, (255, 245, 200), (x + w / 2, y + h * 0.35), w * 0.1)
+    elif letter in cave_files.DOORS:             # a wooden door with an arrow on it
+        pygame.draw.rect(surface, (96, 64, 40), (x + w * 0.12, y, w * 0.76, h))
+        pygame.draw.rect(surface, (50, 34, 22), (x + w * 0.12, y, w * 0.76, h), max(1, int(w * 0.06)))
+        tip, back = (x + w * 0.78, x + w * 0.28) if letter == ">" else (x + w * 0.22, x + w * 0.72)
+        pygame.draw.polygon(surface, (240, 230, 200), [(tip, y + h / 2), (back, y + h * 0.25), (back, y + h * 0.75)])
+    elif letter == cave_files.THORNS:            # dark purple thorns
+        for k in range(3):
+            left = x + w * k / 3
+            pygame.draw.polygon(surface, (70, 30, 90), [(left, y + h), (left + w / 6, y + h * 0.15), (left + w / 3, y + h)])
+            pygame.draw.line(surface, (150, 90, 190), (left + w / 6, y + h * 0.15), (left + w / 6, y + h * 0.6), 1)
 TALL = "S" + "".join(caves.CAVE_MONSTERS)      # pictures taller than one block (the Hero and the monsters)
 
 
@@ -431,6 +457,8 @@ class Editor:
             image = picture.subsurface(part).copy()
             if letter == ".":
                 pygame.draw.rect(image, (230, 230, 240), image.get_rect().inflate(-10, -10), 2, border_radius=6)
+            if letter in SHADOWFALL_BLOCKS:
+                draw_shadowfall_block(image, letter, image.get_rect())
             if letter == caves.SECRET:                   # a secret wall: rock with a question mark
                 self.app.text(image, "?", (image.get_width() / 2, image.get_height() / 2), 44, (200, 170, 255),
                               "center", shadow=True)
@@ -1081,6 +1109,9 @@ class Editor:
                 if hidden:
                     x, y = self.on_screen(r, c)
                     self.app.text(view, letter, (x + ts / 2, y + ts / 2), int(ts * 0.7), ORANGE, "center", shadow=True)
+                elif letter in SHADOWFALL_BLOCKS:
+                    x, y = self.on_screen(r, c)
+                    draw_shadowfall_block(view, letter, pygame.Rect(x, y, math.ceil(ts), math.ceil(ts)))
                 elif letter == caves.SECRET:            # a secret wall looks like rock: mark it, just in the editor
                     x, y = self.on_screen(r, c)
                     self.app.text(view, "?", (x + ts / 2, y + ts / 2), int(ts * 0.6), (200, 170, 255), "center", shadow=True)
@@ -1221,7 +1252,7 @@ class Editor:
             tick(screen, (box.x + 20, y + 8), have)
             app.text(screen, "%s (%s)" % (words, letter), (box.x + 36, y), 22, TEXT if have else ORANGE)
             y += 22
-        tips = [text for how_bad, text in cave_files.check_cave(self.theme, rows)
+        tips = [text for how_bad, text in cave_files.check_cave(self.theme, rows, self.settings)
                 if not any(word in text for word in ("No start", "No exit", "No diamond"))]
         for text in tips:
             for line in app.wrap(text, 19, box.width - 20):

@@ -277,6 +277,59 @@ def every_block_in_the_palette_has_a_picture():
     ed.new_cave()
 
 
+SHADOWFALL_CAVE = """theme: moss
+name: The Lantern Road
+stone: Dawnstone
+land: the Weepingwold
+needs: climb, pound
+dark: yes
+about: a test cave with every Shadowfall letter
+############
+#..........#
+#..C.n.<.>.#
+.S.......*E#
+############
+"""
+
+
+@test
+def the_editor_keeps_shadowfall_settings_when_it_saves():
+    path = os.path.join(TEMP, "lantern_road.txt")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(SHADOWFALL_CAVE)
+    ed.open_file(path)
+    ed.set_tile(1, 2, "C")                       # change something, then save
+    ed.write(path)
+    with open(path, encoding="utf-8") as f:
+        saved = f.read()
+    for line in ("stone: Dawnstone", "land: the Weepingwold", "needs: climb, pound", "dark: yes",
+                 "name: The Lantern Road"):
+        assert line in saved, (line, saved)
+    assert "#.C........#" in saved and "#..C.n.<.>.#" in saved, saved
+    ed.new_cave()
+
+
+@test
+def shadowfall_letters_are_in_the_palette_with_pictures():
+    letters = "".join(group for _, group in editor.PALETTE)
+    for letter in "C<>n":
+        assert letter in letters and letter in editor.BLOCKS, letter
+        assert letter in cave_files.EVERY_LETTER, letter
+    assert "don't know" not in messages(["#####", "#.S.#", "#C<n#", "#####"])
+
+
+@test
+def the_checklist_knows_the_needs_line():
+    rows = ["#######", "#.....#", "#.S.n*E", "#######"]
+    tips = " | ".join(text for _, text in cave_files.check_cave("moss", rows, ["needs: climb, fly"]))
+    assert "the power fly" in tips and "no flare" in tips, tips
+    assert cave_files.check_cave("moss", rows, ["needs: flare, climb"]) == []
+    assert "dark: should say yes or no" in " ".join(t for _, t in cave_files.check_cave("moss", rows, ["dark: maybe"]))
+    assert cave_files.needs_of("needs: Climb, pound\n#") == {"climb", "pound"}
+    assert cave_files.needs_of("needs: none\n#") == set()
+    assert cave_files.needs_of("theme: moss\n#") is None
+
+
 @test
 def painting_rubbing_out_and_undo():
     ed.new_cave()
