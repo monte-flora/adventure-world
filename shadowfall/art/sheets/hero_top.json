@@ -94,15 +94,36 @@
    "fps": 14,
    "loop": false
   },
-  "hurt": {
+  "attack_down_sunfang": {
    "row": 12,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "attack_up_sunfang": {
+   "row": 13,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "attack_side_sunfang": {
+   "row": 14,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "hurt": {
+   "row": 15,
    "col": 0,
    "frames": 2,
    "fps": 12,
    "loop": false
   },
   "lantern_raise": {
-   "row": 13,
+   "row": 16,
    "col": 0,
    "frames": 3,
    "fps": 10,

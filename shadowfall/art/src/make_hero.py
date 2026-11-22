@@ -29,6 +29,9 @@ def lantern(s, x, y, glow=True):
     rect(s, "ink3", x - 3, y + 9, 7, 2)
 
 
+SUNFANG = [False]  # while True every sword drawn is Sunfang (the *_sunfang anims)
+
+
 def sword(s, hx, hy, ang, length=20, runes=False):
     """A plain longsword, hilt at (hx, hy), pointing at ang (degrees, 0 = right, 90 = down)."""
     a = math.radians(ang)
@@ -36,9 +39,10 @@ def sword(s, hx, hy, ang, length=20, runes=False):
     tip = (hx + dx * length, hy + dy * length)
     line(s, "ink5", (hx + dx * 3, hy + dy * 3), tip, 3)
     line(s, "ink7", (hx + dx * 4 - dy, hy + dy * 4 + dx), (tip[0] - dy, tip[1] + dx))
-    if runes:  # Sunfang: ember runes down the fuller
-        for k in range(4, int(length) - 2, 4):
-            px(s, "ember3", hx + dx * k, hy + dy * k)
+    if runes or SUNFANG[0]:  # Sunfang: glowing runes down the fuller, a pale-gold edge
+        line(s, "light0", (hx + dx * 4 + dy, hy + dy * 4 - dx), (tip[0] + dy, tip[1] - dx))
+        for k in range(4, int(length) - 1, 3):
+            px(s, "light1" if k % 2 else "ember3", hx + dx * k, hy + dy * k)
     line(s, "earth0", (hx - dx * 3, hy - dy * 3), (hx, hy), 2)
     px(s, "ink5", hx - dx * 4, hy - dy * 4)
     line(s, "ink4", (hx + dx * 2 - dy * 3, hy + dy * 2 + dx * 3), (hx + dx * 2 + dy * 3, hy + dy * 2 - dx * 3), 2)
@@ -234,6 +238,17 @@ def side_sheet():
                           side(bob=-2, front=(4, -6), back=(-4, -4), sword_ang=50, hand=(8, 33))], 14, False)
     sh.add("pogo", [side(bob=-3, front=(2, -8), back=(-3, -6), sword_ang=90, hand=(9, 30), sway=-3),
                     side(bob=-3, front=(2, -8), back=(-3, -6), sword_ang=90, arc=(60, 120), hand=(9, 30), sway=-4)], 12)
+    SUNFANG[0] = True                      # the same swings with Sunfang in hand
+    sh.add("attack_sunfang", [side(sword_ang=-130, hand=(6, 40), lean=-1),
+                      side(sword_ang=-40, arc=(-120, -20), hand=(6, 40), lean=2, front=(6, 0)),
+                      side(sword_ang=30, arc=(-60, 40), hand=(6, 40), lean=2, front=(6, 0)),
+                      side(sword_ang=70, hand=(7, 39), lean=1, front=(5, 0))], 14, False)
+    sh.add("air_attack_sunfang", [side(bob=-2, front=(4, -6), back=(-4, -4), sword_ang=-110, hand=(8, 33)),
+                          side(bob=-2, front=(4, -6), back=(-4, -4), sword_ang=0, arc=(-90, 20), hand=(8, 33)),
+                          side(bob=-2, front=(4, -6), back=(-4, -4), sword_ang=50, hand=(8, 33))], 14, False)
+    sh.add("pogo_sunfang", [side(bob=-3, front=(2, -8), back=(-3, -6), sword_ang=90, hand=(9, 30), sway=-3),
+                    side(bob=-3, front=(2, -8), back=(-3, -6), sword_ang=90, arc=(60, 120), hand=(9, 30), sway=-4)], 12)
+    SUNFANG[0] = False
     sh.add("climb", [side(front=(4, -6 * (i % 2)), back=(2, -6 * ((i + 1) % 2)), hand=(8, 18 + 4 * (i % 2)),
                           lean=2, sway=-1) for i in range(4)], 8)
     sh.add("wall_slide", [side(front=(5, -3), back=(1, 0), hand=(4, 26), lean=3, sway=-3, scarf=-2)], 1)
@@ -374,6 +389,12 @@ def top_sheet():
         pre, a0, a1 = ATTACK[d]
         sh.add("attack_" + d, [top(d, sword_ang=pre[0]), top(d, sword_ang=(a0 + a1) / 2, arc=(a0 - 60, a1)),
                                top(d, sword_ang=a1)], 14, False)
+    SUNFANG[0] = True                      # the same swings with Sunfang in hand
+    for d in ("down", "up", "side"):
+        pre, a0, a1 = ATTACK[d]
+        sh.add("attack_" + d + "_sunfang", [top(d, sword_ang=pre[0]), top(d, sword_ang=(a0 + a1) / 2, arc=(a0 - 60, a1)),
+                                            top(d, sword_ang=a1)], 14, False)
+    SUNFANG[0] = False
     sh.add("hurt", [flash(top("down")), top("down", sway=-2)], 12, False)
     sh.add("lantern_raise", [top("down", lamp_up=k) for k in (4, 10, 16)], 10, False)
     sh.save()

@@ -185,6 +185,8 @@
    "role": "shop",
    "sells": [
     "arrows",
+    "tonic",
+    "lumen",
     "sun_ore",
     "shard",
     "fortune"

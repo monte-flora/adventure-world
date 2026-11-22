@@ -103,3 +103,16 @@ func test_hound_shows_only_while_you_look_for_him() -> void:
 	Quests.start("lost_hound")
 	ow._show_people()
 	check(ash.visible, "and there once you look for him")
+
+
+func test_the_pedlar_opens_her_shop_and_the_smith_his_forge() -> void:
+	var ow = await _open()
+	for who in [["tamsin", "ShopScreen"], ["garrick", "ForgeScreen"]]:
+		var p: Person = _person(ow, who[0])
+		ow.talk(p)
+		await _click_through(ow, 0)
+		check(ow.screen != null and ow.screen.get_script().get_global_name() == who[1], "%s opens the %s" % who)
+		check(ow.talking and Audio.ducked, "everyone waits while it is open")
+		ow.screen.close()
+		await frames(2)
+		check(not ow.talking and ow.screen == null, "and the walk goes on after")

@@ -66,6 +66,8 @@ func _animate() -> void:
 		anim = "walk"
 	if anim != "hurt":
 		anim += _dir()
+	if anim.begins_with("attack") and Forge.tier() >= Forge.SUNFANG_TIER:
+		anim += "_sunfang"                  # Sunfang's runes glow along the blade
 	sprite.flip_h = facing.x < -0.01 and _dir() == "_side"
 	if sprite.animation != anim:
 		sprite.play(anim)
