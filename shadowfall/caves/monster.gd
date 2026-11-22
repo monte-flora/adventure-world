@@ -195,9 +195,9 @@ func _spider(to: Vector2) -> void:
 		cool = 150
 
 
-## Hit by the sword. Returns true if it died.
-func hit(from: Vector2) -> bool:
-	hp -= 1
+## Hit by the sword (or a reflected arrow: 1). Returns true if it died.
+func hit(from: Vector2, damage := 1) -> bool:
+	hp -= damage
 	flash = 4
 	if sprite:                                        # show it now: the hit-stop holds this frame
 		sprite.modulate = Color(4, 4, 4)
