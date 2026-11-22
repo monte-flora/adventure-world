@@ -1,5 +1,6 @@
 theme: lava
 name: The Lava Cave
+land: cinder_wastes
 about: The lava cave, drawn again in the kid's style: climb the tall wall, or dig under it
 ##########################################################################
 #######....#############################..........#######.....BB####.....#

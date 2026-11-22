@@ -1,0 +1,15 @@
+land: shadowgate
+at: 39 99
+screens: D3
+says: The Gate the Shadow King came through. Seven stones wake it.
+about: The island in the middle of the Mere (D3). The Portal (P) sits in a ring of standing stones: truesight shows the way in.
+gate: Portal Stair 6 7 truesight
+GGGGGGGGGGGGGGG
+GGGGGGGGGGGGGGG
+GGGGGXXXXXGGGGG
+GGGGGXGGGXGGGGG
+GGGGGXGPGXGGGGG
+GGGGGXGGGXGGGGG
+GGGGGXXXXXGGGGG
+GGGGGGGGGGGGGGG
+GGGGGGGGGGGGGGG

@@ -1,5 +1,6 @@
 theme: lava
 name: red lvl 1
+land: cinder_wastes
 about: The kid drew this one in the cave editor (my_caves/red_lvl_1.txt)
 ########################################
 #......................................#

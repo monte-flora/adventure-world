@@ -1,5 +1,6 @@
 theme: lava
 name: The Scorching Swings
+land: mirefen
 about: The Scorching Swings (hard). Wait for the flame jets, then swing from vine to vine over the lava lake. A steam geyser throws you up to the high ground, where one more vine swings you over the spikes to the diamond. Secret: walk into the wall next to the geyser.
 ####################################################################################
 #############..............###......###.....#######.......###.......################

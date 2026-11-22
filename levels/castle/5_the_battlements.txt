@@ -1,5 +1,6 @@
 theme: castle
 name: The Battlements
+land: umbral_reach
 locked door says: The throne room is locked! The Shadow King gave the key to his guard captain, out on the far battlements.
 about: Everything you've learned, and lots of guards. The key opens the throne room!
 ####################################################################################################

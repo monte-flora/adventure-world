@@ -1,5 +1,7 @@
 theme: shadow
 name: The Whisper Hollow
+land: umbral_reach
+dark: yes
 about: Easy: through the whispering tunnel to the hollow, up the ladder to the diamond, up the ledges and dig into the nook for the Sun Shard, then up and over to the exit
 ##################################################################################
 ##################################################################################

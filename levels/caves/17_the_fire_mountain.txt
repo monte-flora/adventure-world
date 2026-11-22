@@ -1,5 +1,6 @@
 theme: lava
 name: The Fire Mountain
+land: cinder_wastes
 lava rises: yes
 about: The Fire Mountain (hard). Jump the fire, wait for the flame jet, and hop the ledges over the lava lake (the crumbly ones fall!). Rest by the spring. When you grab the diamond, the lava rises: climb the ladder, run along the ledge and climb the next ladder to the exit, quick!
 ################################################################

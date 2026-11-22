@@ -1,5 +1,6 @@
 theme: stone
 name: The Old Mine Shaft
+land: hollowcrown
 about: Up the old mine shaft, back along the middle tunnel, over the crumbly ledges, dig to the lever, then down through the iron gate to the diamond, and up the ladder to the exit
 ########################################################################
 ########################################################################

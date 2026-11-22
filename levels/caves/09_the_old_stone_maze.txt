@@ -1,5 +1,6 @@
 theme: stone
 name: The Deep Stone Maze
+land: hollowcrown
 about: The exit is locked! Climb the chimney wall, cross the crumbly ledges, swing over the spikes on the vines, crawl through to the lever room, climb down to the deep tunnel, dig through the old wall, ride the steam geyser up to the diamond and ride back over the lava to the exit. Secret: a hidden room off the chimney!
 ########################################################################################################################
 ########################################################################################################################
