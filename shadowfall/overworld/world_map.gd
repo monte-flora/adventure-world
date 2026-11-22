@@ -19,6 +19,10 @@ const GATE_LETTERS := {"Y": "climb", "K": "flare", "O": "pound"}
 ## Display names come from rules/names.gd (Names.LAND), falling back to the file's `name:` line.
 const LAND_OF_NUMBER := {"01": "home", "02": "woods", "03": "lake", "04": "portal", "05": "ruins",
 	"06": "frost", "07": "desert", "08": "swamp", "09": "nightfall"}
+## The levels/realm/ land ids by their rules/names.gd id (Names.LAND keys); art sheets are realm_<that>.
+const REALM_ID := {"home": "emberhold", "woods": "weepingwold", "ruins": "hollowcrown",
+	"lake": "drowned_mere", "frost": "wintermarch", "desert": "cinder_wastes", "swamp": "mirefen",
+	"portal": "shadowgate", "nightfall": "umbral_reach"}
 
 var cells := {}                         # Vector2i(col, row) -> letter
 var land_of := {}                       # Vector2i -> land id
@@ -75,8 +79,8 @@ func stitch(texts: Dictionary) -> void:
 			errors.append("%s: `at:` needs a row and a column" % f)
 			continue
 		var origin := Vector2i(int(at[1]), int(at[0]))
-		var display: String = names.get(id, lf.setting("name", id))
-		if id == "home" and _names("HOME") != "":
+		var display: String = names.get(names_id(id), lf.setting("name", id))
+		if names_id(id) == "home" and _names("HOME") != "":
 			display = _names("HOME")
 		lands[id] = {"name": display, "file": f, "rect": Rect2i(origin, Vector2i(lf.width, lf.height)),
 			"says": lf.setting("says")}
@@ -192,6 +196,17 @@ func gate_open(p: Vector2i) -> bool:
 	if needs.is_valid_int():
 		return Game.stones.size() >= int(needs)
 	return Game.has_ability(needs)
+
+
+## A land's id in rules/names.gd ("emberhold" -> "home"); old ids stay as they are.
+static func names_id(id: String) -> String:
+	var k = REALM_ID.find_key(id)
+	return k if k != null else id
+
+
+## A land's levels/realm/ id ("home" -> "emberhold"): its art sheet is realm_<that>.
+static func realm_id(id: String) -> String:
+	return REALM_ID.get(id, id)
 
 
 ## Which screen (column, row) a square is on.

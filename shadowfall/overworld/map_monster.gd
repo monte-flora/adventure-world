@@ -2,14 +2,25 @@ class_name MapMonster
 extends Node2D
 ## A monster on the map: roams near where it was born, chases the hero when it sees them, gives up
 ## when they get away (as phase2/monsters.py), and hurts on touch. HP in sword hits at forge tier 1
-## (docs/teen/gameplay §6). Placeholder art. B1 owns this file.
+## (docs/teen/gameplay §6). Art: art/sheets/monster_<kind>. B1 owns this file.
 
 const TILE := LevelFile.TILE
 const KINDS := {
-	# hp (in damage points, sword = 2), speed (squares/s), sees (squares), colour
-	"slime": {"hp": 2, "speed": 2.5, "sees": 5.0, "color": "5fa35a"},
-	"zombie": {"hp": 6, "speed": 1.8, "sees": 6.0, "color": "6f7f5a"},
-	"shade": {"hp": 8, "speed": 3.0, "sees": 7.0, "color": "4a3a6e"},   # Nightfall
+	# hp (in damage points, sword = 2), speed (squares/s), sees (squares); the sheet is monster_<kind>
+	"thornling": {"hp": 2, "speed": 2.5, "sees": 5.0},
+	"barrow_wight": {"hp": 6, "speed": 1.8, "sees": 6.0},
+	"mere_lurker": {"hp": 4, "speed": 2.2, "sees": 5.0},
+	"frost_wolf": {"hp": 4, "speed": 3.4, "sees": 7.0},
+	"ash_scarab": {"hp": 4, "speed": 2.6, "sees": 5.0},
+	"bog_wisp": {"hp": 2, "speed": 3.0, "sees": 6.0},
+	"umbral_hound": {"hp": 8, "speed": 3.0, "sees": 7.0},     # the Umbral Reach (Nightfall)
+}
+## Who haunts each land (levels/realm ids); the rest get thornlings.
+const OF_LAND := {
+	"emberhold": ["thornling"], "weepingwold": ["thornling", "bog_wisp"],
+	"hollowcrown": ["barrow_wight", "thornling"], "drowned_mere": ["mere_lurker"],
+	"wintermarch": ["frost_wolf"], "cinder_wastes": ["ash_scarab"], "mirefen": ["bog_wisp", "mere_lurker"],
+	"shadowgate": ["umbral_hound"], "umbral_reach": ["umbral_hound"],
 }
 const GIVE_UP := 9.0                         # squares
 const TOUCH := 20.0                          # px
@@ -19,7 +30,8 @@ signal died(monster: MapMonster)
 
 var world: WorldMap
 var hero: HeroTop
-var kind := "slime"
+var kind := "thornling"
+var sprite: AnimatedSprite2D
 var hp := 2
 var born := Vector2i.ZERO
 var chasing := false
@@ -38,6 +50,18 @@ func setup(w: WorldMap, h: HeroTop, k: String, at_cell: Vector2i, seed_value: in
 	position = Vector2(at_cell) * TILE + Vector2.ONE * TILE / 2.0
 	target = position
 	rng.seed = seed_value
+	sprite = AnimatedSprite2D.new()
+	sprite.sprite_frames = ArtSheet.frames("monster_" + k)
+	sprite.offset = ArtSheet.offset("monster_" + k)
+	sprite.position = Vector2(0, ArtSheet.cell("monster_" + k).y * 0.3)
+	add_child(sprite)
+	sprite.play("move")
+
+
+## The kind for the i-th monster of a land.
+static func kind_for(land_id: String, i: int) -> String:
+	var list: Array = OF_LAND.get(WorldMap.realm_id(land_id), ["thornling"])
+	return list[i % list.size()]
 
 
 func _physics_process(dt: float) -> void:
@@ -58,7 +82,12 @@ func _physics_process(dt: float) -> void:
 		position = next
 	if to_hero.length() < TOUCH:
 		hero.take_hit(position)
-	queue_redraw()
+	if absf(step.x) > 0.05:
+		sprite.flip_h = step.x < 0.0
+	var anim := "hurt" if flash > 0 else ("attack" if chasing and dist < 1.5 else "move")
+	if sprite.animation != anim:
+		sprite.play(anim)
+	sprite.modulate = Color(4, 4, 4) if flash > 8 else Color.WHITE
 
 
 ## A sword hit. Returns true if this killed it.
@@ -73,10 +102,3 @@ func hit(damage: int, from: Vector2) -> bool:
 		queue_free()
 		return true
 	return false
-
-
-func _draw() -> void:
-	var c := Color.WHITE if flash > 8 else Color(KINDS[kind].color)
-	draw_circle(Vector2.ZERO, 10, c)
-	draw_circle(Vector2(-4, -3), 2, Color("f0e6c8"))
-	draw_circle(Vector2(4, -3), 2, Color("f0e6c8"))
