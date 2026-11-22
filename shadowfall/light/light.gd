@@ -14,7 +14,8 @@ extends CanvasLayer
 ##   places, and (lighter) everywhere at gloom stage 3.
 ## - A Light Stone taken: a burst of light from the lantern and a gold flash.
 ## The HUD is never darkened: this draws on canvas layer LAYER, and the HUD sits on a layer above it
-## (HUD_LAYER or higher). Nothing here tints the main canvas (no CanvasModulate).
+## (HUD_LAYER or higher). Nothing here tints the main canvas: in the realm, RealmLight's CanvasModulate
+## does the dusk, so the overworld sets `tinted = true` and the stage-3 dark overlay stays off there.
 
 const LAYER := 50
 const HUD_LAYER := 100
@@ -30,6 +31,7 @@ const FLASH := Color("fff2a8")       # light1
 
 var dark := false                    # a `dark: yes` cave (or any pitch-dark place)
 var stage := 0                       # the gloom stage now showing
+var tinted := false                  # a RealmLight tints this screen: no stage-3 overlay
 var world_material := ShaderMaterial.new()
 var overlay := ColorRect.new()
 var flash := ColorRect.new()
@@ -94,7 +96,7 @@ static func is_dark(level: LevelFile) -> bool:
 func darkness() -> float:
 	if dark:
 		return DARK_PLACE
-	return DARK_STAGE_3 if stage >= 3 else 0.0
+	return DARK_STAGE_3 if stage >= 3 and not tinted else 0.0
 
 
 ## The dark left at a screen point once the pools cut it (what the shader draws).
