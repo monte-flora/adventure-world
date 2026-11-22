@@ -89,6 +89,15 @@ func moves(c: Vector2i) -> Array:
 				if _landable(f):
 					out.append(["drop", f])
 					break
+	if _l(c + Vector2i.DOWN) == "-":                 # stand on a crumbly ledge and fall through it
+		var f := c + Vector2i.DOWN
+		for k in 20:
+			if _landable(f):
+				out.append(["sink", f])
+				break
+			f += Vector2i.DOWN
+			if not _free(f):
+				break
 	var below := _l(c + Vector2i.DOWN)
 	var lift := 3
 	if not _support(c + Vector2i.DOWN):             # off a ladder you jump at 0.8 speed
@@ -104,6 +113,10 @@ func moves(c: Vector2i) -> Array:
 			if absi(dx) <= 1 and dy == 0:
 				continue
 			var t := c + Vector2i(dx, -dy)
+			if dy == 0 and _walkable(c, t):
+				continue                                    # flat and solid all the way: just walk
+			if dy >= 3 and lift == 3 and absi(dx) > 1 and not _box_clear(c, t):
+				continue                                    # you rise 3 before you can steer: no time left to go over
 			if _landable(t) and _arc_clear(c, t, maxi(dy, 0)):
 				out.append(["launch" if lift > 3 else "jump", t])
 	if _l(c) in CaveTiles.CLIMB or _l(c + Vector2i.DOWN) in CaveTiles.CLIMB:
@@ -122,6 +135,15 @@ func moves(c: Vector2i) -> Array:
 				out.append(["climb", dn])
 				break
 	return out
+
+
+func _walkable(a: Vector2i, b: Vector2i) -> bool:
+	var x := a.x
+	while x != b.x:
+		x += signi(b.x - a.x)
+		if not _landable(Vector2i(x, a.y)):
+			return false
+	return true
 
 
 ## Room for the arc: headroom over the start, a clear corridor along the higher end, and down into the target.
@@ -239,7 +261,7 @@ func do_move(kind: String, t: Vector2i) -> void:
 		for y in range(mini(from.y, t.y) - 1, maxi(from.y, t.y) + 2):
 			if _l(Vector2i(x, y)) in "AJ":
 				crosses = true
-	if kind in ["jump", "launch", "climb"] and _l(from + Vector2i.DOWN) != "-":   # no time on a crumbly ledge
+	if kind in ["jump", "launch", "climb", "sink"] and _l(from + Vector2i.DOWN) != "-":   # no time on a crumbly ledge
 		await _center_on(from)
 		if _done():
 			return
@@ -269,6 +291,12 @@ func do_move(kind: String, t: Vector2i) -> void:
 					await _clear_ahead(signf(dx))
 					if _done():
 						return
+		"sink":
+			for i in 300:
+				h.ix = clampf((tx - h.position.x) / 8.0, -1.0, 1.0) if absf(tx - h.position.x) > 3.0 else 0.0
+				await _frames()
+				if _done() or (here() == t and h.is_on_floor()):
+					break
 		"climb":
 			h.iy = -1.0 if t.y < from.y else 1.0
 			for i in 240:
@@ -435,6 +463,6 @@ func run(tc, max_moves := 400) -> bool:
 			if _done():
 				break
 		if stuck > 12:
-			log.append("stuck at %s" % str(here()))
+			log.append("stuck at %s pos %s state %d vel %s gate %s%s" % [str(here()), str(h.position), h.state, str(h.velocity), _l(here() + Vector2i(1, -1)), _l(here() + Vector2i(1, 0))])
 			return false
 	return _left and not _star_left
