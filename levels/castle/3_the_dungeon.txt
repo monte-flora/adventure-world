@@ -1,7 +1,6 @@
 theme: castle
 name: The Dungeon
 land: umbral_reach
-needs:
 locked door says: Locked! The jailer dropped the key in the lowest, tightest tunnel. Hold DOWN to crawl!
 about: Crawl through the tunnels (hold DOWN), and watch out for spikes and fire.
 ############################################################################################

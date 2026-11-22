@@ -1,7 +1,6 @@
 theme: crystal
 name: The Glacier Crossing
 land: wintermarch
-needs: climb
 about: The Glacier Crossing (hard). Ride two sliding platforms over the first lava lake (change over on the rock in the middle) to the island. Ride the next one as far as it goes, hop the two crumbly ledges to the icy step, then climb the tall wall to the exit. Secret: the mushroom on the island throws you up to a chest.
 ############################################################################
 #.......###.....##################....###....###############....###........#

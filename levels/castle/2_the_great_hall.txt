@@ -1,7 +1,6 @@
 theme: castle
 name: The Great Hall
 land: umbral_reach
-needs:
 locked door says: Locked! A lever opens this door. Look for it where the ladders go down into the dark.
 about: Ladders, ledges and cracked bricks. Find the lever!
 ##############################################################################################

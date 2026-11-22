@@ -1,7 +1,6 @@
 theme: castle
 name: The Gate and the Lava Moat
 land: umbral_reach
-needs:
 locked door says: Locked! The key sleeps up high, where the bats hang. Climb the stone steps by the moat!
 about: Run across the crumbly bridges! The key is up in the gallery.
 ############################################################################################

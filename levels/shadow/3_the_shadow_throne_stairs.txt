@@ -1,7 +1,6 @@
 theme: shadow
 name: The Shadow Stairs
 land: umbral_reach
-needs: climb
 dark: yes
 about: Hard: the burning corridor, the climbing wall, crumbly ledges and flame jets on the walkway, a moving platform over spikes, then up a wall to the deep Sun Shard
 ####################################################################################################
