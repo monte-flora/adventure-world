@@ -58,6 +58,12 @@ Monsters: z `barrow_wight`, k `bone_crawler`, c `ember_imp`, x `cave_bat`; hurt 
 attack pose pulsing red. Hero: `hero_side`, animation from its state. Still drawn in code: shadow thorns
 `n`, the `<` `>` markers, geyser steam, ropes, arrows.
 
+## Juice (`cave_juice.gd`, gameplay §4, same numbers as the realm)
+Sword hit: 3 f stop, shake 1 px/4 f, sparks, white flash. Kill: 6 f, 2/6, the monster's `poof` + light
+motes. Hurt: 10 f (none on the last heart), 5/12, red screen edge, red hero flash. Kingsfall: shake 8/20 +
+dust. Hard landing (> 8 t/s): dust. Broken rock: chips. Pogo and sent-back arrows: sparks. Shake uses
+`Juice.Shake` (off with `UiSettings.screen_shake`). Hit-stop pauses the whole cave, trap clock included.
+
 ## The cave robot (`robot/cave_robot.gd`)
 
 Plays a cave with real physics: it only presses the Hero's buttons. It plans a route over cells you

@@ -277,7 +277,7 @@ func test_n_thorns_hurt_until_the_flare() -> void:
 	Game.take_stone("sun")
 	h.iframes = 0
 	h.tool_pressed = true
-	await physics_frames(2)
+	await physics_frames(2 + CaveJuice.STOP_HURT)       # the hurt hit-stop may still hold the Hero
 	check_eq(Scenes.screen.letter(Vector2i(3, 2)), ".", "the flare burns them")
 
 

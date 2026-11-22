@@ -199,6 +199,9 @@ func _spider(to: Vector2) -> void:
 func hit(from: Vector2) -> bool:
 	hp -= 1
 	flash = 4
+	if sprite:                                        # show it now: the hit-stop holds this frame
+		sprite.modulate = Color(4, 4, 4)
+		sprite.play("hurt")
 	knock = (1.0 if position.x > from.x else -1.0) * KNOCKBACK * 10.0     # 1.5 tiles over 6 frames
 	if kind == "c":
 		tell = 0                                      # a hit skull doesn't blow up

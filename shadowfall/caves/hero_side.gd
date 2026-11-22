@@ -49,6 +49,7 @@ const CLIMB_SPEED := 4.0 * T
 const WALL_CLIMB_SPEED := 3.0 * T                # hold UP on a climbing wall (%) to climb it
 const LADDER_LAYER := 4                          # ladder tops (CaveScene.LADDER_LAYER): a climber passes them
 const SIZE := Vector2(20, 28)
+const DUST_SPEED := 8.0 * T                      # landing faster than this kicks up dust
 
 enum { NORMAL, CLIMB, ROPE, DASH, POUND }
 
@@ -114,6 +115,7 @@ func _animate() -> void:
 		return
 	sprite.visible = iframes == 0 or (iframes / 4) % 2 == 1
 	sprite.flip_h = facing < 0
+	sprite.modulate = Color(2.0, 0.6, 0.6) if hurt_lock > HURT_LOCK - 4 else Color.WHITE   # hurt flash
 	var anim := "idle"
 	sprite.speed_scale = 1.0
 	if hurt_lock > 0:
@@ -270,10 +272,13 @@ func _normal_step(steer: float, dt: float) -> void:
 		var d := -int(signf(get_wall_normal().x))
 		if d == int(signf(steer)) and cave.wall_letter(self, d) == "%":
 			velocity.y = -WALL_CLIMB_SPEED
+	var fall_speed := velocity.y
 	move_and_slide()
 	if not is_on_floor():
 		coyote = maxi(0, coyote - 1)
 	elif cave:
+		if not on_floor and fall_speed > DUST_SPEED:
+			cave.landed_hard(self)
 		cave.landed_on(self)
 	if cave and rope_grab_cool == 0:
 		var r = cave.rope_at(self)
