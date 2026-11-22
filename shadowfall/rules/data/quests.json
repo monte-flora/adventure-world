@@ -1,0 +1,32 @@
+{
+  "about": "Side quests, written like main_quest.json chapters but with no relic. A step is words (done by talking to someone) or {\"text\", \"goal\", \"to\"} (done by itself). Rewards: gold, arrows, sun_ore, shard, sigil.",
+  "quests": {
+    "lost_hound": {
+      "title": "The Hound Who Would Not Come Home",
+      "giver": "wren",
+      "steps": [
+        {"text": "Find Wren's hound, Ash, somewhere in the Weepingwold", "goal": "found:ash", "to": "land:woods"},
+        {"text": "Bring word to Wren in Emberhold", "to": "person:wren"}
+      ],
+      "reward": {"gold": 15, "shard": 1}
+    },
+    "ore_for_the_forge": {
+      "title": "Fire for the Forge",
+      "giver": "garrick",
+      "steps": [
+        {"text": "Carry 3 Sun Ore up from the deep places", "goal": "has:sun_ore:3", "to": "mine:home"},
+        {"text": "Bring the ore to Garrick Ashhand", "to": "person:garrick"}
+      ],
+      "reward": {"gold": 30, "sigil": "keen_edge"}
+    },
+    "wolves_of_the_pass": {
+      "title": "Wolves of the Pass",
+      "giver": "hrefna",
+      "steps": [
+        {"text": "Thin the frost wolves of the Wintermarch (5)", "goal": "defeat:frost:frost_wolf:5", "to": "land:frost"},
+        {"text": "Return to Hrefna", "to": "person:hrefna"}
+      ],
+      "reward": {"gold": 40, "sigil": "steady"}
+    }
+  }
+}

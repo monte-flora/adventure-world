@@ -10,6 +10,12 @@ Check a saved cave:
     python cave_solver.py my_caves/lava_tower.txt
 
 The cave editor runs this for you when you press "Can it be beaten?".
+
+Shadowfall caves: a "needs: climb, pound" line says which powers the robot may use. Without
+pound, cracked rock (B) is plain rock; without climb, climbing walls (%) are; without truesight,
+secret walls (F) are; without flare, shadow thorns (n) hurt like spikes. With no needs: line it may
+use them all. The pygame game has no dash, swim or double jump, so the robot never uses those.
+It knows checkpoints (C) and one-way doors (< >) too.
 """
 
 import copy
@@ -20,6 +26,7 @@ import random
 import sys
 import time
 
+import cave_files
 import caves
 
 # ===========================================================================
@@ -39,6 +46,38 @@ NO_GO = set("^~!")                                   # spikes, lava and fire: th
 JUMP_ROWS = 3           # on the map, you can jump up into a block this high above the ground (1 = standing on it)
 MUSHROOM_ROWS = 4       # a bouncy mushroom throws you this many blocks higher than a jump
 AIR_STEPS = 4           # ...and a running jump carries you this many blocks sideways over a gap
+
+
+# What a power lets you through: without it, these letters are plain rock to the robot
+LOCKED_WITHOUT = {"pound": "B", "climb": "%", "truesight": caves.SECRET}
+
+
+def robot_text(text):
+    """The cave as the pygame game can play it, with the robot's rules for Shadowfall's letters and the
+    cave's needs: line. One-way doors start as rock (do_move opens them)."""
+    needs = cave_files.needs_of(text)
+    swap = {cave_files.CHECKPOINT: ".", cave_files.THORNS: "." if needs is None or "flare" in needs else "^"}
+    swap.update({door: "#" for door in cave_files.DOORS})
+    if needs is not None:
+        swap.update({letter: "#" for power, letter in LOCKED_WITHOUT.items() if power not in needs})
+    table = str.maketrans(swap)
+    return "\n".join(line if ":" in line else line.translate(table) for line in text.strip().splitlines()) + "\n"
+
+
+def find_doors(text):
+    """Where the one-way doors are: {(row, column): "<" or ">"}."""
+    return {(r, c): letter for r, row in enumerate(caves.level_lines(text))
+            for c, letter in enumerate(row) if letter in cave_files.DOORS}
+
+
+def open_doors(cave):
+    """A shut one-way door opens for good when you touch it from the side its arrow points to."""
+    you = cave.you
+    for (r, c), letter in cave.doors.items():
+        if cave.map[r][c] == "#" and r in you.rows():
+            edge, side = (you.x, c + 1) if letter == ">" else (you.x + you.w, c)
+            if abs(edge - side) < 0.05:
+                cave.change(r, c, ".")
 
 
 class Pickaxe:
@@ -102,6 +141,8 @@ def controls(move, frame):
 def do_move(cave, move):
     for frame in range(FRAMES):
         cave.update(DT, controls(move, frame))
+        if getattr(cave, "doors", None):
+            open_doors(cave)
         if cave.result:
             return
 
@@ -166,6 +207,7 @@ def steps_to(cave, goals):
     (It works backwards from the goals, so it also counts how many sideways steps in the air
     you've already used: far[r][c][used].)"""
     rides = {spot for platform in getattr(cave, "platforms", ()) for spot in platform.cells()}
+    doors = getattr(cave, "doors", {})
     holds = {spot for swing in getattr(cave, "swings", ()) for spot in swing.reach()}
     height = [[how_high(cave, r, c, rides, holds) for c in range(cave.cols)] for r in range(cave.rows)]
 
@@ -195,7 +237,10 @@ def steps_to(cave, goals):
             if not (0 <= rr < cave.rows and 0 <= cc < cave.cols):
                 continue
             tile = cave.map[rr][cc]
-            if tile in WALLS or tile in NO_GO:
+            if (rr, cc) in doors and tile in WALLS:
+                if (r, c) != (rr, cc - 1 if doors[(rr, cc)] == ">" else cc + 1):
+                    continue              # a shut one-way door: you go through it away from its arrow
+            elif tile in WALLS or tile in NO_GO:
                 continue
             if rr == r - 1 and cave.map[r][c] == "=":
                 continue                  # you can't drop down through a ledge
@@ -266,8 +311,9 @@ def search(start, goal, goals, tries, deadline):
 
 
 def fresh_cave(text):
-    cave = caves.Cave(Robot(), (0, 0), text)
+    cave = caves.Cave(Robot(), (0, 0), robot_text(text))
     cave.monsters = []                   # the robot ignores monsters
+    cave.doors = find_doors(text)
     return cave
 
 
@@ -279,7 +325,10 @@ def check(text, tries=TRIES, chest_tries=CHEST_TRIES, time_limit=TIME_LIMIT):
     shards = [(r, c) for r, row in enumerate(start.map) for c, tile in enumerate(row) if tile == caves.SHARD]
     exits = [(r, c) for r, row in enumerate(start.map) for c, tile in enumerate(row) if tile == "E"]
     result = {"diamond": None, "exit": None, "seconds": 0.0, "tries": 0, "trail": [], "stuck_at": None,
-              "chests": [], "gave_up": False}
+              "chests": [], "gave_up": False, "needs": None}
+    needs = cave_files.needs_of(text)
+    if needs is not None:
+        result["needs"] = sorted(needs)
 
     legs = []
     levers = [(r, c) for r, row in enumerate(start.map) for c, tile in enumerate(row) if tile == caves.LEVER]
@@ -327,6 +376,8 @@ def check(text, tries=TRIES, chest_tries=CHEST_TRIES, time_limit=TIME_LIMIT):
 def say(result):
     """The robot's answer in words."""
     lines = []
+    if result.get("needs") is not None:
+        lines.append("(The needs: line lets me use: %s.)" % (", ".join(result["needs"]) or "no powers"))
     if result.get("lever") is False:
         lines.append("I couldn't find a way to pull the lever, so the iron gates stay shut.")
         if result["gave_up"]:
