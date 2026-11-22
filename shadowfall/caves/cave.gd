@@ -4,7 +4,7 @@ extends Node2D
 ##   Scenes.goto("cave", {"file": "caves/01_the_easy_moss_cave.txt"})
 ##   Scenes.goto("cave", {"text": "theme: stone\n#####\n#S.E#\n#####"})   (tests)
 ## Every letter's meaning is in tiles.gd (CaveTiles) and levels/README.md. Touch E (or walk out the
-## left edge) to go back to the overworld.
+## left edge) to go back to the overworld, next to the Mine you came from ("mine" and "realm" args).
 
 const TILE := LevelFile.TILE
 const DEFAULT_FILE := "caves/01_the_easy_moss_cave.txt"
@@ -476,7 +476,12 @@ func leave() -> void:
 		return
 	leaving = true
 	left_cave.emit(file)
-	Scenes.goto("overworld", {"from_cave": file})
+	var back := {"from_cave": file}
+	if Scenes.args.has("mine"):                     # the overworld sent us: back next to that Mine
+		back["at"] = Scenes.args["mine"]
+	if Scenes.args.has("realm"):
+		back["realm"] = Scenes.args["realm"]
+	Scenes.goto("overworld", back)
 
 
 # ---------------------------------------------------------------- building

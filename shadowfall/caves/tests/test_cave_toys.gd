@@ -15,7 +15,8 @@ func _open(text: String) -> HeroSide:
 func _walk(h: HeroSide, dir: float, frames: int) -> void:
 	h.ix = dir
 	await physics_frames(frames)
-	h.ix = 0.0
+	if is_instance_valid(h):
+		h.ix = 0.0
 
 
 func test_touching_E_returns_to_the_overworld() -> void:
@@ -33,6 +34,15 @@ func test_E_in_a_real_cave() -> void:
 	await physics_frames(3)
 	check_eq(Scenes.current, "overworld", "back to the overworld from cave 01")
 	check_eq(Scenes.args.get("from_cave"), "caves/01_the_easy_moss_cave.txt", "the overworld hears which cave")
+
+
+func test_exit_goes_back_to_the_mine() -> void:
+	Scenes.goto("cave", {"text": "theme: stone\n#####\n#S.E#\n#####", "mine": Vector2i(12, 7), "realm": "nightfall"})
+	await physics_frames(5)
+	Scenes.screen.leave()
+	check_eq(Scenes.current, "overworld", "back on the map")
+	check_eq(Scenes.args.get("at"), Vector2i(12, 7), "next to the Mine we came in by")
+	check_eq(Scenes.args.get("realm"), "nightfall", "in the same realm")
 
 
 func test_walking_out_the_left_gap_leaves() -> void:
