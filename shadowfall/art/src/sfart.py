@@ -176,6 +176,7 @@ class Sheet:
         self.origin = origin or [w // 2, h]
         self.cols = cols
         self.anims = []  # (name, frames, fps, loop)
+        self.extra = {}  # more JSON keys (gear sheets: slot, light)
 
     def add(self, name, frames, fps=8, loop=True):
         for f in frames:
@@ -206,7 +207,7 @@ class Sheet:
         os.makedirs(d, exist_ok=True)
         pygame.image.save(img, os.path.join(d, self.name + ".png"))
         doc = {"image": self.name + ".png", "kind": self.kind, "cell": [self.w, self.h],
-               "origin": self.origin, "anims": meta}
+               "origin": self.origin, "anims": meta, **self.extra}
         with open(os.path.join(d, self.name + ".json"), "w") as fh:
             json.dump(doc, fh, indent=1)
             fh.write("\n")

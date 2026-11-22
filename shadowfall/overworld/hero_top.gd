@@ -1,5 +1,5 @@
 class_name HeroTop
-extends Node2D
+extends Entity
 ## The hooded wanderer on the map (top-down), docs/teen/gameplay §4 "Overworld": 8-way walk at
 ## 5.5 squares/s (0→max 5 f, stop 3 f), sword arc on R, roll on SHIFT once Wraithstep (dash) is owned.
 ## Collides square by square with WorldMap.walkable(), so ability gates open the moment Game has the
@@ -35,7 +35,6 @@ var roll_dir := Vector2.ZERO
 var attack_frame := -1                      # -1 = not swinging
 var iframes := 0
 var lock_frames := 0
-var sprite: AnimatedSprite2D
 var light: LanternLight
 var embers: CPUParticles2D
 ## Where the lantern hangs, from the middle of the box, by facing (the side one is for facing right).
@@ -43,6 +42,7 @@ const LANTERN_AT := {"_down": Vector2(9, 0), "_up": Vector2(-8, 0), "_side": Vec
 
 
 func _ready() -> void:
+	gear_set = "tall"                                 # his sheet is taller: gear_tall_<item> (none drawn yet)
 	sprite = AnimatedSprite2D.new()
 	sprite.sprite_frames = ArtSheet.frames("hero_top")
 	sprite.offset = ArtSheet.offset("hero_top")

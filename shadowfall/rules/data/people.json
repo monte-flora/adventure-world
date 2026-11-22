@@ -1,10 +1,14 @@
 {
- "about": "Everyone in the realm (rules/conversation.gd runs their talk). 'place' is a realm land id (levels/realm/, e.g. emberhold) and a row and column in that land's own file (the nearest open square if it is blocked). 'move' is idle or pace (a few steps to and fro). 'look' is a picture in art/. 'role' (shop or smith) opens a shop or the forge. 'show_if' hides them until true. 'talk' is nodes: 'start' first; each node is a list of variants, the first whose 'if' all pass is used. 'say' pages, 'do' effects, 'choices', 'next'. Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N, stones:N, flag:NAME, gloom:N (the gloom stage is N or more), not:... Effects: start_quest|advance_quest|finish_quest:ID, give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:GOAL.",
+ "about": "Everyone in the realm (rules/conversation.gd runs their talk). 'place' is a realm land id (levels/realm/, e.g. emberhold) and a row and column in that land's own file (the nearest open square if it is blocked). 'move' is idle or pace (a few steps to and fro). 'look' is a picture in art/ (sheets/people_<look>). 'gear' is what they carry: items laid over the picture (art/sheets/gear_<item>: spear, staff, hammer, axe, shield, torch, lantern, candle, sword_back, bow, pack). 'role' (shop or smith) opens a shop or the forge. 'show_if' hides them until true. 'talk' is nodes: 'start' first; each node is a list of variants, the first whose 'if' all pass is used. 'say' pages, 'do' effects, 'choices', 'next'. Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N, stones:N, flag:NAME, gloom:N (the gloom stage is N or more), not:... Effects: start_quest|advance_quest|finish_quest:ID, give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:GOAL.",
  "people": [
   {
    "id": "maera",
    "name": "Warden Maera",
    "look": "warden",
+   "gear": [
+    "spear",
+    "shield"
+   ],
    "place": {
     "land": "emberhold",
     "row": 26,
@@ -99,6 +103,9 @@
    "id": "garrick",
    "name": "Garrick Ashhand",
    "look": "smith",
+   "gear": [
+    "hammer"
+   ],
    "role": "smith",
    "place": {
     "land": "emberhold",
@@ -182,6 +189,9 @@
    "id": "tamsin",
    "name": "Tamsin the Pedlar",
    "look": "trader",
+   "gear": [
+    "pack"
+   ],
    "role": "shop",
    "sells": [
     "arrows",
@@ -307,6 +317,9 @@
    "id": "wenna",
    "name": "Old Mother Wenna",
    "look": "elder",
+   "gear": [
+    "staff"
+   ],
    "place": {
     "land": "weepingwold",
     "row": 24,
@@ -368,6 +381,10 @@
    "id": "corran",
    "name": "Corran the Ferryman",
    "look": "ferryman",
+   "gear": [
+    "staff",
+    "lantern"
+   ],
    "place": {
     "land": "drowned_mere",
     "row": 3,
@@ -428,6 +445,10 @@
    "id": "aldric",
    "name": "Ser Aldric",
    "look": "knight",
+   "gear": [
+    "shield",
+    "sword_back"
+   ],
    "place": {
     "land": "hollowcrown",
     "row": 23,
@@ -488,6 +509,9 @@
    "id": "hrefna",
    "name": "Hrefna the Huntress",
    "look": "hunter",
+   "gear": [
+    "bow"
+   ],
    "place": {
     "land": "wintermarch",
     "row": 29,
@@ -547,7 +571,11 @@
   {
    "id": "sefa",
    "name": "Sefa of the Last Well",
-   "look": "trader",
+   "look": "wayfarer",
+   "gear": [
+    "pack",
+    "lantern"
+   ],
    "place": {
     "land": "cinder_wastes",
     "row": 3,
@@ -608,6 +636,9 @@
    "id": "morwen",
    "name": "Morwen of the Mirefen",
    "look": "seer",
+   "gear": [
+    "candle"
+   ],
    "place": {
     "land": "mirefen",
     "row": 3,
@@ -668,6 +699,10 @@
    "id": "bram",
    "name": "Bram of the Wall",
    "look": "watchman",
+   "gear": [
+    "spear",
+    "torch"
+   ],
    "place": {
     "land": "emberhold",
     "row": 23,
@@ -706,6 +741,9 @@
    "id": "isolde",
    "name": "Isolde Greymantle",
    "look": "mourner",
+   "gear": [
+    "candle"
+   ],
    "place": {
     "land": "emberhold",
     "row": 30,
@@ -773,7 +811,10 @@
   {
    "id": "oswin",
    "name": "Oswin Hollowbark",
-   "look": "peasant",
+   "look": "woodsman",
+   "gear": [
+    "axe"
+   ],
    "place": {
     "land": "weepingwold",
     "row": 23,
@@ -803,6 +844,9 @@
    "id": "brother_cael",
    "name": "Brother Cael",
    "look": "pilgrim",
+   "gear": [
+    "staff"
+   ],
    "place": {
     "land": "hollowcrown",
     "row": 26,
@@ -832,7 +876,10 @@
   {
    "id": "nessa",
    "name": "Nessa Saltwake",
-   "look": "ferryman",
+   "look": "fisher",
+   "gear": [
+    "lantern"
+   ],
    "place": {
     "land": "drowned_mere",
     "row": 5,
@@ -862,7 +909,11 @@
   {
    "id": "jorund",
    "name": "Jorund Icebeard",
-   "look": "watchman",
+   "look": "northman",
+   "gear": [
+    "spear",
+    "shield"
+   ],
    "place": {
     "land": "wintermarch",
     "row": 32,
@@ -891,7 +942,11 @@
   {
    "id": "vesh",
    "name": "Vesh the Ash-Walker",
-   "look": "pilgrim",
+   "look": "wayfarer",
+   "gear": [
+    "staff",
+    "pack"
+   ],
    "place": {
     "land": "cinder_wastes",
     "row": 6,
@@ -920,7 +975,11 @@
   {
    "id": "grub",
    "name": "Old Grub",
-   "look": "peasant",
+   "look": "bogger",
+   "gear": [
+    "staff",
+    "lantern"
+   ],
    "place": {
     "land": "mirefen",
     "row": 5,
@@ -949,7 +1008,10 @@
   {
    "id": "deserter",
    "name": "Hollow-Eyed Deserter",
-   "look": "mourner",
+   "look": "deserter",
+   "gear": [
+    "sword_back"
+   ],
    "place": {
     "land": "shadowgate",
     "row": 1,

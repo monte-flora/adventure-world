@@ -1,6 +1,7 @@
 class_name Person
-extends Node2D
-## One person from rules/data/people.json standing in the realm (top-down, art/sheets/people_<look>).
+extends Entity
+## One person from rules/data/people.json standing in the realm (top-down, art/sheets/people_<look>),
+## carrying their 'gear' (Entity's overlays: a spear, a pack, a lantern).
 ## 'move': idle stands and breathes; pace walks a few squares to and fro, waiting at each end. A person
 ## stops while the hero is close, and turns to face the hero to talk. B1 owns this folder.
 
@@ -15,7 +16,6 @@ var data: Dictionary = {}
 var cell := Vector2i.ZERO                   # home square on the realm map
 var facing := Vector2.DOWN
 var hero: Node2D
-var sprite: AnimatedSprite2D
 var _span := Vector2.ZERO                   # pace: min and max x (px)
 var _dir := 1.0
 var _wait := 0.0
@@ -47,6 +47,8 @@ func setup(person: Dictionary, at: Vector2i, world: WorldMap) -> void:
 	sprite.position = Vector2(0, 12)        # feet on the bottom of the square, like the hero
 	add_child(sprite)
 	sprite.play("idle_down")
+	for item in person.get("gear", []):
+		equip(str(item))
 
 
 func paces() -> bool:
