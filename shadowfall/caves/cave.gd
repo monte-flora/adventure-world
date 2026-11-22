@@ -55,6 +55,8 @@ var _solid_index := {}
 var art_sheet := "tiles_stone"                   # the theme's tile sheet (CaveArt)
 var art_tex: Texture2D
 var parallax: Array[Parallax2D] = []             # far, back, mid, front
+var cam: Camera2D
+var juice: CaveJuice                             # hit-stop, shake, sparks, dust, hurt edge
 
 
 func _ready() -> void:
@@ -108,7 +110,9 @@ func build(lf: LevelFile, from_file := "") -> void:
 	add_child(hero)
 	_spawn_monsters()
 	add_child(parallax[3])                         # the front layer passes in front of the Hero
-	var cam := Camera2D.new()
+	juice = CaveJuice.new(self)
+	add_child(juice)
+	cam = Camera2D.new()
 	cam.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 10.0
@@ -279,9 +283,15 @@ func landed_on(h: HeroSide) -> void:
 					crumbling[cell] = CRUMBLE_SHAKE
 
 
+## A hard landing: dust at the Hero's feet.
+func landed_hard(h: HeroSide) -> void:
+	juice.dust(h.position + Vector2(0, HeroSide.SIZE.y / 2.0))
+
+
 ## Kingsfall landed: break the cracked rock under the Hero.
 func pounded(h: HeroSide) -> void:
 	var y := h.position.y + HeroSide.SIZE.y / 2.0 + 2
+	juice.slam(Vector2(h.position.x, y - 2))
 	for x in [h.position.x - HeroSide.SIZE.x / 2.0, h.position.x, h.position.x + HeroSide.SIZE.x / 2.0]:
 		var cell := cell_of(Vector2(x, y))
 		if letter(cell) == "B":
@@ -312,7 +322,7 @@ func arrow_moved(a) -> void:
 	if a.reflected:
 		for m in monsters.get_children():
 			if m is CaveMonster and m.rect().intersects(a.rect()):
-				m.hit(a.position)
+				juice.hit(m, m.hit(a.position))
 				a.queue_free()
 				return
 	elif a.rect().intersects(hero.rect()):
@@ -323,6 +333,7 @@ func arrow_moved(a) -> void:
 func hurt_hero(from: Vector2, amount := 1) -> void:
 	if not hero.hurt(from, amount):
 		return
+	juice.hurt()
 	heal.hit()
 	if Game.hearts <= 0:
 		_wake_at_checkpoint()
@@ -330,10 +341,14 @@ func hurt_hero(from: Vector2, amount := 1) -> void:
 
 # ---------------------------------------------------------------- every frame
 
-func _physics_process(_dt: float) -> void:
-	clock += 1
+func _physics_process(dt: float) -> void:
 	if hero == null or leaving:
+		clock += 1
 		return
+	juice.step(dt, cam)
+	if juice.stopped():                             # hit-stop: the whole cave waits, traps too
+		return
+	clock += 1
 	_tick_crumbles()
 	for cell in springs.keys():
 		springs[cell] -= 1
@@ -428,6 +443,7 @@ func _cell_spot(cell: Vector2i) -> Vector2:
 func _hazard(from: Vector2) -> void:
 	if not hero.hurt(from, 1):
 		return
+	juice.hurt()
 	heal.hit()
 	if Game.hearts <= 0:
 		_wake_at_checkpoint()
@@ -518,10 +534,11 @@ func _attack() -> void:
 			continue
 		hero.attack_hits.append(m)
 		if m is CaveMonster:
-			m.hit(hero.position)
+			juice.hit(m, m.hit(hero.position))
 			Vitals.lumen_hit()
 			bounced = true
 		elif not m.reflected:
+			juice.spark(m.position)
 			m.reflected = true
 			m.velocity = -m.velocity
 			bounced = true
@@ -537,6 +554,7 @@ func _attack() -> void:
 			bounced = true
 	if down and bounced and hero.attack_hits.find("pogo") == -1:
 		hero.attack_hits.append("pogo")
+		juice.spark(Vector2(box.get_center().x, box.end.y))
 		hero.pogo()
 
 
@@ -565,6 +583,8 @@ func dig() -> void:
 ## Dig (or strike) cracked rock, diamond ore or Sun Shard ore: the ore gives its treasure.
 func _break(cell: Vector2i) -> void:
 	var ch := letter(cell)
+	if ch in "B*s":
+		juice.chips(cell_rect(cell).get_center(), Color(CaveTiles.palette(level.theme())[1]))
 	if ch == "B":
 		set_letter(cell, ".")
 	elif ch in "*s":
