@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one empty old wooden hand cart with two spoked wheels, seen from the side and above.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

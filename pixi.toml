@@ -23,6 +23,7 @@ godot-web = { cmd = "sh shadowfall/tools/export_web.sh", description = "Shadowfa
 godot-cave = { cmd = "python shadowfall/tools/play_cave.py", description = "Shadowfall (Godot): play one cave file, e.g. pixi run godot-cave levels/caves/03_blue_lvl_1.txt" }
 shadowfall = { cmd = "godot --headless --path shadowfall --import && godot --path shadowfall", description = "Play Shadowfall, the Godot rebuild (needs Godot 4.7.2 on PATH)" }
 painted = { cmd = "godot --headless --path shadowfall --import && godot --audio-driver Dummy --path shadowfall res://painted/painted.tscn", description = "Shadowfall prototype P1: Emberhold as one painted screen (silent)" }
+import-art = { cmd = "sh shadowfall/tools/import_art.sh", description = "Shadowfall: turn the Gemini pictures in shadowfall/realm/gemini/in/ into game art (see its README.txt)" }
 guide = { cmd = '''python -c "import pathlib, webbrowser; webbrowser.open(pathlib.Path('how_it_works/index.html').resolve().as_uri())"''', description = "Open the how-it-works guide in your web browser" }
 
 [dependencies]

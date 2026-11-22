@@ -1,0 +1,22 @@
+{
+ "name": "fallen_log",
+ "size": [
+  80,
+  23
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  0,
+  9,
+  80,
+  14
+ ],
+ "anchor": [
+  40,
+  23
+ ],
+ "base": 23
+}

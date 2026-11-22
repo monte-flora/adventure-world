@@ -1,0 +1,22 @@
+{
+ "name": "mine_mouth",
+ "size": [
+  126,
+  104
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  0,
+  57,
+  126,
+  47
+ ],
+ "anchor": [
+  63,
+  104
+ ],
+ "base": 104
+}

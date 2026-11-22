@@ -1,0 +1,33 @@
+{
+ "name": "cottage_a",
+ "size": [
+  144,
+  128
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   43,
+   92,
+   44
+  ],
+  [
+   101,
+   92,
+   44
+  ]
+ ],
+ "foot": [
+  6,
+  64,
+  132,
+  64
+ ],
+ "anchor": [
+  72,
+  128
+ ],
+ "base": 128
+}

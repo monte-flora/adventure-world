@@ -1,0 +1,22 @@
+{
+ "name": "bush",
+ "size": [
+  48,
+  35
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  5,
+  19,
+  38,
+  16
+ ],
+ "anchor": [
+  24,
+  35
+ ],
+ "base": 35
+}
