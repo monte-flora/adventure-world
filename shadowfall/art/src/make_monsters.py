@@ -112,7 +112,6 @@ def build(name, w, h, fn, seed=1):
             return -min(hi - (P + n - 1), lo - (P + 1))
         return 0
     sx, sy = fit(box.left, box.right, w), fit(box.top, box.bottom, h)
-    print("DBG", name, w, "x", box.left - P, box.right - P, "y", box.top - P, box.bottom - P, sx, sy)
 
     def fr(ph, st=None):
         s = raw[ph, st].subsurface((P - sx, P - sy, w, h)).copy()
@@ -136,8 +135,8 @@ def build(name, w, h, fn, seed=1):
 
 # --- map monsters -------------------------------------------------------------------------
 def thornling(s, ph, st):
-    lean = (-2, 3, 1)[st] if st is not None else 0
-    cy = 14 + (2 if st == 0 else 0) - (round(abs(sin(ph))) if st is None else 0)
+    lean = (-1, 1, 1)[st] if st is not None else 0
+    cy = 15 + (1 if st in (0, 1) else 0) - (round(abs(sin(ph))) if st is None else 0)
     sw = round(sin(ph) * 3) if st is None else 0
     for i, hx in enumerate((12, 20)):
         o = sw * (1 - 2 * i)
@@ -149,7 +148,7 @@ def thornling(s, ph, st):
         if 240 < a < 300:
             continue
         r = math.radians(a)
-        ln = 8 if st == 1 else 5
+        ln = 6 if st == 1 else 5
         nx, ny = -sin(r), -cos(r)
         p = (cx + cos(r) * 8, cy - sin(r) * 8)
         tip = (cx + cos(r) * (8 + ln), cy - sin(r) * (8 + ln))
@@ -185,7 +184,7 @@ def barrow_wight(s, ph, st):
 
 
 def mere_lurker(s, ph, st):
-    step = (2.9, 3.5, 3.2)[st] if st is not None else 3.1
+    step = (2.7, 3.3, 3.0)[st] if st is not None else 2.9
     amp = 7 if st == 0 else 5
     o = (0, 1, .5)[st] if st is not None else .2 + .2 * (sin(ph) > 0)
     sp = []
@@ -212,9 +211,9 @@ def quad(s, ph, st, K):
     th = K["th"]
     c0 = 3 if st == 0 else 0
     b = 0 if st is not None else -round(abs(cos(ph)))
-    hd = (-3, 6, 2)[st] if st is not None else 0
+    hd = (-3, 4, 1)[st] if st is not None else 0
     by = 26 + c0 + b
-    hx, hy = 50 + hd, by + 2 + (2 if st == 0 else 0)
+    hx, hy = 48 + hd, by + 2 + (2 if st == 0 else 0)
     far, near = K["far"], K["body"]
 
     def leg(i, hip, isfar, po):
@@ -231,7 +230,7 @@ def quad(s, ph, st, K):
     for hip, isfar, po in ((18, 1, 0), (42, 1, pi)):
         leg(0, hip, isfar, po)
     # tail
-    tp = [(14 - i * 2.2, by + 4 + i * (1.3 if hnd else .6) + sin(ph + i * .6) * 2) for i in range(6)]
+    tp = [(14 - i * 1.3, by + 4 + i * (1.3 if hnd else .6) + sin(ph + i * .6) * 2) for i in range(6)]
     tr = [3 - i * .4 for i in range(6)] if hnd else [2.5 + i * .5 for i in range(6)]
     part(s, far, lambda t: chain(t, tp, tr))
     # ridge / mane
@@ -251,7 +250,7 @@ def quad(s, ph, st, K):
         poly(s, far[1], [(hx - 1, hy - 5), (hx + 1, hy - 12), (hx + 4, hy - 5)])
     part(s, near, lambda t: ellipse(t, W, hx - 7, hy - 6, 14, 12))
     o = (0, 1, .5)[st] if st is not None else 0
-    jaws(s, hx + 2, hy + 1, 12 if hnd else 10, 5, o, near, teeth=K["teeth"], gap=6)
+    jaws(s, hx + 2, hy + 1, 10, 5, o, near, teeth=K["teeth"], gap=6, tw=1, tl=3)
     if not hnd:
         poly(s, near[1], [(hx - 6, hy - 4), (hx - 3, hy - 13), (hx + 0, hy - 5)])
         poly(s, near[2], [(hx - 5, hy - 5), (hx - 3, hy - 11), (hx - 2, hy - 5)])
@@ -330,10 +329,10 @@ def ash_scarab(s, ph, st):
 
 
 def bog_wisp(s, ph, st):
-    dx = (-2, 4, 1)[st] if st is not None else 0
+    dx = (-1, 3, 1)[st] if st is not None else 0
     bob = 2 * sin(ph) if st is None else 0
     big = 1.3 if st == 1 else 1
-    sp = [(17 + dx - i * 2.1, 14 + bob + i * 1.5 + sin(ph + i * .8) * 2 * i / 7) for i in range(8)]
+    sp = [(17 + dx - i * 1.9, 14 + bob + i * 1.5 + sin(ph + i * .8) * 2 * i / 7) for i in range(8)]
     part(s, ("moss2", "moss3", "moss4"), lambda t: chain(t, sp, [7 * big - i * .8 for i in range(8)]))
     x, y = sp[0]
     circle(s, "light1", x - 2, y - 2, 3)
@@ -419,7 +418,7 @@ def gloom_slime(s, ph, st):
 
 
 def bone_crawler(s, ph, st):
-    dx = (-2, 3, 1)[st] if st is not None else 0
+    dx = (-1, 2, 1)[st] if st is not None else 0
     bob = -round(abs(sin(ph))) if st is None else 0
     gx = lambda x: x + dx
     for i, (hx, far) in enumerate(((7, 1), (12, 0), (17, 1), (21, 0))):
@@ -428,7 +427,7 @@ def bone_crawler(s, ph, st):
         lift = 2 * (cos(p) > .3) if st is None else 0
         fx, fy = hx + (hx - 14) // 2 + o + 1, 30 - lift
         if st is not None and i == 3:
-            fx, fy = (hx + 4, 17) if st == 0 else (hx + 10 + dx, 26) if st == 1 else (hx + 6, 24)
+            fx, fy = (hx + 4, 17) if st == 0 else (hx + 6 + dx, 26) if st == 1 else (hx + 6, 24)
         kx, ky = hx + (fx - hx) * .4 + (2 if hx > 14 else -2), 10 - (3 if st == 0 and i == 3 else 0)
         col = "ink3" if far else "ink5"
         pygame.draw.lines(s, c(col), False, [(gx(x) + OFF[0], y + OFF[1]) for x, y in ((hx, 17 + bob), (kx, ky), (fx, fy))], 1)
@@ -447,12 +446,12 @@ def bone_crawler(s, ph, st):
 
 
 def ember_imp(s, ph, st):
-    lean = (-2, 2, 0)[st] if st is not None else 0
+    lean = (-1, 1, 0)[st] if st is not None else 0
     bob = -round(abs(sin(ph))) if st is None else 0
     sw = round(sin(ph) * 3) if st is None else 0
     fl = round(sin(ph) * 3)
     poly(s, "ember1", [(13 + lean, 17 + bob), (5, 10 - fl + bob), (9, 12 + bob), (8, 18 + bob), (13 + lean, 19 + bob)])
-    tp = [(12 + lean - i * 2, 21 + bob - i * 1.3 + sin(ph + i) * 1.5) for i in range(5)]
+    tp = [(12 + lean - i * 1.6, 21 + bob - i * 1.3 + sin(ph + i) * 1.5) for i in range(5)]
     part(s, ("ember1", "ember2", "ember2"), lambda t: chain(t, tp, [1.5] * 5))
     circle(s, "light0", tp[-1][0] - 1, tp[-1][1] - 2, 2)
     px(s, "light1", tp[-1][0] - 1, tp[-1][1] - 2)
@@ -465,7 +464,7 @@ def ember_imp(s, ph, st):
     rect(s, "light1", 20 + lean, 8 + bob, 3, 2)
     px(s, "ink0", 22 + lean, 9 + bob)
     line(s, "ink0", (20 + lean, 12 + bob), (23 + lean, 12 + bob))
-    hand = ((12, 12), (26, 14), (21, 19))[st] if st is not None else (24 - sw, 20 + bob)
+    hand = ((12, 12), (24, 14), (21, 19))[st] if st is not None else (24 - sw, 20 + bob)
     part(s, ("ember1", "ember2", "ember3"), lambda t: limb(t, (19 + lean, 16 + bob), hand, 3))
     if st is not None:
         r = (2, 4, 1)[st]
@@ -532,7 +531,7 @@ def mire_toad(s, ph, st):
     sq = 2 if u < 0 or st == 0 else 0
     M = ("moss1", "moss2", "moss3")
     air = u > 0
-    part(s, M, lambda t: ellipse(t, W, 4 + ox - (4 if air else 0), 23 + oy + (-4 if air else 0), 12 + (4 if air else 0), 7 if not air else 4))
+    part(s, M, lambda t: ellipse(t, W, 4 + ox - (2 if air else 0), 23 + oy + (-4 if air else 0), 12 + (2 if air else 0), 7 if not air else 4))
     part(s, M, lambda t: (ellipse(t, W, 5 + ox, 11 + oy + sq, 22, 16 - sq), ellipse(t, W, 17 + ox, 11 + oy + sq, 12, 12 - sq),
                           ellipse(t, W, 6 + ox, 16 + oy + sq, 10, 12 - sq)))
     part(s, M, lambda t: limb(t, (22 + ox, 22 + oy), (25 + ox + (3 if air else 0), 29 + oy * 0 - (3 if air else 0)), 3))
@@ -545,25 +544,25 @@ def mire_toad(s, ph, st):
     px(s, "ink0", ex + 4, ey + 2)
     line(s, "ink0", (ex - 4, ey + 11), (ex + 7, ey + 9))
     if st == 1:
-        line(s, "ember2", (ex + 5, ey + 10), (30, ey + 10), 2)
-        circle(s, "ember2", 29, ey + 10, 2)
+        line(s, "ember2", (ex + 5, ey + 10), (28, ey + 10), 2)
+        circle(s, "ember2", 27, ey + 10, 2)
 
 
 def shade_(s, ph, st):
-    dx = (-2, 3, 1)[st] if st is not None else 0
-    bob = round(sin(ph) * 2) if st is None else 0
-    sp = [(19 + dx - i * 2.2, 9 + bob + i * 2.2 + sin(ph + i * .7) * 2 * i / 8) for i in range(9)]
+    dx = (-1, 2, 1)[st] if st is not None else 0
+    bob = round(sin(ph) * 1) if st is None else 0
+    sp = [(19 + dx - i * 1.8, 11 + bob + i * 1.8 + sin(ph + i * .7) * 2 * i / 8) for i in range(9)]
     for i, (hx, hy) in enumerate(((20, 14), (18, 16))):
         far = i == 0
-        tgt = ((17, 6), (31 - 1, 15 - i * 3), (26, 17 + i * 2))[st] if st is not None else (27 - i * 3, 17 + round(sin(ph + i) * 2) + 2 * i)
+        tgt = ((17, 6), (27, 15 - i * 3), (26, 17 + i * 2))[st] if st is not None else (27 - i * 3, 17 + round(sin(ph + i) * 2) + 2 * i)
         a = (hx + dx, hy + bob)
         part(s, ("shadow0", "shadow0", "shadow1") if far else ("shadow0", "shadow1", "shadow2"), lambda t, a=a, tgt=tgt: limb(t, a, tgt, 3))
         for dy in (-2, 0, 2):
             line(s, "shadow2", tgt, (tgt[0] + 2, tgt[1] + dy), 1)
     part(s, ("shadow0", "shadow1", "shadow2"), lambda t: chain(t, sp, [6.5 - i * .7 for i in range(9)]))
     hx, hy = sp[0]
-    poly(s, "shadow1", [(hx - 4, hy - 4), (hx - 5, hy - 11), (hx - 1, hy - 6)])
-    poly(s, "shadow1", [(hx + 3, hy - 4), (hx + 6, hy - 10), (hx + 5, hy - 3)])
+    poly(s, "shadow1", [(hx - 4, hy - 4), (hx - 5, hy - 9), (hx - 1, hy - 6)])
+    poly(s, "shadow1", [(hx + 3, hy - 4), (hx + 6, hy - 9), (hx + 5, hy - 3)])
     ellipse(s, "ink0", hx - 1, hy - 3, 9, 7)
     h = 2 if st == 1 else 1
     rect(s, "light1", hx + 1, hy - 1, 3, h)
@@ -595,7 +594,7 @@ def stone_warden(s, ph, st):
         part(s, cols, lambda t: (limb(t, (sx, sy), el, 12), limb(t, el, hand, 11), rock(t, hand[0], hand[1] + 2, 20, 18, seed)))
     sw = round(sin(ph) * 7) if st is None else 0
     far_h = (36 - sw, 58 + b) if st is None else ((34, 14), (70, 80), (66, 70))[st]
-    near_h = (66 + sw, 58 + b) if st is None else ((60, 6), (84, 82), (80, 70))[st]
+    near_h = (66 + sw, 58 + b) if st is None else ((60, 8), (84, 82), (80, 70))[st]
     arm(30, 30 + b, far_h, lg, 11)
     part(s, RK, lambda t: rock(t, 31, 32 + b, 20, 18, 2))
     part(s, RK, lambda t: rock(t, 66, 32 + b, 22, 20, 4))
@@ -656,7 +655,7 @@ def cinder_drake(s, ph, st):
     a = cos(ph) if st is None else (1, -.3, .3)[st]
     b = round(abs(sin(ph)) * -2) if st is None else (0, 0, 0)[st]
     sw = round(sin(ph) * 6) if st is None else 0
-    hdx, hdy = ((-6, 0), (4, 6), (0, 2))[st] if st is not None else (0, round(sin(ph) * 1))
+    hdx, hdy = ((-5, 0), (2, 6), (-1, 2))[st] if st is not None else (0, round(sin(ph) * 1))
     BD = ("ember1", "ember2", "ember3")
     DK = ("ember0", "ember0", "ember1")
 
@@ -673,7 +672,7 @@ def cinder_drake(s, ph, st):
     for hx, o in ((34, -sw), (58, sw)):
         part(s, DK, lambda t, hx=hx, o=o: (limb(t, (hx, 62 + b), (hx + 5 + o // 2, 76), 10), limb(t, (hx + 5 + o // 2, 76), (hx + o, 91), 7)))
     # tail
-    tp = [(26 - i * 3.6, 56 + b + i * 1.6 + sin(ph + i * .6) * 3) for i in range(8)]
+    tp = [(26 - i * 2.4, 56 + b + i * 1.6 + sin(ph + i * .6) * 3) for i in range(8)]
     part(s, BD, lambda t: chain(t, tp, [7 - i * .75 for i in range(8)]))
     poly(s, "ember3", [(tp[-1][0] - 1, tp[-1][1] - 3), (tp[-1][0] - 8, tp[-1][1] - 1), (tp[-1][0] - 1, tp[-1][1] + 4)])
     # neck + body
@@ -695,14 +694,14 @@ def cinder_drake(s, ph, st):
         circle(s, "ember3", hx + 8, hy + 1, 2)
     if st in (1, 2):
         fx, fy = hx + 14, hy + 1 + (2 if st == 1 else 0)
-        L = 94 - fx
+        L = 93 - fx
         if st == 1:
             poly(s, "ember3", [(fx, fy - 2), (fx + L, fy - 10), (fx + L, fy + 8), (fx, fy + 4)])
             poly(s, "light0", [(fx, fy - 1), (fx + L - 2, fy - 6), (fx + L - 2, fy + 5), (fx, fy + 3)])
             poly(s, "light1", [(fx, fy), (fx + L - 5, fy - 2), (fx + L - 5, fy + 2), (fx, fy + 2)])
         else:
             for i in range(3):
-                circle(s, "ember3" if i != 1 else "light0", fx + 3 + i * 4, fy - 3 + i * 3 - (i % 2) * 4, 2 - i % 2)
+                circle(s, "ember3" if i != 1 else "light0", fx + 1 + i * 3, fy - 3 + i * 3 - (i % 2) * 4, 2 - i % 2)
     # near legs
     for hx2, o in ((40, sw), (64, -sw)):
         part(s, BD, lambda t, hx2=hx2, o=o: (limb(t, (hx2, 62 + b), (hx2 + 5 + o // 2, 76), 11), limb(t, (hx2 + 5 + o // 2, 76), (hx2 + o, 90), 7),
