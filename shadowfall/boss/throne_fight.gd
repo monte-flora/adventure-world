@@ -30,16 +30,15 @@ const CROWN_SIZE := Vector2(34, 22)
 const CROWN_LOW_Y := FLOOR_Y - 52.0
 const BEAM_WIDTH := 26.0
 
-## The 7 lieutenants' signature attacks he calls back in the Eclipse. Display names come from
-## rules/names.gd (LIEUTENANT) when B4 adds them; these are the fallbacks from the gameplay spec.
+## The 7 lieutenants' signature attacks he calls back in the Eclipse. Display names: Names.LIEUTENANT.
 const LIEUTENANTS := {
-	"thornwarden": {"name": "the Thornwarden", "attack": "charge", "color": "6fae4f"},
-	"loom_widow": {"name": "the Loom Widow", "attack": "drop", "color": "b9b4c9"},
-	"bellwarden": {"name": "the Bellwarden", "attack": "toll", "color": "4fa3b5"},
-	"rust_regent": {"name": "the Rust Regent", "attack": "rain", "color": "b5653a"},
-	"rime_matriarch": {"name": "the Rime Matriarch", "attack": "breath", "color": "cfeeff"},
-	"glass_wyrm": {"name": "the Glass Wyrm", "attack": "erupt", "color": "e8c26a"},
-	"mire_lantern": {"name": "the Mire Lantern", "attack": "wisps", "color": "8fe07a"},
+	"thornwarden": {"attack": "charge", "color": "6fae4f"},
+	"loom_widow": {"attack": "drop", "color": "b9b4c9"},
+	"bellwarden": {"attack": "toll", "color": "4fa3b5"},
+	"rust_regent": {"attack": "rain", "color": "b5653a"},
+	"rime_matriarch": {"attack": "breath", "color": "cfeeff"},
+	"glass_wyrm": {"attack": "erupt", "color": "e8c26a"},
+	"mire_lantern": {"attack": "wisps", "color": "8fe07a"},
 }
 
 const LINES := {
@@ -385,7 +384,7 @@ func _echo(id: String) -> void:
 	var x0 := WALL_L if side > 0 else WALL_R
 	var hx := clampf(hero.pos.x, WALL_L + 30, WALL_R - 30)
 	var base := {"lieu": id, "color": l["color"], "tele": 0.6}
-	_ev("echo", {"name": Castle.display("LIEUTENANT", id, l["name"]), "id": id})
+	_ev("echo", {"name": Names.LIEUTENANT[id], "id": id})
 	match l["attack"]:
 		"charge":       # the Thornwarden's antlers lowered: jump the charge
 			_add(_with(base, {"kind": "charge", "rect": Rect2(x0 - (56 if side > 0 else 0), FLOOR_Y - 40, 56, 40),

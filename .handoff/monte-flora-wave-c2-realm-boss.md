@@ -1,18 +1,26 @@
-# Handoff: Wave C2 (realm + boss look and feel), 2026-11-22
+# Handoff: Wave C2 (realm + boss), 2026-11-22
 
-## Done (PRs into phase-2, auto-merge on green)
-- #38 `monte-flora/c2-realm-art`: overworld drawn from `realm_<land>` sheets (overworld/realm_tiles.gd: ground+shore autotile, objects, canopy layer), hero_top sprite, map monsters per land (MapMonster.OF_LAND), banners from Names via WorldMap.REALM_ID/names_id(). Tests: test_realm_art_per_land, test_gate_art_opens_with_the_ability.
-- #41 `monte-flora/c2-boss-art`: throne room hero_side sprite, tiles_castle walls/floor/platforms (_draw_solid), GloomLight on boss screen, ui/hud hearts, pixel font, lieutenant echo ghosts (ECHO_SHEET). Test: test_throne_art_in_place.
-- Both include #37's commit until it merges. Check `gh pr checks 38` / `41`; pytest "tests" was slow to start.
+## Done (merged into phase-2)
+- #38 realm art, #41 boss art, #43 monster art fixes (ash_scarab + cave_bat redrawn, thin fangs, padded-canvas
+  build() in art/src/make_monsters.py shifts each monster inside the 1-px margin: 0 clip notes),
+  #44 juice (overworld/juice.gd: Juice.Shake + Juice.burst; overworld hit-stop/shake/poof/motes/red hurt edge/
+  camera look-ahead; boss sparks via boss.gd _fx(); UiSettings.screen_shake saved under [access]).
 
-## In flight: branch `monte-flora/c2-art-fixes` (this commit: only shot.gd + this file)
-Goal 3: redraw weak monsters in shadowfall/art/src/make_monsters.py: ash_scarab (blob, needs a real beetle: domed shell split line, horn, 6 legs), cave_bat (wing is a flat triangle: needs scalloped membrane + finger bones), frost_matriarch (spider legs clip right edge; st=1 and move ph=1.6 clip), sand_wyrm (teeth read as a white box in attack: use jaws() with more, thinner teeth). Then fix every "clipped at the margin" note (run `SDL_AUDIODRIVER=dummy <python> shadowfall/art/src/make_monsters.py`; ~25 notes: cinder_drake all frames, frost_wolf, ember_imp, bog_wisp, ...). Rebuild, `sh shadowfall/tools/run_tests.sh --only=art` (ArtCheck), screenshot sheets.
-
-## Next
-- Goal 4 juice: overworld has no hit-stop/shake/particles yet. Spec docs/teen/gameplay §4 table: sword hit 3 f stop + shake 1px/4f + white flash 4 f (MapMonster already flashes); kill 6 f + 2px/6f + light motes (+ play the `poof` anim); hurt 10 f + 5px/12f + red edge. Camera: overworld cam uses smoothing 8; consider drag margins / look-ahead. Boss: ThroneFight already has hitstop/slowmo/shake events; add particles (sparks on clang, motes on kill) in boss.gd.
-- Shake OFF switch: ask the coordinator for a ui/settings.gd accessibility value (not my folder).
-- Asks for others: rules/names.gd could add realm ids (emberhold...) to LAND; LIEUTENANT names table (boss uses fallbacks).
+## Next: task_6d102335ee18 (approved, ONE small PR into phase-2; may touch ui/pause.gd and rules/names.gd)
+1. ui/pause.gd: a row for the screen-shake switch (UiSettings.screen_shake; save via UiSettings.save()).
+   Look at how the SOUND tab rows work (ui/tests/test_ui.gd test_volume_steps_and_saves); add a ui test.
+2. rules/names.gd: realm ids in LAND (emberhold, weepingwold, hollowcrown, drowned_mere, wintermarch,
+   cinder_wastes, mirefen, shadowgate, umbral_reach: see MapMonster.OF_LAND), plus BOSS / SUNFANG /
+   LIEUTENANT names (epic, original, LOTR/GoT tone, teen-safe). Use them in boss/ (boss uses fallbacks
+   now: Castle.display("LIEUTENANT", id, ...), lieutenant ids in boss.gd ECHO_SHEET).
+3. Redraw frost_matriarch in art/src/make_monsters.py (96 cell; only clip-fixed so far; looks like a blue
+   blob + stick legs). Run: `cd shadowfall/art && SDL_VIDEODRIVER=dummy <py> src/make_monsters.py frost_matriarch`
+   (py = /Users/montgomeryflora/noah-adventure/.pixi/envs/default/bin/python); must print no notes.
+   Zoom contact sheet: a 4x pygame upscale of sheets/monster_frost_matriarch.png (script was in old scratchpad).
+- Tests: `sh shadowfall/tools/run_tests.sh` (all) and pytest `<py> -m pytest -q -n auto tests`.
+- Then worker_done to the coordinator (task_6d102335ee18, dispatch ctx_56753d91423b).
 
 ## Gotchas
-- A texture first `load()`ed inside a draw callback draws nothing (white/clear). Load in _ready.
-- Screenshots: `art/src/shot.gd` (window render at 2x, silent).
+- A texture first load()ed inside a draw callback draws nothing. Load in _ready.
+- GDScript: `var x := m.hit()` on an untyped loop var fails to parse; type it.
+- Hit-stop must not skip overworld cell checks (Lost Light pickup).

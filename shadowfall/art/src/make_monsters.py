@@ -609,46 +609,72 @@ def stone_warden(s, ph, st):
 
 
 def frost_matriarch(s, ph, st):
-    b = round(sin(ph * 2) * 0) + (-round(abs(sin(ph)) * 2) if st is None else (3, 0, 1)[st])
-    fw = (0, 4, 2)[st] if st is not None else 0
-    LG = ("water1", "water2", "water3")
-    FG = ("water1", "water1", "water2")
-    hips = [(66, 0), (62, 1), (56, 2), (50, 3)]
-    feet = [(84, 0), (72, 0), (36, 0), (14, 0)]
+    """The Rime Matriarch's brood-queen: a great ice spider, knees high over her back, a crown of icicles,
+    rime crystals on her abdomen and umbral eyes. Attack: rears, then breathes a cone of frost."""
+    b = -round(abs(sin(ph)) * 2) if st is None else (-3, 1, 0)[st]
+    rear = (6, 0, 2)[st] if st is not None else 0          # her front lifts on the wind-up
+    NEAR = ("water1", "water2", "water3")
+    FAR = ("ink1", "ink2", "water1")
+    hips = [(66, 58), (62, 59), (57, 59), (52, 58)]
+    feet = [88, 78, 36, 14]
+    knees = [(82, 34), (72, 30), (40, 30), (24, 36)]
 
-    def legs(idx, cols, off):
+    def legs(idx, cols, off, w=1.0):
         for i in idx:
-            hxx, _ = hips[i]
+            up = rear if i < 2 else 0
+            hx, hy = hips[i][0], hips[i][1] + b - up
             p = ph + pi * (i % 2) + off
-            fx = feet[i][0] + (round(sin(p) * 5) if st is None else 0) + (fw if i == 0 else 0)
-            lift = round(max(0, cos(p)) * 7) if st is None else 0
-            fy = 90 - lift
-            if st is not None and i == 0:
-                fy = (66, 90, 80)[st]
-                fx = feet[0][0] + (-6 if st == 0 else fw)
-            kx = hxx + (fx - hxx) * .4 + (4 if i == 0 else 0)
-            ky = 34 + 3 * i - (lift if lift else 0) - (8 if (st == 0 and i == 0) else 0)
-            part(s, cols, lambda t, hxx=hxx, kx=kx, ky=ky, fx=fx, fy=fy: (limb(t, (hxx, 56 + b), (kx, ky), 7),
-                 limb(t, (kx, ky), (fx, fy), 5), poly(t, W, [(fx - 2, fy - 2), (fx + 1, fy + 2), (fx + 3, fy - 2)])))
-    legs((1, 3), FG, pi * .5)
-    ab = (st == 0) * 4
-    part(s, ("water2", "water3", "water4"), lambda t: ellipse(t, W, 6, 26 + b - ab, 46, 38))
-    over(s, lambda t: (poly(t, "shadow2", [(28, 40 + b - ab), (34, 40 + b - ab), (31, 47 + b - ab), (34, 54 + b - ab), (28, 54 + b - ab), (31, 47 + b - ab)]),
-                       [circle(t, "ink7", x, y + b - ab, 2) for x, y in ((14, 44), (20, 34), (40, 36), (44, 50), (22, 58))],
-                       [line(t, "water4", (10, 48 + b - ab), (18, 32 + b - ab))]))
-    part(s, ("water2", "water3", "water4"), lambda t: (ellipse(t, W, 48, 44 + b, 28, 24), circle(t, W, 72 + fw // 2, 54 + b, 11)))
-    for k in range(4):
-        x = 52 + k * 7
-        poly(s, "ink7" if k % 2 else "water4", [(x, 48 + b), (x + 3, 36 + b - k % 2 * 4 - (k == 1) * 3), (x + 6, 48 + b)])
-    hx = 74 + fw // 2
-    for ex, ey, r in ((3, 0, 2), (8, -1, 2), (6, 4, 1), (11, 3, 1)):
-        circle(s, "shadow2", hx + ex, 50 + b + ey, r)
-    px(s, "light1", hx + 3, 49 + b)
-    px(s, "light1", hx + 8, 48 + b)
-    sp = 6 if st == 1 else 2
+            fx = feet[i] + (round(sin(p) * 4) if st is None else 0)
+            lift = round(max(0, cos(p)) * 6) if st is None else 0
+            fy = 91 - lift
+            if st is not None and i == 0:                  # the front leg: raised, then stabs down
+                fx, fy = ((88, 50), (93, 91), (91, 86))[st]
+            kx, ky = knees[i][0] + (fx - feet[i]) // 2, knees[i][1] + b - up - (st == 0 and i == 0) * 8
+            d = 1 if i < 2 else -1
+            ax, ay = kx + (fx - kx) * .6 + 3 * d, ky + (fy - ky) * .45
+            part(s, cols, lambda t, hx=hx, hy=hy, kx=kx, ky=ky, ax=ax, ay=ay, fx=fx, fy=fy: (
+                limb(t, (hx, hy), (kx, ky), 6 * w), limb(t, (kx, ky), (ax, ay), 5 * w), limb(t, (ax, ay), (fx, fy - 3), 3),
+                poly(t, W, [(fx - 2, fy - 4), (fx + 1, fy - 4), (fx, fy)])))
+            poly(s, "ink7" if cols is NEAR else "water2", [(kx - 2, ky - 1), (kx, ky - 6), (kx + 2, ky)])  # knee spur
+    legs((0, 1, 2, 3), FAR, pi * .5 + .3, .85)
+    # abdomen, raised behind her, crusted with rime
+    ay = 26 + b
+    part(s, NEAR, lambda t: (ellipse(t, W, 3, ay, 46, 34), ellipse(t, W, 38, ay + 20, 16, 14)))
+    over(s, lambda t: ([poly(t, "ink6", [(13 + k * 8, ay + 24), (17 + k * 8, ay + 18), (21 + k * 8, ay + 24), (17 + k * 8, ay + 21)])
+                        for k in range(3)],
+                       [line(t, "water4", (9, ay + 22), (17, ay + 8))],
+                       [circle(t, "shadow1", x, ay + y, 1) for x, y in ((12, 28), (28, 30), (40, 26))]))
+    for k, (x, y, hgt) in enumerate(((10, 8, 8), (18, 3, 12), (27, 1, 14), (36, 3, 10), (43, 8, 7))):
+        poly(s, "water4" if k % 2 else "ink7", [(x - 3, ay + y + 3), (x, ay + y + 3 - hgt), (x + 3, ay + y + 3)])
+        line(s, "ink6", (x, ay + y + 1), (x, ay + y + 4 - hgt))
+    legs((1, 3), NEAR, 0)
+    legs((0, 2), NEAR, .3)
+    # thorax and head (on top of the legs), the crown, the eyes
+    hy = 50 + b - rear
+    part(s, NEAR, lambda t: ellipse(t, W, 46, hy + 2, 24, 15))
+    part(s, ("water2", "water3", "water4"), lambda t: ellipse(t, W, 66, hy, 18, 16))
+    for k, hgt in enumerate((6, 10, 14, 10, 6)):
+        x = 68 + k * 3
+        poly(s, "ink7" if k == 2 else "water4", [(x - 2, hy + 2), (x, hy + 2 - hgt), (x + 2, hy + 2)])
+    ex = 77
+    for dx, dy, r in ((0, 5, 2), (5, 4, 2), (2, 9, 1), (7, 8, 1)):
+        circle(s, "shadow2", ex + dx, hy + dy, r)
+    px(s, "light1", ex, hy + 4)
+    px(s, "light1", ex + 5, hy + 3)
+    # fangs: closed on the walk, spread wide when she breathes
+    sp = 3 if st == 1 else 0
     for k in (0, 1):
-        poly(s, "ink7", [(hx + 6 + k * 7 - sp * k + 0, 60 + b), (hx + 9 + k * 7 - sp * k, 60 + b), (hx + 8 + k * 7 + sp * (k - 0), 70 + b + (4 if st == 1 else 0))])
-    legs((0, 2), LG, 0)
+        x = ex + k * 5
+        poly(s, "ink7", [(x - 1, hy + 13), (x + 2, hy + 13), (x + 1 + (k * 2 - 1) * sp, hy + 20 + (st == 1) * 2)])
+    if st == 1:                                            # a cone of frost
+        fx, fy = ex + 4, hy + 16
+        L = 94 - fx
+        poly(s, "water3", [(fx, fy - 2), (fx + L, fy - 12), (fx + L, fy + 18), (fx, fy + 3)])
+        poly(s, "water4", [(fx, fy - 1), (fx + L - 1, fy - 7), (fx + L - 1, fy + 12), (fx, fy + 2)])
+        poly(s, "ink7", [(fx, fy), (fx + L - 3, fy), (fx + L - 3, fy + 3), (fx, fy + 1)])
+    elif st == 2:
+        for k in range(3):
+            circle(s, "water4" if k != 1 else "ink7", ex + 10 + k * 3, hy + 16 + (k % 2) * 3, 1)
 
 
 def cinder_drake(s, ph, st):

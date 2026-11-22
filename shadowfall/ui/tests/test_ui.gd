@@ -139,6 +139,25 @@ func test_volume_steps_and_saves() -> void:
 	_after()
 
 
+func test_screen_shake_row_toggles_and_saves() -> void:
+	_before()
+	var p = await _open_pause()
+	p.show_tab(p.TABS.find("SOUND"))
+	p.cursor = UiSettings.BUSES.size()
+	check_eq(p.rows[p.cursor].text, "Screen shake", "the row is under the volumes")
+	UiSettings.screen_shake = true
+	p.press("move_right")
+	check(not UiSettings.screen_shake, "RIGHT turns the shake off")
+	check_eq(p.rows[p.cursor].value, "OFF", "the row says OFF")
+	UiSettings.screen_shake = true
+	UiSettings.load_and_apply()
+	check(not UiSettings.screen_shake, "saved and read back")
+	p.press("jump")
+	check(UiSettings.screen_shake, "SPACE turns it back on")
+	Scenes.resume()
+	_after()
+
+
 func test_remap_changes_input_map() -> void:
 	_before()
 	var p = await _open_pause()

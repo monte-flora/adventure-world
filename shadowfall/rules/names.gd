@@ -15,6 +15,10 @@ const LAND := {
 	"home": "Emberhold", "woods": "the Weepingwold", "ruins": "Hollowcrown", "lake": "the Drowned Mere",
 	"frost": "the Wintermarch", "desert": "the Cinder Wastes", "swamp": "the Mirefen",
 	"portal": "the Shadowgate", "nightfall": "the Umbral Reach",
+	# the same lands by their realm ids (overworld/world_map.gd REALM_ID, MapMonster.OF_LAND)
+	"emberhold": "Emberhold", "weepingwold": "the Weepingwold", "hollowcrown": "Hollowcrown",
+	"drowned_mere": "the Drowned Mere", "wintermarch": "the Wintermarch", "cinder_wastes": "the Cinder Wastes",
+	"mirefen": "the Mirefen", "shadowgate": "the Shadowgate", "umbral_reach": "the Umbral Reach",
 }
 ## The name a world file still has (levels/world/*.txt `name:`) -> land id, until B-L renames them.
 const LAND_OF_OLD_NAME := {
@@ -26,6 +30,15 @@ const HOME := "Emberhold"
 const NIGHTFALL_PLACE := "the Umbral Reach"
 const NIGHTFALL_EVENT := "Nightfall"
 const BOSS := "the Shadow King"
+## The blade the 7 Light Stones forge at the castle gate.
+const SUNFANG := "Sunfang"
+## The Shadow King's 7 lieutenants (one guards each Stone); he calls their echoes in the Eclipse.
+const LIEUTENANT := {
+	"thornwarden": "Vargoth the Thornwarden", "loom_widow": "Ysmera, the Loom Widow",
+	"bellwarden": "Old Dunmoor, the Bellwarden", "rust_regent": "Kael Rustcrown, the Rust Regent",
+	"rime_matriarch": "Skaldra, the Rime Matriarch", "glass_wyrm": "Sarkhaal, the Glass Wyrm",
+	"mire_lantern": "Gloamwick, the Mire Lantern",
+}
 const GAME_TITLE := "Shadowfall"
 
 

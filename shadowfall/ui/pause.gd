@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## The pause screen, opened by Scenes.pause() (ESC / Start; ESC again resumes).
-## Tabs: JOURNEY (resume, save and quit, quest log) · MAP · SIGILS · SOUND · CONTROLS (remap).
+## Tabs: JOURNEY (resume, save and quit, quest log) · MAP · SIGILS · SOUND (volumes, screen shake) · CONTROLS (remap).
 ## Q / E (LB / LT) change tab, UP/DOWN choose, LEFT/RIGHT change a value, SPACE / G confirm.
 ## TAB opens straight on the map. Quests come from Quests.log_entries(), sigils from Sigils
 ## (rules/), the map from Game.flags ("map_screen": [x, y], "map_seen": [[x, y], ...]).
@@ -168,6 +168,7 @@ func _sigil_line(id: String) -> String:
 func _tab_sound() -> void:
 	for b in UiSettings.BUSES:
 		_row(b, "", Callable(), _change_volume.bind(b))
+	_row("Screen shake", "", _toggle_shake, _toggle_shake.unbind(1))
 	_relabel_sound()
 
 
@@ -177,6 +178,14 @@ func _relabel_sound() -> void:
 		var v: float = UiSettings.volume[b]
 		var steps := int(round(v * 10))
 		rows[i].value = "<%s%s>  %d%%" % ["|".repeat(steps), ".".repeat(10 - steps), steps * 10]
+	rows[UiSettings.BUSES.size()].value = "ON" if UiSettings.screen_shake else "OFF"
+
+
+func _toggle_shake() -> void:
+	UiSettings.screen_shake = not UiSettings.screen_shake
+	UiSettings.save()
+	_relabel_sound()
+	_draw_rows()
 
 
 func _change_volume(dir: int, bus: String) -> void:
