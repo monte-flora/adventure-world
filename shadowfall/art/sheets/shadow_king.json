@@ -1,0 +1,63 @@
+{
+ "image": "shadow_king.png",
+ "kind": "sprite",
+ "cell": [
+  192,
+  256
+ ],
+ "origin": [
+  96,
+  250
+ ],
+ "anims": {
+  "idle": {
+   "row": 0,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "float": {
+   "row": 1,
+   "col": 0,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "cast": {
+   "row": 2,
+   "col": 0,
+   "frames": 6,
+   "fps": 10,
+   "loop": false
+  },
+  "summon": {
+   "row": 3,
+   "col": 0,
+   "frames": 6,
+   "fps": 10,
+   "loop": false
+  },
+  "blade": {
+   "row": 4,
+   "col": 0,
+   "frames": 4,
+   "fps": 10,
+   "loop": false
+  },
+  "hurt": {
+   "row": 5,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": false
+  },
+  "fade_out": {
+   "row": 6,
+   "col": 0,
+   "frames": 8,
+   "fps": 8,
+   "loop": false
+  }
+ }
+}

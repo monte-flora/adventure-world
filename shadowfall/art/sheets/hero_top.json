@@ -1,0 +1,112 @@
+{
+ "image": "hero_top.png",
+ "kind": "sprite",
+ "cell": [
+  32,
+  48
+ ],
+ "origin": [
+  16,
+  46
+ ],
+ "anims": {
+  "idle_down": {
+   "row": 0,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "idle_up": {
+   "row": 1,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "idle_side": {
+   "row": 2,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "walk_down": {
+   "row": 3,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "walk_up": {
+   "row": 4,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "walk_side": {
+   "row": 5,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "roll_down": {
+   "row": 6,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "roll_up": {
+   "row": 7,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "roll_side": {
+   "row": 8,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "attack_down": {
+   "row": 9,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "attack_up": {
+   "row": 10,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "attack_side": {
+   "row": 11,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "hurt": {
+   "row": 12,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": false
+  },
+  "lantern_raise": {
+   "row": 13,
+   "col": 0,
+   "frames": 3,
+   "fps": 10,
+   "loop": false
+  }
+ }
+}

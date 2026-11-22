@@ -1,0 +1,655 @@
+{
+ "about": "Everyone in the realm (rules/dialogue.gd runs their talk). 'place' is a village (a 'village:' line in levels/world/) plus rows and columns from its square, or a land id and a row and column. 'look' is a picture in art/. 'role' (shop or smith) opens a shop or the forge. 'show_if' hides them until true. 'talk' is nodes: 'start' first; each node is a list of variants, the first whose 'if' all pass is used. 'say' pages, 'do' effects, 'choices', 'next'. Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N, stones:N, flag:NAME, not:... Effects: start_quest|advance_quest|finish_quest:ID, give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:GOAL.",
+ "people": [
+  {
+   "id": "maera",
+   "name": "Warden Maera",
+   "look": "warden",
+   "place": {
+    "land": "home",
+    "row": 12,
+    "col": 12
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_home:1"
+      ],
+      "say": [
+       "You came back. Most don't, the first time.",
+       "Then this is yours. The Dawnstone, first of the seven. Hold it high and the dark will remember what it fears.",
+       "Go north to the Weepingwold. Old Mother Wenna has kept the second secret longer than I have been alive."
+      ],
+      "do": [
+       "finish_quest:main_home"
+      ],
+      "next": "menu"
+     },
+     {
+      "if": [
+       "first_time"
+      ],
+      "say": [
+       "So. You are the one the fires chose, {hero}.",
+       "I am Maera, Warden of Emberhold. Every night the Shadow King drinks more of our light, and soon there will be none left to drink.",
+       "Seven Light Stones can seal the Shadowgate. I keep the first. But I will not hand it to someone who has never faced the dark.",
+       "There is a Mine below the village. Go down. Walk out again. Then we will talk."
+      ],
+      "next": "menu"
+     },
+     {
+      "if": [
+       "quest_active:main_home"
+      ],
+      "say": [
+       "The Mine waits below the village, {hero}. The dark will not come up to meet you."
+      ],
+      "next": "menu"
+     },
+     {
+      "say": [
+       "Keep your lantern lit, {hero}."
+      ],
+      "next": "menu"
+     }
+    ],
+    "menu": [
+     {
+      "say": [
+       "Ask what you must."
+      ],
+      "choices": [
+       {
+        "text": "How do I mend my wounds?",
+        "go": "heal"
+       },
+       {
+        "text": "What happens if I fall?",
+        "go": "fall"
+       },
+       {
+        "text": "Farewell."
+       }
+      ]
+     }
+    ],
+    "heal": [
+     {
+      "say": [
+       "Strike your foes and your lantern drinks their light: that is Lumen.",
+       "Stand still, hold Q, and it will close a wound. Take a blow while you do it and the light is wasted."
+      ],
+      "next": "menu"
+     }
+    ],
+    "fall": [
+     {
+      "say": [
+       "You will wake at the last lantern you touched. Your gold stays where you fell, glowing: a Lost Light.",
+       "Reach it and the gold is yours again. Fall a second time first, and the dark keeps it."
+      ],
+      "next": "menu"
+     }
+    ]
+   }
+  },
+  {
+   "id": "garrick",
+   "name": "Garrick Ashhand",
+   "look": "smith",
+   "role": "smith",
+   "place": {
+    "land": "home",
+    "row": 10,
+    "col": 16
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:ore_for_the_forge:1",
+       "has:sun_ore:3"
+      ],
+      "say": [
+       "Sun ore. Three pieces, still warm. You went deep for this.",
+       "Take this sigil. My father cut it; I never earned it. You have."
+      ],
+      "do": [
+       "take:sun_ore:3",
+       "finish_quest:ore_for_the_forge"
+      ],
+      "next": "menu"
+     },
+     {
+      "say": [
+       "The fire's hot. What do you want, {hero}?"
+      ],
+      "next": "menu"
+     }
+    ],
+    "menu": [
+     {
+      "say": [
+       "Speak."
+      ],
+      "choices": [
+       {
+        "text": "Temper my blade.",
+        "do": [
+         "open:forge"
+        ]
+       },
+       {
+        "text": "Any work?",
+        "if": [
+         "quest_new:ore_for_the_forge"
+        ],
+        "go": "work"
+       },
+       {
+        "text": "Farewell."
+       }
+      ]
+     }
+    ],
+    "work": [
+     {
+      "say": [
+       "The forge starves. Sun ore lies in the deep places, where the light used to pool.",
+       "Bring me three pieces and I will give you something worth more than gold."
+      ],
+      "choices": [
+       {
+        "text": "I'll find it.",
+        "do": [
+         "start_quest:ore_for_the_forge"
+        ],
+        "go": "menu"
+       },
+       {
+        "text": "Not now.",
+        "go": "menu"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "tamsin",
+   "name": "Tamsin the Pedlar",
+   "look": "trader",
+   "role": "shop",
+   "sells": [
+    "arrows",
+    "sun_ore",
+    "shard",
+    "fortune"
+   ],
+   "place": {
+    "land": "home",
+    "row": 11,
+    "col": 8
+   },
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "Gold for goods, goods for gold. The dark is bad for trade, so I don't haggle."
+      ],
+      "choices": [
+       {
+        "text": "Show me your wares.",
+        "do": [
+         "open:shop"
+        ]
+       },
+       {
+        "text": "Farewell."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "wren",
+   "name": "Wren",
+   "look": "child",
+   "place": {
+    "land": "home",
+    "row": 13,
+    "col": 6
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:lost_hound:1"
+      ],
+      "say": [
+       "You found Ash? He's alive?",
+       "...Thank you. Take this. I found it in the old well and I don't know what it is, but it glows like you do."
+      ],
+      "do": [
+       "finish_quest:lost_hound"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:lost_hound"
+      ],
+      "say": [
+       "Ash ran into the Weepingwold when the howling started. He's grey with one white ear."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:lost_hound"
+      ],
+      "say": [
+       "Ash won't leave my side now. Neither of us goes near the trees."
+      ]
+     },
+     {
+      "say": [
+       "My hound ran off into the Weepingwold three nights ago. Everyone says he's gone. Will you look?"
+      ],
+      "choices": [
+       {
+        "text": "I'll find him.",
+        "do": [
+         "start_quest:lost_hound"
+        ]
+       },
+       {
+        "text": "I can't. Not yet."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "ash",
+   "name": "Ash",
+   "look": "hound",
+   "show_if": [
+    "quest_step:lost_hound:0"
+   ],
+   "place": {
+    "land": "woods",
+    "row": 8,
+    "col": 30
+   },
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The grey hound whines, thin and shaking, and limps to your side. He will find his own way home now."
+      ],
+      "do": [
+       "event:found:ash"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "wenna",
+   "name": "Old Mother Wenna",
+   "look": "elder",
+   "place": {
+    "village": "Oakhollow",
+    "row": 1,
+    "col": 2
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_woods:3"
+      ],
+      "say": [
+       "The thorns have stopped whispering your name. That means they accept you.",
+       "Take the Thornheart. Walls will not hold you now. South lies the Drowned Mere; Corran the Ferryman knows its depths."
+      ],
+      "do": [
+       "finish_quest:main_woods"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_woods:0"
+      ],
+      "say": [
+       "The Warden sent you. I heard your boots a mile off.",
+       "The Thornheart sleeps in roots older than Emberhold, and the wood will not give it to a stranger.",
+       "Cut down what hunts here. Climb the watchtower and look on the wold. Then come back and we will see."
+      ],
+      "do": [
+       "advance_quest:main_woods"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_woods"
+      ],
+      "say": [
+       "The wold is watching you, {hero}. It has not decided yet."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_woods"
+      ],
+      "say": [
+       "Go on. The trees remember you kindly."
+      ]
+     },
+     {
+      "say": [
+       "You do not have the smell of the Warden's errand on you yet. Come back when you do."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "corran",
+   "name": "Corran the Ferryman",
+   "look": "ferryman",
+   "place": {
+    "village": "Lakeside",
+    "row": 0,
+    "col": 1
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_lake:2"
+      ],
+      "say": [
+       "You came up. And you are holding it.",
+       "Keep the Pearl and the water will carry you. North, in Hollowcrown, the last knight still keeps his watch."
+      ],
+      "do": [
+       "finish_quest:main_lake"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_lake:0"
+      ],
+      "say": [
+       "A whole village sank under this water once. The Drowned Pearl went down with it.",
+       "There is a Mine below the shore where the old roads lead. Find its bottom and come back breathing."
+      ],
+      "do": [
+       "advance_quest:main_lake"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_lake"
+      ],
+      "say": [
+       "The Mine on the shore, {hero}. The water is patient. Be quicker than it."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_lake"
+      ],
+      "say": [
+       "The Mere is calmer since you came. I sleep, sometimes."
+      ]
+     },
+     {
+      "say": [
+       "No passage today. The water is wrong."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "aldric",
+   "name": "Ser Aldric",
+   "look": "knight",
+   "place": {
+    "land": "ruins",
+    "row": 7,
+    "col": 20
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_ruins:2"
+      ],
+      "say": [
+       "It is done. They are quiet.",
+       "Wear the Crown's strength, not the Crown. Break what bars your way. In the Wintermarch, find Hrefna."
+      ],
+      "do": [
+       "finish_quest:main_ruins"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_ruins:0"
+      ],
+      "say": [
+       "I was the Hollow Guard. All of it, now. The others walk these halls still, but not as men.",
+       "Lay three of them to rest. They deserve that much. Then the Crown of Ash is yours."
+      ],
+      "do": [
+       "advance_quest:main_ruins"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_ruins"
+      ],
+      "say": [
+       "Three of my brothers, {hero}. Be quick. They feel nothing, but I do."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_ruins"
+      ],
+      "say": [
+       "I keep my watch. Someone must."
+      ]
+     },
+     {
+      "say": [
+       "Turn back, wanderer. These halls are not for the living."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "hrefna",
+   "name": "Hrefna the Huntress",
+   "look": "hunter",
+   "place": {
+    "village": "Snowcap",
+    "row": 0,
+    "col": 1
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_frost:3"
+      ],
+      "say": [
+       "Under the snow, where they circled: the Wintermark. You'll leap like the storm with it.",
+       "The Cinder Wastes are past the Ashen Gate, and the Gate only opens for one who carries five stones."
+      ],
+      "do": [
+       "finish_quest:main_frost"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_frost:0"
+      ],
+      "say": [
+       "You're the one with the stones. Good. The wolves have grown bold since the light failed.",
+       "Bring down three. Then climb a watchtower and see what they have been circling."
+      ],
+      "do": [
+       "advance_quest:main_frost"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_frost"
+      ],
+      "say": [
+       "The wolves, {hero}. And the tower. The cold won't wait for you."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_frost"
+      ],
+      "say": [
+       "Hunting's better now. Thanks to you."
+      ]
+     },
+     {
+      "say": [
+       "Not now. I'm tracking."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "sefa",
+   "name": "Sefa of the Last Well",
+   "look": "trader",
+   "place": {
+    "village": "Sandwell",
+    "row": 1,
+    "col": 2
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_desert:3"
+      ],
+      "say": [
+       "Your hands aren't even burned. The Ember chose you.",
+       "One stone left. Morwen, in the Mirefen, has been waiting a long time for you."
+      ],
+      "do": [
+       "finish_quest:main_desert"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_desert:1"
+      ],
+      "say": [
+       "The Gate let you through. Then you carry five of the seven.",
+       "The Sunforge Ember burns at the bottom of the Mine beneath the Wastes. It burned the last three who went for it."
+      ],
+      "do": [
+       "advance_quest:main_desert"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_desert"
+      ],
+      "say": [
+       "The Mine beneath the Wastes. Drink before you go."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_desert"
+      ],
+      "say": [
+       "The well is full again. First time in nine years."
+      ]
+     },
+     {
+      "say": [
+       "The Ashen Gate is shut to you, stranger."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "morwen",
+   "name": "Morwen of the Mirefen",
+   "look": "seer",
+   "place": {
+    "village": "Bogwater",
+    "row": 0,
+    "col": 1
+   },
+   "talk": {
+    "start": [
+     {
+      "if": [
+       "quest_step:main_swamp:2"
+      ],
+      "say": [
+       "The Ravenmoon. Look through it and the hidden ways will show themselves.",
+       "Seven stones. Go to the Shadowgate. What waits beyond it has waited a hundred years for you."
+      ],
+      "do": [
+       "finish_quest:main_swamp"
+      ]
+     },
+     {
+      "if": [
+       "quest_step:main_swamp:0"
+      ],
+      "say": [
+       "I dreamed of you. Twice. In the second dream you won.",
+       "The lurkers in the black water have the Ravenmoon's scent. Drive off three and it will surface."
+      ],
+      "do": [
+       "advance_quest:main_swamp"
+      ]
+     },
+     {
+      "if": [
+       "quest_active:main_swamp"
+      ],
+      "say": [
+       "Three lurkers, {hero}. The fen does not forgive slowness."
+      ]
+     },
+     {
+      "if": [
+       "quest_done:main_swamp"
+      ],
+      "say": [
+       "Go. I will not dream of you again until it is over."
+      ]
+     },
+     {
+      "say": [
+       "Not yet, child. Not yet."
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

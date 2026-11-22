@@ -32,6 +32,14 @@ CASTLE_ONLY = "iwf"                                         # torches, windows a
 MONSTERS = caves.CAVE_MONSTERS                              # z, k, c and x
 EVERY_LETTER = ".#B*s=-HV%I^A~!o$TSEu" + "FGgJMPUR" + "".join(MONSTERS) + CASTLE_ONLY + "?" + "KLlD+"   # the last ones: castle.py
 
+# Shadowfall (the Godot rebuild) adds these. The pygame game plays them as air; the robot knows them.
+CHECKPOINT = "C"           # a lantern shrine: you wake up here after a fall
+DOORS = "<>"               # one-way doors: shut until you touch them from the side the arrow points to
+THORNS = "n"               # shadow thorns: they hurt, until the flare (the Sun stone's power) burns them
+EVERY_LETTER += CHECKPOINT + DOORS + THORNS
+# The 7 powers a "needs:" line can list (their ids, from shadowfall/core/game.gd)
+ABILITIES = ("dash", "climb", "pound", "swim", "double_jump", "flare", "truesight")
+
 # A brand new cave: rock all around, a way in on the left, a diamond and an exit on the right
 NEW_CAVE_WIDTH = 40
 NEW_CAVE_HEIGHT = 14
@@ -69,6 +77,16 @@ def settings_of(text):
     """A cave drawing's setting lines, all but its look ("theme: ..."), so they're kept when it's saved."""
     lines = [line.strip() for line in text.strip().splitlines() if ":" in line]
     return [line for line in lines if not line.startswith("theme:")]
+
+
+def needs_of(text):
+    """The powers a cave's "needs:" line lists ("needs: climb, pound" gives {"climb", "pound"}).
+    No needs: line at all gives None: then the robot may use every power."""
+    line = caves.level_setting(text, "needs")
+    if line is None:
+        return None
+    words = {word.strip().lower() for word in line.replace(",", " ").split()}
+    return words - {"none", ""}
 
 
 def new_cave_rows(width=NEW_CAVE_WIDTH, height=NEW_CAVE_HEIGHT):
@@ -189,10 +207,11 @@ def is_rock(rows, r, c):
     return 0 <= r < len(rows) and 0 <= c < len(rows[0]) and rows[r][c] in caves.SOLIDS
 
 
-def check_cave(theme, rows):
+def check_cave(theme, rows, settings=()):
     """Look for problems. Returns a list of (how_bad, message):
-    "must" = you have to fix it before you can play, "tip" = the cave works, but you might want to fix it."""
-    problems = []
+    "must" = you have to fix it before you can play, "tip" = the cave works, but you might want to fix it.
+    settings: the cave's setting lines ("needs: climb"), to check those too."""
+    problems = check_settings(rows, settings)
     starts, exits, ores = find_all(rows, "S"), find_all(rows, "E"), find_all(rows, "*")
     if not starts:
         problems.append(("must", "No start yet! Put an S where the Hero climbs in."))
@@ -249,6 +268,24 @@ def check_cave(theme, rows):
     return problems
 
 
+def check_settings(rows, settings):
+    """Tips about Shadowfall's setting lines: needs: and dark:."""
+    problems = []
+    text = "\n".join(settings)
+    needs = needs_of(text)
+    if needs is not None:
+        strange = sorted(needs - set(ABILITIES))
+        if strange:
+            problems.append(("tip", "I don't know the power %s in the needs: line. The powers are: %s."
+                             % (", ".join(strange), ", ".join(ABILITIES))))
+        if find_all(rows, THORNS) and "flare" not in needs:
+            problems.append(("tip", "There are shadow thorns (n), but needs: has no flare, so nothing burns them."))
+    dark = caves.level_setting(text, "dark")
+    if dark is not None and dark.lower() not in ("yes", "no"):
+        problems.append(("tip", "dark: should say yes or no (it says '%s')." % dark))
+    return problems
+
+
 def check_platforms(rows):
     """Tips about moving-platform tracks: the P's and U's are exactly where a platform goes."""
     problems = []
@@ -273,6 +310,6 @@ def check_platforms(rows):
     return problems
 
 
-def can_play(theme, rows):
+def can_play(theme, rows, settings=()):
     """You can play a cave as soon as it has a start."""
-    return not any(how_bad == "must" for how_bad, _ in check_cave(theme, rows))
+    return not any(how_bad == "must" for how_bad, _ in check_cave(theme, rows, settings))

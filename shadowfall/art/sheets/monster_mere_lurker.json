@@ -1,0 +1,42 @@
+{
+ "image": "monster_mere_lurker.png",
+ "kind": "sprite",
+ "cell": [
+  64,
+  64
+ ],
+ "origin": [
+  32,
+  64
+ ],
+ "anims": {
+  "move": {
+   "row": 0,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "attack": {
+   "row": 1,
+   "col": 0,
+   "frames": 3,
+   "fps": 10,
+   "loop": false
+  },
+  "hurt": {
+   "row": 2,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": false
+  },
+  "poof": {
+   "row": 3,
+   "col": 0,
+   "frames": 4,
+   "fps": 10,
+   "loop": false
+  }
+ }
+}

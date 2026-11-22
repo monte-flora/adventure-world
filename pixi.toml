@@ -20,6 +20,7 @@ test = { cmd = "python -m pytest tests -n auto", description = "Check that nothi
 test-all-caves = { cmd = "python -m pytest tests -n auto --all-caves", description = "Every test, and the robot beats every cave on the map (slow)" }
 godot-test = { cmd = "sh shadowfall/tools/run_tests.sh", description = "Shadowfall (Godot): run its tests headless and boot it (needs Godot 4.7.2 on PATH)" }
 godot-web = { cmd = "sh shadowfall/tools/export_web.sh", description = "Shadowfall (Godot): make the web version in shadowfall/build/web" }
+godot-cave = { cmd = "python shadowfall/tools/play_cave.py", description = "Shadowfall (Godot): play one cave file, e.g. pixi run godot-cave levels/caves/03_blue_lvl_1.txt" }
 shadowfall = { cmd = "godot --path shadowfall", description = "Play Shadowfall, the Godot rebuild (needs Godot 4.7.2 on PATH)" }
 guide = { cmd = '''python -c "import pathlib, webbrowser; webbrowser.open(pathlib.Path('how_it_works/index.html').resolve().as_uri())"''', description = "Open the how-it-works guide in your web browser" }
 
