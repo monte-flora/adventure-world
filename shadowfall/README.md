@@ -9,7 +9,7 @@ Install Godot **4.7.2** (`brew install --cask godot` or godotengine.org; the pin
 
 | What | Command |
 |---|---|
-| Play | `pixi run shadowfall` (or `godot --path shadowfall`) |
+| Play | `pixi run shadowfall` (it runs `godot --headless --path shadowfall --import` first: a fresh checkout needs that, or boot fails with *Identifier "Paths" not declared*) |
 | Jump to a screen | `godot --path shadowfall -- --scene=cave --file=caves/03_blue_lvl_1.txt` |
 | Open the editor | `godot -e --path shadowfall` |
 | Tests (headless) + boot check | `pixi run godot-test` (`sh shadowfall/tools/run_tests.sh --only=caves` for one area) |

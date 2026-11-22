@@ -38,8 +38,7 @@ def main():
     except FileNotFoundError as problem:
         print(problem)
         return 1
-    if not os.path.isdir(os.path.join(SHADOWFALL, ".godot")):     # a fresh checkout: Godot imports once first
-        subprocess.call([godot, "--headless", "--path", SHADOWFALL, "--import"])
+    subprocess.call([godot, "--headless", "--path", SHADOWFALL, "--import"])   # builds the class list a fresh checkout lacks
     return subprocess.call(command)
 
 
