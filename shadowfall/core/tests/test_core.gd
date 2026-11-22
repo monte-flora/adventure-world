@@ -18,6 +18,15 @@ func test_every_screen_opens() -> void:
 		check(Scenes.screen != null and Scenes.screen.is_inside_tree(), s + " opens")
 
 
+func test_goto_drops_the_old_screen_at_once() -> void:
+	Scenes.goto("title")
+	await frames(1)
+	var old := Scenes.screen
+	Scenes.goto("overworld")
+	check(not old.is_inside_tree(), "the old screen leaves the same frame")
+	check_eq(get_children().size(), 1, "only the new screen is in the host")
+
+
 func test_pause_and_resume() -> void:
 	Scenes.goto("overworld")
 	await frames(1)
@@ -79,11 +88,17 @@ func test_level_file_reads_settings_and_rows() -> void:
 	check_eq(Vector2i(lf.width, lf.height), Vector2i(5, 3), "size")
 	check_eq(lf.start(), Vector2i(1, 1), "start")
 	check_eq(lf.find("E"), [Vector2i(3, 1)] as Array[Vector2i], "exit")
+	var two := LevelFile.from_text("mine: A 1 1\ngate: Ivy 2 1 climb\nmine: B 3 1\n#####\n")
+	check_eq(two.all("mine"), PackedStringArray(["A 1 1", "B 3 1"]), "repeated mine: keys are all kept")
+	check_eq(two.all("gate").size(), 1, "one gate")
+	check_eq(two.all("nope").size(), 0, "missing key: none")
 
 
 func test_every_level_file_loads() -> void:
 	var n := 0
-	for folder in ["caves", "secret", "shadow", "castle"]:
+	for folder in ["caves", "secret", "shadow", "castle", "world", "realm", "stone"]:
+		if not DirAccess.dir_exists_absolute(Paths.level(folder)):
+			continue                   # levels/realm and levels/stone come with the levels PR
 		for f in Paths.level_files(folder):
 			var lf := LevelFile.load_file(Paths.level(f))
 			check(lf.error == "", f + ": " + lf.error)
