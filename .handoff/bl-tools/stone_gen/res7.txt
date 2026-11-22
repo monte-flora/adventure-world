@@ -1,1 +1,0 @@
-levels/stone/7_the_mirefen_maw.txt STUCK {'lever': False, 'diamond': None, 'exit': None, 'stuck_at': [30.96, 10.71], 'chests': [{'row': 26, 'column': 34, 'ok': True, 'gave_up': False}], 'seconds': 0.0}

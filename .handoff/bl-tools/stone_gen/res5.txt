@@ -1,1 +1,0 @@
-levels/stone/5_the_wintermarch_climb.txt STUCK {'lever': False, 'diamond': None, 'exit': None, 'stuck_at': [70.98, 23.68], 'chests': [{'row': 36, 'column': 52, 'ok': True, 'gave_up': False}], 'seconds': 0.0}

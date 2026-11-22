@@ -1,2 +1,0 @@
-~~~~##M#~~~~~~~##M#~~~~~~~#### {'exit': False, 'stuck_at': [35.21, 10.37], 'gave_up': True, 'seconds': 0.0, 'tries': 225862} 80
-

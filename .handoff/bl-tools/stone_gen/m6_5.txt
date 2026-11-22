@@ -1,1 +1,0 @@
-['8', '24', '5'] {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 7.3, 'tries': 23601} 13

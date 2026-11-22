@@ -1,1 +1,0 @@
-v4_shortpit2.txt (23, 62) {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 10.3, 'tries': 1583} 1

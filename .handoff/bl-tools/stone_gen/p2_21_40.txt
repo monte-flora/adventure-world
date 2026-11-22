@@ -1,1 +1,0 @@
-out2.txt (21, 40) {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 7.3, 'tries': 1310} 2

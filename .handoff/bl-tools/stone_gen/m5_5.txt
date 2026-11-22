@@ -1,1 +1,0 @@
-~~~~###M~~~~~~~#### {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 6.6, 'tries': 130086} 46
