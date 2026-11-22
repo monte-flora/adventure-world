@@ -65,6 +65,9 @@ static func layer(theme: String, which: String, speed: float) -> Parallax2D:
 ## levels/polish/<cave file name>/painted.* fills the cave's bounds behind the blocks.
 static var polish_root := ""                      # tests point this somewhere else; "" = levels/polish
 const PAINTED := ["painted.webp", "painted.png", "painted.jpg", "painted.jpeg"]
+## Letters not drawn when the cave has a painting (the painting shows them; collision stays):
+## rock, secret wall and one-way ledges. Everything that moves, changes or hurts still draws.
+const HIDE_PAINTED := "#F="
 
 
 ## The cave's painting, or null when it has none (then the parallax layers show as before).

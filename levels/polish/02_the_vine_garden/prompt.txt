@@ -1,0 +1,12 @@
+Repaint this map as a painted pixel-art cave backdrop for a 2D side-view fantasy game.
+
+Place: a drowned, moss-choked cavern of roots, dripping stone and broken carvings, deep in Emberhold.
+Mood: grim, epic and ancient, like a war-torn realm of old kingdoms. Original art, teen-safe, no gore.
+Moody light: dim torch glow and cold shafts of light, deep shadows in the corners.
+
+Keep the layout exactly: dark = solid rock, light = open cave air. Every wall, ledge, tunnel and opening stays exactly where the map shows it; do not move, add or close any of them.
+Outlined bars are thin stone ledges. Red = spikes, orange = lava, yellow = fire, purple = black thorns. Green dot = the way in, gold door = the way out, blue diamond = a small lantern shrine.
+
+No characters, creatures, people, text, letters, numbers, UI or grid lines (remove the grid).
+Same size and shape as the map: 2752x1536, 16:9, the whole frame filled edge to edge.
+Crisp pixel art, chunky pixels, limited dark palette, strong silhouettes.

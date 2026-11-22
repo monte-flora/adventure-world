@@ -56,7 +56,10 @@ animated at the sheet's fps). Parallax: `art/parallax/<theme>_{far,back,mid,fron
 1.4x; the front rocks only scroll sideways and are 60 % see-through so they never hide the floor.
 Painted backdrop: if `levels/polish/<cave file name>/painted.*` exists (made with Gemini, see
 `levels/README.md`), it is stretched over the cave's bounds behind the blocks (gloom applies) and the far,
-back and mid layers are hidden; the blocks stay crisp on top. `tests/test_cave_painting.gd`.
+back and mid layers are hidden. The painting shows the static blocks, so rock, secret walls and `=` ledges
+(`CaveArt.HIDE_PAINTED`) are not drawn; their collision stays. Everything that moves, changes or hurts still
+draws. F3 (dev, not in the pause menu) shows the hidden collision as faint outlines, to check a painting's
+alignment. `tests/test_cave_painting.gd`.
 Monsters: z `barrow_wight`, k `bone_crawler`, c `ember_imp`, x `cave_bat`; hurt = white flash, telegraph =
 attack pose pulsing red. Hero: `hero_side`, animation from its state; `crawl` on the floor while rock is within a tile above its head. Still
 drawn in code: the `<` `>` markers, geyser steam, ropes, arrows.

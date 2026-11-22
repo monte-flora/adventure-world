@@ -56,6 +56,7 @@ var art_sheet := "tiles_stone"                   # the theme's tile sheet (CaveA
 var art_tex: Texture2D
 var parallax: Array[Parallax2D] = []             # far, back, mid, front
 var painting: Sprite2D                           # levels/polish/<cave>/painted.*, in place of far/back/mid
+var show_collision := false                      # F3 (dev): faint outlines of the blocks a painting hides
 var cam: Camera2D
 var juice: CaveJuice                             # hit-stop, shake, sparks, dust, hurt edge
 
@@ -138,6 +139,14 @@ func build(lf: LevelFile, from_file := "") -> void:
 		painting.material = light.world_material
 	light.follow(hero)
 	add_child(preload("res://ui/hud.tscn").instantiate())
+
+
+## F3 (dev, not in the pause menu): show the collision a painting hides, to check its alignment.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		show_collision = not show_collision
+		overlay.queue_redraw()
+		get_viewport().set_input_as_handled()
 
 
 # ---------------------------------------------------------------- the grid
@@ -717,12 +726,14 @@ func _tileset() -> TileSet:
 	for i in letters.length():                      # row 0: one tile per letter
 		var ch := letters[i]
 		var at := Vector2i(i * TILE, 0)
-		if ch == LADDER_TOP:
-			continue                                  # invisible: the ladder is drawn over it
+		if ch == LADDER_TOP or (painting and ch in CaveArt.HIDE_PAINTED):
+			continue                                  # invisible: the ladder (or the painting) is drawn there
 		img.blit_rect(CaveArt.tile_image(art_sheet, CaveArt.MAP_TILE.get(ch, "solid_15")), Rect2i(0, 0, TILE, TILE), at)
 		if ch in "<>":                                # a one-way wall: the marker shows the side it opens from
 			img.fill_rect(Rect2i(at + Vector2i(6 if ch == "<" else 18, 12), Vector2i(8, 8)), Color("f7c64a"))
 	for bits in 16:                                 # rows 1 and 2: rock (#) and secret wall (F) edges
+		if painting:
+			break                                     # the painting shows the rock
 		var rock := CaveArt.tile_image(art_sheet, "solid_%d" % bits)
 		img.blit_rect(rock, Rect2i(0, 0, TILE, TILE), Vector2i(bits * TILE, TILE))
 		img.blit_rect(rock, Rect2i(0, 0, TILE, TILE), Vector2i(bits * TILE, 2 * TILE))
@@ -769,6 +780,9 @@ func _draw_overlay() -> void:
 	var view := Rect2(hero.position - Vector2(700, 420), Vector2(1400, 840))
 	for cell in cells_in(view.intersection(Rect2(Vector2.ZERO, Vector2(level.width, level.height) * TILE))):
 		var ch := letter(cell)
+		if show_collision and painting and ch in CaveArt.HIDE_PAINTED and ch != "F":
+			var h: float = TILE if ch == "#" else 8.0     # a ledge only stops you at its top
+			overlay.draw_rect(Rect2(Vector2(cell) * TILE, Vector2(TILE, h)), Color(0.4, 1.0, 0.9, 0.35), false, 1.0)
 		if ch == "." or ch == "#":
 			continue
 		var p := Vector2(cell) * TILE
