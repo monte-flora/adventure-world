@@ -1,5 +1,5 @@
 extends SceneTree
-## Screenshot any screen (silent window): godot --path shadowfall --audio-driver Dummy -s art/src/shot.gd -- --scene=overworld --out=/abs/x.png [--frames=40] [--realm=nightfall] [--at=c,r] [--eval='scene.hero.place(Vector2i(5,5))'] (eval: calls only, no assignment)
+## Screenshot any screen (silent window): godot --path shadowfall --audio-driver Dummy -s art/src/shot.gd -- --scene=overworld --out=/abs/x.png [--frames=40] [--dusk=3a4068] [--realm=nightfall] [--at=c,r] [--eval='scene.hero.place(Vector2i(5,5))'] (eval: calls only, no assignment)
 func _initialize() -> void:
 	_run.call_deferred()
 
@@ -21,6 +21,12 @@ func _run() -> void:
 	root.get_node("Scenes").goto(opts.get("scene", "overworld"), args)
 	for i in int(opts.get("frames", "40")):
 		await process_frame
+	if opts.has("dusk"):                       # --dusk=3a4068: tint the world to check lights at night
+		var cm := CanvasModulate.new()
+		cm.color = Color(opts.dusk)
+		current_scene.add_child(cm)
+		for i in 90:
+			await process_frame
 	if opts.has("eval"):
 		var e := Expression.new()
 		e.parse(opts.eval, ["scene"])

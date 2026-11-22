@@ -276,126 +276,85 @@ def lantern_only():
     return outline(s)
 
 
-# --- top-down (32x48): down, up, side (right; the game flips for left) ---------------------
-def top(d, step=0, bob=0, sway=0, hand=0, sword_ang=None, arc=None, roll=None, lamp_up=0):
-    s = surf(32, 48)
-    cx = 16
+# --- top-down (48x56, feet at 24,54): down, up, side (right; the game flips for left) -------
+# A lean ranger, about 1.45 tiles tall (body.py's "tall" figure): midnight hood and torn cloak, one bright
+# steel pauldron and a vambrace on the sword arm, leather over mail, the blood-red sash, the sword held
+# low, and the caged lantern in the other hand.
+CELL, G = (48, 56), 54
+NIGHT = ("ink1", "water0", "water1")       # the cloak: shadow, base, light (deep midnight blue)
+RANGER = {"size": "tall", "hood": NIGHT, "cloak": NIGHT, "eyes": "ink7", "tunic": LEATHER, "cross": "earth0",
+          "mail_hem": True, "skirt": 5, "sash": SASH, "pants": "earth0", "pants_far": "ink1", "boots": BOOT,
+          "mud": "earth2", "sleeve": "ink3", "glove": "earth1", "vambrace": True, "pauldron": True,
+          "clasp": "ink5"}
+REST = {"down": 125, "up": 55, "side": 40}  # the sword's angle when it is only carried
+
+
+def top(d, step=0, bob=0, sway=0, hem=0, sword_ang=None, arc=None, roll=None, lamp_up=0):
+    cx = CELL[0] // 2
     if roll is not None:  # a tumbling cloak ball, the lantern glinting as it turns
-        y = 26 - [0, 6, 6, 0][roll]
-        ellipse(s, CLOAK[0], 6, y, 20, 18)
-        ellipse(s, CLOAK[1], 7, y + 1, 17, 14)
-        ellipse(s, CLOAK[2], 9 + roll * 2 % 8, y + 3, 7, 4)
-        rect(s, SASH[1], 6 + (roll * 5) % 14, y + 8, 6, 3)
-        px(s, "light1", 8 + (roll * 7) % 16, y + 12)
+        s = surf(*CELL)
+        y = 30 - [0, 6, 6, 0][roll]
+        ellipse(s, NIGHT[0], cx - 10, y, 20, 18)
+        ellipse(s, NIGHT[1], cx - 9, y + 1, 17, 14)
+        ellipse(s, NIGHT[2], cx - 7 + roll * 2 % 8, y + 3, 7, 3)
+        rect(s, SASH[1], cx - 10 + (roll * 5) % 14, y + 8, 6, 3)
+        rect(s, STEEL[2], cx - 2 + (roll * 3) % 7, y + 2, 3, 2)
+        px(s, "light1", cx - 8 + (roll * 7) % 16, y + 12)
+        px(s, "light0", cx - 7 + (roll * 7) % 16, y + 12)
         return outline(s)
-    t, h = 19 + bob, 42 + bob
-    # boots under the cloak hem
-    for i, fx in enumerate((-5, 2)):
-        st = step if i == 0 else -step
-        if d == "side":
-            rect(s, BOOT[1 - i], cx - 3 + st * 2, 42 + bob, 6, 4)
-            px(s, "earth2", cx + 1 + st * 2, 44 + bob)
-        else:
-            fy = 41 + bob + (st if d == "down" else -st)
-            rect(s, BOOT[1], cx + fx, fy, 4, 5)
-            rect(s, BOOT[0], cx + fx, fy, 4, 1)
-    # the long torn cloak
-    hem = torn(cx - 11 + sway, cx + 11 + sway, h - 3, 6, 3, seed=step + sway)
-    poly(s, CLOAK[1], [(cx - 7, t), (cx + 7, t)] + hem[::-1])
-    poly(s, CLOAK[0], [(cx - 7, t), (cx - 4, t)] + [(x, y) for x, y in hem[:3]][::-1])
-    line(s, CLOAK[2], (cx + 5, t + 2), (cx + 8 + sway, h - 4))
-    if d == "down":  # the cloak open at the front: jerkin, mail, sash, the lantern on the hip
-        poly(s, MAIL[0], [(cx - 4, t + 2), (cx + 4, t + 2)] + torn(cx + 4, cx - 4, h - 4, 3, 2))
-        for y in range(t + 10, h - 3, 2):
-            for x in range(cx - 3 + (y // 2) % 2, cx + 4, 2):
-                px(s, MAIL[1], x, y)
-        rect(s, LEATHER[1], cx - 4, t + 2, 8, 8)
-        line(s, LEATHER[0], (cx - 4, t + 2), (cx + 3, t + 9))
-        rect(s, SASH[1], cx - 5, t + 10, 10, 3)
-        rect(s, SASH[0], cx - 5, t + 12, 10, 1)
-        poly(s, SASH[0], [(cx + 1, t + 12), (cx + 3, t + 12), (cx + 4 + sway, t + 18), (cx + 2 + sway, t + 18)])
-        px(s, "ink5", cx - 1, t + 11)
-    elif d == "up":  # the back: hood folds, sash ends
-        line(s, CLOAK[0], (cx, t + 3), (cx + sway, h - 4), 2)
-        poly(s, SASH[0], [(cx - 6, t + 9), (cx - 4, t + 9), (cx - 5 + sway, t + 16), (cx - 7 + sway, t + 15)])
+    from body import SIZES, figure
+    sh = G - sum(SIZES["tall"]) + bob + SIZES["tall"][0]
+    main = off = None
+    side_x = {"down": cx - 7, "up": cx + 7, "side": cx}[d]
+    if sword_ang is not None:              # the sword arm reaches along the swing
+        a = math.radians(sword_ang)
+        main = (side_x + round(math.cos(a) * 5), sh + 5 + round(math.sin(a) * 5))
+    if lamp_up:                            # the lantern lifted high in the other hand
+        off = ({"down": cx + 8, "up": cx - 8, "side": cx + 5}[d], sh + 13 - lamp_up)
+    s, A = figure(RANGER, d, CELL, G, step=step, bob=bob, sway=sway, main=main, off=off, hem=hem)
+    hx, hy = A["main"]
+    ox, oy = A["off"]
+    if d == "side" and not lamp_up:        # at the back hip, over the cloak, swinging
+        lantern(s, cx - 5 - sway, A["hip"] - 2)
+    elif d == "up" and not lamp_up:        # carried in front: only its glow shows past the cloak
+        lantern(s, ox - 1, oy + 1, glow=False)
+        px(s, "light0", ox - 1, oy + 7)
     else:
-        rect(s, LEATHER[1], cx + 1, t + 3, 5, 9)
-        rect(s, SASH[1], cx, t + 10, 7, 3)
-        poly(s, SASH[0], [(cx - 1, t + 11), (cx - 7 - sway, t + 13), (cx - 6 - sway, t + 16)])
-    # hood: midnight blue, peak, face in shadow with pale eyes
-    hy = 3 + bob
-    ellipse(s, CLOAK[1], cx - 8, hy, 16, 17)
-    poly(s, CLOAK[1], [(cx - 3, hy + 1), (cx + 3, hy + 1), (cx, hy - 2)])
-    ellipse(s, CLOAK[2], cx - 5, hy + 1, 8, 3)
-    if d == "down":
-        ellipse(s, "ink0", cx - 5, hy + 5, 10, 11)
-        ellipse(s, "ink1", cx - 4, hy + 8, 8, 7)
-        px(s, "ink6", cx - 3, hy + 9); px(s, "ink7", cx - 2, hy + 9)
-        px(s, "ink7", cx + 1, hy + 9); px(s, "ink6", cx + 2, hy + 9)
-        for fx, fy in ((-2, 11), (-1, 12), (0, 12), (1, 11), (0, 13), (-1, 13)):
-            px(s, SKIN[0], cx + fx, hy + fy)
-    elif d == "side":
-        ellipse(s, "ink0", cx + 1, hy + 5, 8, 10)
-        ellipse(s, "ink1", cx + 3, hy + 7, 5, 7)
-        px(s, "ink7", cx + 6, hy + 9)
-        for fx, fy in ((6, 10), (7, 11), (6, 12), (5, 13)):
-            px(s, SKIN[0], cx + fx, hy + fy)
-    else:
-        line(s, CLOAK[0], (cx, hy + 5), (cx, hy + 15), 2)
-        line(s, CLOAK[2], (cx - 5, hy + 4), (cx - 3, hy + 13))
-    px(s, CLOAK[2], cx, t)  # clasp
-    # sword shoulder: the steel pauldron, flat plate
-    psx = {"down": cx - 7, "up": cx + 4, "side": cx + 1}[d]
-    rect(s, STEEL[0], psx, t - 1, 5, 4)
-    line(s, STEEL[1], (psx, t - 1), (psx + 4, t - 1))
-    px(s, STEEL[2], psx + 1, t - 1)
-    line(s, STEEL[0], (psx, t + 3), (psx + 4, t + 3))
-    # lantern on the hip (raised in hand for lantern_raise)
-    if d == "down":
-        lx, ly = cx + 7, t + 10 + hand - lamp_up
-    elif d == "side":
-        lx, ly = cx + 6, t + 11 + hand - lamp_up
-    else:
-        lx, ly = cx - 8, t + 10 + hand - lamp_up
-    if lamp_up:
-        rect(s, LEATHER[1], lx - 1, ly - 2, 3, 3)
-    lantern(s, lx, ly, glow=d != "up" or lamp_up > 0)
-    if d == "up" and not lamp_up:
-        px(s, "light0", lx, ly + 6)
-    if sword_ang is not None:
-        sx, sy = {"down": (cx - 6, 30), "up": (cx + 6, 21), "side": (cx + 4, 28)}[d]
-        rect(s, STEEL[1], sx - 1, sy + bob - 1, 3, 3)
-        sword(s, sx, sy + bob, sword_ang, 14)
+        if lamp_up and d == "side":
+            line(s, RANGER["sleeve"], (cx + 1, sh + 3), (ox, oy), 3)
+            rect(s, RANGER["glove"], ox - 1, oy, 3, 2)
+        lantern(s, ox + (1 if d == "down" else 0), oy + 1)
+    sword(s, hx, hy + 1, REST[d] if sword_ang is None else sword_ang, 15)
+    rect(s, RANGER["glove"], hx - 1, hy, 3, 2)
     s = outline(s)
     if arc:
-        sx, sy = {"down": (16, 30), "up": (16, 22), "side": (16, 30)}[d]
-        slash(s, sx, sy, 15, *arc)
+        slash(s, cx, {"down": 36, "up": 26, "side": 34}[d] + bob, 17, *arc)
     return s
 
 
 ATTACK = {"down": ((-150, 0), 60, 120), "up": ((-30, 0), -60, -120), "side": ((-100, 0), -20, 50)}
+IDLE_T = ((0, 0), (0, 1), (1, 1), (1, 0))                         # bob, sway
+WALK_T = ((2, 0, 1), (0, -1, 2), (-2, 0, -1), (0, -1, -2))        # step, bob, sway: the cloak waves
 
 
 def top_sheet():
-    sh = Sheet("hero_top", 32, 48, origin=[16, 46])
-    for d in ("down", "up", "side"):
-        sh.add("idle_" + d, [top(d, bob=b, sway=w) for b, w in ((0, 0), (0, 1), (1, 1), (1, 0))], 4)
-    for d in ("down", "up", "side"):
-        sh.add("walk_" + d, [top(d, step=st, bob=b, sway=w, hand=hd)
-                             for st, b, w, hd in ((2, 0, 1, 0), (0, -1, 0, 1), (-2, 0, -1, 0), (0, -1, 0, 1))], 8)
+    sh = Sheet("hero_top", *CELL, origin=[CELL[0] // 2, G])
+    for sun in (False, True):              # every sword-in-hand frame again with Sunfang's runes
+        SUNFANG[0] = sun
+        tag = "_sunfang" if sun else ""
+        for d in ("down", "up", "side"):
+            sh.add("idle_" + d + tag, [top(d, bob=b, sway=w, hem=i // 2) for i, (b, w) in enumerate(IDLE_T)], 4)
+        for d in ("down", "up", "side"):
+            sh.add("walk_" + d + tag, [top(d, step=st, bob=b, sway=w, hem=i)
+                                       for i, (st, b, w) in enumerate(WALK_T)], 8)
+        for d in ("down", "up", "side"):
+            pre, a0, a1 = ATTACK[d]
+            sh.add("attack_" + d + tag, [top(d, sword_ang=pre[0]), top(d, sword_ang=(a0 + a1) / 2, arc=(a0 - 60, a1), sway=2),
+                                         top(d, sword_ang=a1, sway=1)], 14, False)
+    SUNFANG[0] = False
     for d in ("down", "up", "side"):
         sh.add("roll_" + d, [top(d, roll=k) for k in range(4)], 14, False)
-    for d in ("down", "up", "side"):
-        pre, a0, a1 = ATTACK[d]
-        sh.add("attack_" + d, [top(d, sword_ang=pre[0]), top(d, sword_ang=(a0 + a1) / 2, arc=(a0 - 60, a1)),
-                               top(d, sword_ang=a1)], 14, False)
-    SUNFANG[0] = True                      # the same swings with Sunfang in hand
-    for d in ("down", "up", "side"):
-        pre, a0, a1 = ATTACK[d]
-        sh.add("attack_" + d + "_sunfang", [top(d, sword_ang=pre[0]), top(d, sword_ang=(a0 + a1) / 2, arc=(a0 - 60, a1)),
-                                            top(d, sword_ang=a1)], 14, False)
-    SUNFANG[0] = False
-    sh.add("hurt", [flash(top("down")), top("down", sway=-2)], 12, False)
+    sh.add("hurt", [flash(top("down")), top("down", sway=-2, bob=1)], 12, False)
     sh.add("lantern_raise", [top("down", lamp_up=k) for k in (4, 10, 16)], 10, False)
     sh.save()
 

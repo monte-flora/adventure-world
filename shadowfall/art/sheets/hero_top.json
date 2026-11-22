@@ -2,12 +2,12 @@
  "image": "hero_top.png",
  "kind": "sprite",
  "cell": [
-  32,
-  48
+  48,
+  56
  ],
  "origin": [
-  16,
-  46
+  24,
+  54
  ],
  "anims": {
   "idle_down": {
@@ -52,78 +52,120 @@
    "fps": 8,
    "loop": true
   },
-  "roll_down": {
-   "row": 6,
-   "col": 0,
-   "frames": 4,
-   "fps": 14,
-   "loop": false
-  },
-  "roll_up": {
-   "row": 7,
-   "col": 0,
-   "frames": 4,
-   "fps": 14,
-   "loop": false
-  },
-  "roll_side": {
-   "row": 8,
-   "col": 0,
-   "frames": 4,
-   "fps": 14,
-   "loop": false
-  },
   "attack_down": {
-   "row": 9,
+   "row": 6,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
   "attack_up": {
-   "row": 10,
+   "row": 7,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
   "attack_side": {
-   "row": 11,
+   "row": 8,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
-  "attack_down_sunfang": {
+  "idle_down_sunfang": {
+   "row": 9,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "idle_up_sunfang": {
+   "row": 10,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "idle_side_sunfang": {
+   "row": 11,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "walk_down_sunfang": {
    "row": 12,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "walk_up_sunfang": {
+   "row": 13,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "walk_side_sunfang": {
+   "row": 14,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "attack_down_sunfang": {
+   "row": 15,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
   "attack_up_sunfang": {
-   "row": 13,
+   "row": 16,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
   "attack_side_sunfang": {
-   "row": 14,
+   "row": 17,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
+  "roll_down": {
+   "row": 18,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "roll_up": {
+   "row": 19,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
+  "roll_side": {
+   "row": 20,
+   "col": 0,
+   "frames": 4,
+   "fps": 14,
+   "loop": false
+  },
   "hurt": {
-   "row": 15,
+   "row": 21,
    "col": 0,
    "frames": 2,
    "fps": 12,
    "loop": false
   },
   "lantern_raise": {
-   "row": 16,
+   "row": 22,
    "col": 0,
    "frames": 3,
    "fps": 10,

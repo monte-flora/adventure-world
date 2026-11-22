@@ -25,7 +25,7 @@ var font: Font = load("res://art/font/body.fnt")
 | Sheet | Cell | Animations |
 |---|---|---|
 | `hero_side` (hooded wanderer, lantern) | 48×64 | idle 4, run 6, jump 3 (rise/apex/fall), fall 2, land 2, attack 4, air_attack 3, pogo 2, climb 4, wall_slide 1, dash 3, swim 4, lantern_raise 3, crawl 4 (under 32 px), hurt 2, death 6 (ends in smoke) |
-| `hero_top` | 32×48 | idle/walk/roll/attack × `_down` `_up` `_side`, hurt 2, lantern_raise 3 |
+| `hero_top` (lean ranger from `src/body.py`, about 1.45 tiles tall; sword in hand, lantern in the other) | 48×56 | idle/walk/attack × `_down` `_up` `_side`, each again as `_sunfang`; roll × 3, hurt 2, lantern_raise 3 |
 | `shadow_king` (spiked black plate, iron crown, violet eyes, crystal heart, torn rune cloak, greatsword) | 192×256 | idle 4, float 4, cast 6, summon 6, blade 4, hurt 2, fade_out 8 |
 | `monster_<id>` (18) | 32, 64 or 96 | move 4, attack 3, hurt 2, poof 4. Realm: thornling, barrow_wight, mere_lurker, frost_wolf, ash_scarab, bog_wisp, umbral_hound. Cave: cave_bat, gloom_slime, bone_crawler, ember_imp, ice_mite, sand_wyrm, mire_toad, shade. Mini-bosses 96: stone_warden, frost_matriarch, cinder_drake |
 | `tiles_<theme>` (stone, moss, crystal, lava, frost, sand, swamp, shadow, castle) | 32×32 | `solid_0`–`solid_15` (bits N1 E2 S4 W8 = that neighbour is solid), cracked `B`, ore_diamond `*`, ore_sun `s`, ledge `=`, ledge_crumbly `-`, spikes `^`, spike_trap `A`, thorns `n`, fire `!`, lava `~`, chest `T` (closed, open), gem `$`, door `E`, mushroom `o`, ladder `H`, vine `V`, rope `R`, climb_wall `%`, ice `I`, spring `u`, lever `L`, gate `G` (shut, open), flame_jet `J` + flame, geyser `M`, platform `P` `U`, checkpoint / checkpoint_lit `C`, crystal, torch `i`, window `w`, banner `f`, key `K`, light_shard `+`, back_wall, stalactite, tuft, skull |
@@ -38,4 +38,4 @@ var font: Font = load("res://art/font/body.fnt")
 - `gloom_lut.png` (32×4): row = gloom stage 0–3, column = source palette index, and the pixel is the colour it turns into. B3's palette-swap shader reads it. Accents never change.
 - `parallax/<theme>_{far,back,mid,front}.png` (960×540): `far` is opaque and scrolls 0×, `back` 0.25× (`ink1`), `mid` 0.5× (`ink2`), `front` 1.4× (`ink0`, ≤15 % of the screen).
 - `font/body` (5×7 glyphs, 6×10 cell, ASCII 32–126) and `font/num` (3×5 digits and `+ - / : x %`): each is a PNG grid, a JSON and a BMFont `.fnt` that Godot loads as a `Font`. Draw them at a whole-number scale.
-- `src/` (ignored by Godot): the generators. `sfart.py` holds the palette, the sheet packer and the drawing helpers.
+- `src/` (ignored by Godot): the generators. `body.py` is the top-down body kit (one lean figure from a spec: palette, headgear, hair, armour, cloak) that the hero and the people share. `sfart.py` holds the palette, the sheet packer and the drawing helpers.

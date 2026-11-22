@@ -41,7 +41,7 @@ func test_hero_has_every_move() -> void:
 		for a in ["idle_", "walk_", "roll_", "attack_"]:
 			check(ArtSheet.frames("hero_top").has_animation(a + d), "hero_top has " + a + d)
 	check_eq(ArtSheet.cell("hero_side"), Vector2i(48, 64), "side hero cell")
-	check_eq(ArtSheet.cell("hero_top"), Vector2i(32, 48), "top-down hero cell")
+	check_eq(ArtSheet.cell("hero_top"), Vector2i(48, 56), "top-down hero cell")
 
 
 func test_sprite_plays_in_a_scene() -> void:

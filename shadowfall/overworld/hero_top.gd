@@ -4,6 +4,8 @@ extends Node2D
 ## 5.5 squares/s (0→max 5 f, stop 3 f), sword arc on R, roll on SHIFT once Wraithstep (dash) is owned.
 ## Collides square by square with WorldMap.walkable(), so ability gates open the moment Game has the
 ## ability. Art: art/sheets/hero_top (AnimatedSprite2D, feet on the bottom of the box). B1 owns this file.
+## The lantern: `light` (LanternLight.HERO, the strongest light in the realm) sits on the lantern in his
+## hand and moves with his facing; `embers` are a few sparks drifting up from it.
 
 const TILE := LevelFile.TILE
 const HALF := Vector2(10, 10)               # collision box half size (px)
@@ -34,6 +36,10 @@ var attack_frame := -1                      # -1 = not swinging
 var iframes := 0
 var lock_frames := 0
 var sprite: AnimatedSprite2D
+var light: LanternLight
+var embers: CPUParticles2D
+## Where the lantern hangs, from the middle of the box, by facing (the side one is for facing right).
+const LANTERN_AT := {"_down": Vector2(9, 0), "_up": Vector2(-8, 0), "_side": Vector2(-5, 3)}
 
 
 func _ready() -> void:
@@ -43,6 +49,47 @@ func _ready() -> void:
 	sprite.position = Vector2(0, HALF.y + 2)          # the feet, just below the box's middle
 	add_child(sprite)
 	sprite.play("idle_down")
+	light = LanternLight.new(LanternLight.HERO)
+	light.name = "LanternLight"
+	add_child(light)
+	embers = _make_embers()
+	add_child(embers)
+	_place_lantern()
+
+
+## Faint sparks rising from the lantern (CPU particles: safe in the web build).
+func _make_embers() -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.name = "Embers"
+	p.amount = 9
+	p.lifetime = 1.8
+	p.local_coords = false                            # they stay behind as he walks on
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 4.0
+	p.direction = Vector2.UP
+	p.spread = 28.0
+	p.gravity = Vector2(0, -14)
+	p.initial_velocity_min = 6.0
+	p.initial_velocity_max = 16.0
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 2.0
+	var ramp := Gradient.new()
+	ramp.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	ramp.colors = PackedColorArray([Color("fff2a8"), Color("f0784a"), Color(Color("c23a3a"), 0.0)])
+	p.color_ramp = ramp
+	var unlit := CanvasItemMaterial.new()             # sparks glow: the dusk does not dim them
+	unlit.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	p.material = unlit
+	p.z_index = 1
+	return p
+
+
+func _place_lantern() -> void:
+	var at: Vector2 = LANTERN_AT[_dir()]
+	if facing.x < -0.01 and _dir() == "_side":
+		at.x = -at.x
+	light.position = at
+	embers.position = at
 
 
 ## The facing as a sheet suffix: _down, _up or _side (flip_h when facing left).
@@ -66,7 +113,7 @@ func _animate() -> void:
 		anim = "walk"
 	if anim != "hurt":
 		anim += _dir()
-	if anim.begins_with("attack") and Forge.tier() >= Forge.SUNFANG_TIER:
+	if Forge.tier() >= Forge.SUNFANG_TIER and sprite.sprite_frames.has_animation(anim + "_sunfang"):
 		anim += "_sunfang"                  # Sunfang's runes glow along the blade
 	sprite.flip_h = facing.x < -0.01 and _dir() == "_side"
 	if sprite.animation != anim:
@@ -74,6 +121,7 @@ func _animate() -> void:
 	elif anim.begins_with("attack") and attack_frame == 0:
 		sprite.frame = 0
 	sprite.visible = not (iframes > 0 and (iframes / 4) % 2 == 0)
+	_place_lantern()
 
 
 func cell() -> Vector2i:
