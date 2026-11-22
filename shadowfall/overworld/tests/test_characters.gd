@@ -103,3 +103,25 @@ func test_entity_toggles_equipment() -> void:
 	bram._sync_gear()
 	check(spear.flip_h, "gear flips with the body")
 	check(not ow.hero.equip("shield"), "the hero's sheet is taller: no gear art for him yet")
+
+
+func test_peoples_lights_are_dimmer_than_the_heros() -> void:
+	var ow = await _open()
+	var hero: HeroTop = ow.hero
+	for p in ow.people:
+		var lights: Array = p.get_children().filter(func(c): return c is PointLight2D)
+		check_eq(lights.size(), 1, "%s has one light" % p.id)
+		check(p.light.base_energy <= hero.light.base_energy * 0.5, "%s's light is at most half as strong as the hero's" % p.id)
+		check(p.light.radius <= hero.light.radius * 0.5, "%s's light is at most half as wide" % p.id)
+		check(p.light.get_children().any(func(c): return c is Flicker), "%s's light flickers" % p.id)
+	var bram := _person(ow, "bram")
+	var tollan := _person(ow, "tollan")
+	check_eq(bram.lit, "torch", "Bram's torch burns")
+	check(tollan.lit == "" and tollan.light.base_energy < bram.light.base_energy, "Tollan carries no flame: a fainter glow")
+	bram.face(bram.position + Vector2(40, 0))
+	var right := bram.light.position
+	bram.face(bram.position + Vector2(-40, 0))
+	check(bram.light.position.x == -right.x and right.x != 0.0, "the light stays on the torch as he turns")
+	bram.equip("torch", false)
+	bram.face(bram.position + Vector2(0, 40))
+	check(not bram.light.enabled, "put the torch away and its light goes out")
