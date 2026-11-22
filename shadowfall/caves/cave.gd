@@ -104,7 +104,12 @@ func build(lf: LevelFile, from_file := "") -> void:
 	cam.limit_right = lf.width * TILE
 	cam.limit_bottom = lf.height * TILE
 	hero.add_child(cam)
-	add_child(GloomLight.new())
+	var light := GloomLight.new()
+	light.dark = lf.setting("dark") == "yes"
+	add_child(light)
+	map.material = light.world_material
+	light.follow(hero)
+	add_child(preload("res://ui/hud.tscn").instantiate())
 
 
 # ---------------------------------------------------------------- the grid

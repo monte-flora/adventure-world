@@ -6,7 +6,7 @@ All music and sound is made in code when first needed: no audio files.
 |---|---|
 | `audio.gd` | The `Audio` autoload: buses (Master, Music, SFX), music that follows the gloom, SFX, volumes (saved in `user://audio.cfg`) |
 | `synth.gd` | The sound maker: pulse/triangle/sine/noise voices, echo, low-pass |
-| `tunes.gd` | The tunes as text: `overworld` (title and map), `cave`, `boss`, plus the Shadow King sting. Rewrite them here |
+| `tunes.gd` | The tunes as text on a 16th-note grid (`parts`): `overworld` (title and map), `cave`, `boss`, plus the Shadow King sting. Rewrite them here |
 | `sfx.gd` | The sound effects, one recipe each (`Audio.play_sfx("jump")`) |
 | `CREDITS-audio.md` | Where any outside audio file would be logged (none) |
 

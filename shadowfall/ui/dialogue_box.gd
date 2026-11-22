@@ -8,7 +8,7 @@ extends CanvasLayer
 
 signal finished
 
-const LAYER := 60
+const LAYER := GloomLight.HUD_LAYER + 10
 const LINES := 3
 const WIDTH := 640                     # text width (px) inside the frame
 const CHARS_PER_SECOND := 60.0

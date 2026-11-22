@@ -33,11 +33,18 @@ var nightfall := false
 var errors: PackedStringArray = []
 
 
-## The light realm from every file in levels/world/.
+## Where the land files are: levels/realm/ (the redrawn 6 × 5 realm) once it exists, else levels/world/.
+static func land_folder() -> String:
+	return "realm" if DirAccess.dir_exists_absolute(Paths.level("realm")) else "world"
+
+
+## The light realm from every land file (the Umbral Reach's file, `world: umbral_reach`, is left out).
 static func load_realm() -> WorldMap:
 	var texts := {}
-	for f in Paths.level_files("world"):
-		texts[f] = FileAccess.get_file_as_string(Paths.level(f))
+	for f in Paths.level_files(land_folder()):
+		var text := FileAccess.get_file_as_string(Paths.level(f))
+		if LevelFile.from_text(text).setting("world") == "":
+			texts[f] = text
 	var wm := WorldMap.new()
 	wm.stitch(texts)
 	wm.plan_caves(Paths.level_files("caves"), Paths.level_files("secret"))
@@ -89,7 +96,12 @@ func stitch(texts: Dictionary) -> void:
 		var h := lf.setting("home").split(" ", false)
 		if h.size() == 2:
 			home = origin + Vector2i(int(h[1]), int(h[0]))
-		for line in _all(texts[f], "gate"):
+		for line in lf.all("mine"):
+			# "stone/1_the_crumbling_vigil.txt 23 8": the cave under the Mine at that row, column
+			var mp := line.split(" ", false)
+			if mp.size() == 3:
+				cave_of[origin + Vector2i(int(mp[2]), int(mp[1]))] = mp[0]
+		for line in lf.all("gate"):
 			# "Desert Gate 7 0 3" or "Ivy Cliff 3 4 climb": name, row, col, then a level/stone count or an ability
 			var parts := line.split(" ", false)
 			if parts.size() >= 4:
@@ -109,6 +121,8 @@ func plan_caves(files: PackedStringArray, secret: PackedStringArray) -> void:
 	var i := 0
 	var s := 0
 	for m in mines:
+		if cave_of.has(m):                    # a mine: line already named its cave
+			continue
 		if cells[m] == "S" and secret.size() > 0:
 			cave_of[m] = secret[s % secret.size()]
 			s += 1
@@ -229,16 +243,6 @@ func _first_walkable() -> Vector2i:
 			if walkable(Vector2i(c, r)):
 				return Vector2i(c, r)
 	return Vector2i.ZERO
-
-
-## Every value of a repeated setting line ("gate: ..."), which LevelFile keeps only the last of.
-static func _all(text: String, key: String) -> PackedStringArray:
-	var out := PackedStringArray()
-	for raw in text.split("\n"):
-		var kv := raw.strip_edges().split(":", true, 1)
-		if kv.size() == 2 and kv[0].strip_edges() == key:
-			out.append(kv[1].strip_edges())
-	return out
 
 
 ## A display-name table from rules/names.gd (B4's), or {} / "" while it doesn't have one yet.

@@ -3,7 +3,7 @@ extends CanvasLayer
 ## count, top-right gold. It sits above the light layer, so it is never darkened.
 ## A screen adds it with  add_child(preload("res://ui/hud.tscn").instantiate()).
 
-const LAYER := 50
+const LAYER := GloomLight.HUD_LAYER   # above the dark (light/ draws on 50)
 const MARGIN := 8
 const SIZE := UiStyle.SMALL * 2   # small font at 2×: hearts read clearly
 

@@ -7,7 +7,8 @@ class_name LevelFile
 const TILE := 32                       # pixels per tile (user, 2026-11-21)
 
 var path := ""
-var settings := {}                     # "theme" -> "moss", "lava rises" -> "yes", ...
+var settings := {}                     # "theme" -> "moss", "lava rises" -> "yes", ... (last one wins)
+var repeats := {}                      # every value of every key, in order: "mine" -> ["A 3 4", "B 9 2"]
 var rows := PackedStringArray()
 var width := 0
 var height := 0
@@ -37,7 +38,11 @@ func parse(text: String) -> void:
 			continue
 		if ":" in line:
 			var kv := line.split(":", true, 1)
-			settings[kv[0].strip_edges()] = kv[1].strip_edges()
+			var key := kv[0].strip_edges()
+			settings[key] = kv[1].strip_edges()
+			if not repeats.has(key):
+				repeats[key] = PackedStringArray()
+			repeats[key].append(settings[key])
 		else:
 			rows.append(line)
 	height = rows.size()
@@ -53,6 +58,11 @@ func parse(text: String) -> void:
 
 func setting(key: String, default := "") -> String:
 	return settings.get(key, default)
+
+
+## Every value of a key that may repeat ("mine:", "gate:"), in file order.
+func all(key: String) -> PackedStringArray:
+	return repeats.get(key, PackedStringArray())
 
 
 func theme() -> String:

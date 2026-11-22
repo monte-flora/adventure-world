@@ -60,6 +60,32 @@ func test_tunes_loop_on_whole_bars() -> void:
 		check(base.loop_end / bar >= 4, tune + ": at least 4 bars")
 
 
+## The tunes aren't steady eighths: every lead mixes note lengths and rests, every beat varies its bars.
+func test_tunes_have_varied_rhythm() -> void:
+	for tune in Tunes.TUNES:
+		var parts := Tunes.parts(tune)
+		for part in parts:
+			check_eq(Synth.tokens(parts[part]).size(), 8 * Tunes.STEPS_PER_BAR, "%s %s: 8 whole bars" % [tune, part])
+		for part in ["lead", "dark_lead"]:
+			var seq := Synth.tokens(parts[part])
+			var lengths := {}
+			var i := 0
+			while i < seq.size():
+				var hold := 1
+				while i + hold < seq.size() and seq[i + hold] == "-":
+					hold += 1
+				if seq[i] != "." and seq[i] != "-":
+					lengths[hold] = true
+				i += hold
+			check(lengths.size() >= 3, "%s %s: %d note lengths, want 3+" % [tune, part, lengths.size()])
+			check("." in seq, "%s %s: has rests" % [tune, part])
+		var bars := {}
+		var beat := Synth.tokens(parts.beat)
+		for b in 8:
+			bars[" ".join(beat.slice(b * Tunes.STEPS_PER_BAR, (b + 1) * Tunes.STEPS_PER_BAR))] = true
+		check(bars.size() >= 3, "%s beat: %d different bars, want 3+" % [tune, bars.size()])
+
+
 func test_peaks_and_size_budget() -> void:
 	var music_bytes := 0
 	for tune in Tunes.TUNES:
