@@ -66,57 +66,78 @@
    "fps": 12,
    "loop": true
   },
-  "climb": {
+  "attack_sunfang": {
    "row": 8,
    "col": 0,
    "frames": 4,
-   "fps": 8,
-   "loop": true
+   "fps": 14,
+   "loop": false
   },
-  "wall_slide": {
+  "air_attack_sunfang": {
    "row": 9,
-   "col": 0,
-   "frames": 1,
-   "fps": 1,
-   "loop": true
-  },
-  "dash": {
-   "row": 10,
    "col": 0,
    "frames": 3,
    "fps": 14,
    "loop": false
   },
-  "swim": {
+  "pogo_sunfang": {
+   "row": 10,
+   "col": 0,
+   "frames": 2,
+   "fps": 12,
+   "loop": true
+  },
+  "climb": {
    "row": 11,
    "col": 0,
    "frames": 4,
    "fps": 8,
    "loop": true
   },
-  "lantern_raise": {
+  "wall_slide": {
    "row": 12,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": true
+  },
+  "dash": {
+   "row": 13,
+   "col": 0,
+   "frames": 3,
+   "fps": 14,
+   "loop": false
+  },
+  "swim": {
+   "row": 14,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "lantern_raise": {
+   "row": 15,
    "col": 0,
    "frames": 3,
    "fps": 10,
    "loop": false
   },
   "crawl": {
-   "row": 13,
+   "row": 16,
    "col": 0,
    "frames": 4,
    "fps": 8,
    "loop": true
   },
   "hurt": {
-   "row": 14,
+   "row": 17,
    "col": 0,
    "frames": 2,
    "fps": 12,
    "loop": false
   },
   "death": {
-   "row": 15,
+   "row": 18,
    "col": 0,
    "frames": 6,
    "fps": 8,

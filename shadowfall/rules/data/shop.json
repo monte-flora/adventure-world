@@ -1,7 +1,9 @@
 {
-  "about": "What the traders sell and buy, in gold. 'stock' is how many each trader has (null: no end). A trader in people.json can sell only some ('sells': [...]). 'gives' is what you get: arrows, sun_ore, shard (a heart shard) or sigil:ID. The sword never breaks, so nobody mends one.",
+  "about": "What the traders sell and buy, in gold. 'stock' is how many each trader has (null: no end). A trader in people.json can sell only some ('sells': [...]). 'gives' is what you get: arrows, sun_ore, shard (a heart shard), hearts (mended now), lumen (heal charges) or sigil:ID. The sword never breaks, so nobody mends one.",
   "buy": [
     {"id": "arrows",     "name": "Bundle of Arrows", "says": "+5 arrows",                 "price": 6,   "stock": null, "gives": {"arrows": 5}},
+    {"id": "tonic",      "name": "Bitter Tonic",     "says": "mends 2 hearts now",        "price": 8,   "stock": null, "gives": {"hearts": 2}},
+    {"id": "lumen",      "name": "Phial of Lumen",   "says": "fills one heal charge",     "price": 15,  "stock": null, "gives": {"lumen": 1}},
     {"id": "sun_ore",    "name": "Sun Ore",          "says": "the forge drinks it",       "price": 25,  "stock": 3,    "gives": {"sun_ore": 1}},
     {"id": "shard",      "name": "Heart Shard",      "says": "four make a heart",         "price": 60,  "stock": 1,    "gives": {"shard": 1}},
     {"id": "fortune",    "name": "Sigil of Fortune", "says": "+50% gold from the fallen", "price": 80,  "stock": 1,    "gives": {"sigil": "fortune"}},

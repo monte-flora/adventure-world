@@ -24,12 +24,17 @@ static func count(item: String) -> int:
 	return int(_items().get(item, 0))
 
 
-## Gives n of a thing. Heart shards grow your hearts; gold goes to Game.gold.
+## Gives n of a thing. Heart shards grow your hearts; gold goes to Game.gold; "hearts" mends
+## that many now and "lumen" fills that many heal charges (shop tonics and phials).
 static func give(item: String, n: int) -> void:
 	if n <= 0:
 		return
 	if item == "gold":
 		Game.gold += n
+	elif item == "hearts":                    # a tonic: mends n hearts now
+		Game.hearts = mini(Game.max_hearts, Game.hearts + n)
+	elif item == "lumen":                     # a phial: n heal charges into the lantern
+		_set_lumen(lumen() + n)
 	elif item in ITEMS:
 		_items()[item] = count(item) + n
 		if item == "shard":

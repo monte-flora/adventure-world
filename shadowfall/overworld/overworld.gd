@@ -27,6 +27,7 @@ var last_cell := Vector2i(-1, -1)
 var people: Array[Person] = []
 var box: CanvasLayer                          # ui/dialogue_box.tscn
 var talking := false
+var screen: CanvasLayer                       # the shop or forge, while open (ui/)
 const TALK_REACH := 1.4 * TILE                # px from the hero to a person you face
 var heal := LumenHeal.new()                   # Q, standing still: a Lumen charge becomes a heart
 ## Game feel (docs/teen/gameplay §4): hit-stop freezes hero and monsters for a few frames.
@@ -225,6 +226,13 @@ func talk(p: Person) -> String:
 	p.face(hero.position)
 	Audio.duck(true)
 	var then: String = await box.talk(Conversation.new(p.id))
+	if then == "shop" or then == "forge":
+		screen = ShopScreen.new() if then == "shop" else ForgeScreen.new()
+		if then == "shop":
+			screen.trader = p.id
+		add_child(screen)
+		await screen.closed
+		screen = null
 	Audio.duck(false)
 	_freeze(false)
 	talking = false
@@ -302,7 +310,7 @@ func _on_swing(at: Vector2, _facing: Vector2) -> void:
 	for m in monsters.duplicate():
 		if is_instance_valid(m) and hero.sword_hits(m.position):
 			var fresh: bool = m.flash <= 0
-			var killed: bool = m.hit(2, at)
+			var killed: bool = m.hit(Forge.sword_damage(), at)
 			if fresh:
 				Vitals.lumen_hit()
 				_hit_fx(m, killed)

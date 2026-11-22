@@ -2,7 +2,7 @@ extends TestCase
 ## Cut on purpose (user, 2026-11-21): XP, lives, food, sword wear. None of them anywhere in rules/.
 
 const BANNED := ["xp", "level_up", "lives", "life", "food", "berries", "durability", "repair", "hits_left", "armor"]
-const REWARDS := ["gold", "arrows", "sun_ore", "shard", "sigil"]
+const REWARDS := ["gold", "arrows", "sun_ore", "shard", "sigil", "hearts", "lumen"]
 
 
 func _words(text: String) -> PackedStringArray:
