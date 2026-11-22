@@ -49,30 +49,34 @@ def surf(w, h):
 
 
 # --- drawing (never anti-aliased, so only palette colours land) ---------------------------
+OFF = [0, 0]  # added to every drawing coordinate (make_monsters draws on a padded canvas)
+
+
 def rect(s, col, x, y, w, h):
-    pygame.draw.rect(s, c(col), (round(x), round(y), round(w), round(h)))
+    pygame.draw.rect(s, c(col), (round(x + OFF[0]), round(y + OFF[1]), round(w), round(h)))
 
 
 def px(s, col, x, y):
-    x, y = round(x), round(y)
+    x, y = round(x + OFF[0]), round(y + OFF[1])
     if 0 <= x < s.get_width() and 0 <= y < s.get_height():
         s.set_at((x, y), c(col))
 
 
 def ellipse(s, col, x, y, w, h):
-    pygame.draw.ellipse(s, c(col), (round(x), round(y), max(1, round(w)), max(1, round(h))))
+    pygame.draw.ellipse(s, c(col), (round(x + OFF[0]), round(y + OFF[1]), max(1, round(w)), max(1, round(h))))
 
 
 def circle(s, col, x, y, r):
-    pygame.draw.circle(s, c(col), (round(x), round(y)), max(1, round(r)))
+    pygame.draw.circle(s, c(col), (round(x + OFF[0]), round(y + OFF[1])), max(1, round(r)))
 
 
 def poly(s, col, pts):
-    pygame.draw.polygon(s, c(col), [(round(a), round(b)) for a, b in pts])
+    pygame.draw.polygon(s, c(col), [(round(a + OFF[0]), round(b + OFF[1])) for a, b in pts])
 
 
 def line(s, col, a, b, w=1):
-    pygame.draw.line(s, c(col), (round(a[0]), round(a[1])), (round(b[0]), round(b[1])), w)
+    pygame.draw.line(s, c(col), (round(a[0] + OFF[0]), round(a[1] + OFF[1])),
+                     (round(b[0] + OFF[0]), round(b[1] + OFF[1])), w)
 
 
 def grid(rows, key, s=None, ox=0, oy=0):
