@@ -1,0 +1,6 @@
+{
+  "disableAllHooks": true,
+  "permissions": {
+    "allow": ["Bash", "Edit", "Write", "WebFetch", "WebSearch"]
+  }
+}
