@@ -19,6 +19,8 @@ HOW TO USE IT
   Save                     puts your cave in the my_caves folder. Open one of the caves in
                            the game (levels folder) and Save changes it in the game!
   Save as                  saves a copy in my_caves, with a new name
+  Polish                   gets your saved cave ready for Gemini to paint (levels/polish/<cave>/README.txt
+                           says how). Press it again once Gemini's picture is in that folder: the game uses it!
 
 Everything is drawn by the game itself (game.py), so your cave looks exactly
 the way it will when you play it. Loading, saving and the checks live in
@@ -41,6 +43,8 @@ import cave_solver
 import caves
 import game
 import rules
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "shadowfall", "tools"))
+import polish  # noqa: E402  (shadowfall/tools/polish.py: the map and prompt for Gemini, and the import)
 from game import TILE, TEXT, DIM, YELLOW, GREEN, RED, ORANGE
 
 # The editor's window can be bigger than the game's. These start the same as the
@@ -410,7 +414,7 @@ class Editor:
                  ("Wider", 84, self.wider), ("Narrower", 110, self.narrower),
                  ("Box", 70, self.toggle_box, BUTTON, 24, lambda: self.box_mode),
                  ("Grid", 70, self.toggle_grid, BUTTON, 24, lambda: self.grid),
-                 ("Zoom", 140, self.next_zoom)])
+                 ("Zoom", 140, self.next_zoom), ("Polish", 96, self.polish)])
 
     def button_label(self, button):
         if button.label == "Look":
@@ -714,6 +718,21 @@ class Editor:
             self.say("Saved in the game! (%s) Start the game to play it." % cave_files.short_path(path), GREEN)
         else:
             self.say("Saved! It's in %s" % cave_files.short_path(path), GREEN)
+
+    # ----- Polish: Gemini paints the cave ------------------------------------------
+
+    def polish(self):
+        """Make the map and prompt for Gemini, or bring in the picture Gemini made."""
+        if not self.path or self.unsaved():
+            return self.say("Save your cave first, then Polish it.", ORANGE)
+        if polish.dropped(self.path):
+            ok, message = polish.import_painting(self.path, self.text_rows())
+            if not ok:
+                return self.say(message, RED)
+            polish.export(self.path, self.theme, self.text_rows(), self.settings)
+            return self.say(message, GREEN)
+        folder = polish.export(self.path, self.theme, self.text_rows(), self.settings)
+        self.say("Ready for Gemini! Read README.txt in %s" % polish.short(folder), GREEN)
 
     # ----- Play it! ---------------------------------------------------------------
 

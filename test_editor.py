@@ -30,6 +30,8 @@ TEMP = tempfile.mkdtemp(prefix="my_caves_test_")
 cave_files.MY_CAVES_FOLDER = TEMP
 
 import editor   # noqa: E402  (after the temporary folder is set up)
+import polish   # noqa: E402  (shadowfall/tools/polish.py; editor put it on the path)
+polish.POLISH_DIR = os.path.join(TEMP, "polish")          # never the game's levels/polish
 
 
 def test(function):
@@ -306,6 +308,51 @@ def the_editor_keeps_shadowfall_settings_when_it_saves():
                  "name: The Lantern Road"):
         assert line in saved, (line, saved)
     assert "#.C........#" in saved and "#..C.n.<.>.#" in saved, saved
+    ed.new_cave()
+
+
+@test
+def the_polish_map_has_rock_dark_and_air_light():
+    theme, rows, _ = cave_files.read_cave(SHADOWFALL_CAVE)
+    pic = polish.layout(rows)
+    assert pic.get_size() == (2752, 1536)
+    for r, row in enumerate(rows):
+        for c, letter in enumerate(row):
+            if letter in "#." and polish.cell_rect(r, c, rows).w:
+                box = polish.cell_rect(r, c, rows)
+                colour = tuple(pic.get_at((box.x + box.w // 3, box.y + box.h // 3)))[:3]
+                assert colour == (polish.ROCK if letter == "#" else polish.AIR), (r, c, letter, colour)
+    assert tuple(pic.get_at(polish.cell_rect(3, 1, rows).center))[:3] == polish.COLOUR["start"]
+    assert tuple(pic.get_at(polish.cell_rect(2, 5, rows).center))[:3] == polish.COLOUR["thorns"]
+
+
+@test
+def polish_after_save_keeps_the_settings_and_writes_the_prompt():
+    path = os.path.join(TEMP, "lantern_road.txt")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(SHADOWFALL_CAVE)
+    ed.open_file(path)
+    ed.set_tile(1, 2, "$")
+    press_button("Polish")
+    assert "Save your cave first" in ed.message
+    ed.write(path)
+    press_button("Polish")
+    out = os.path.join(TEMP, "polish", "lantern_road")
+    assert sorted(os.listdir(out)) == ["README.txt", "layout.png", "legend.png", "prompt.txt"], os.listdir(out)
+    with open(os.path.join(out, "prompt.txt"), encoding="utf-8") as f:
+        prompt = f.read()
+    assert "the Weepingwold" in prompt and "Almost no light" in prompt and "No characters" in prompt, prompt
+    with open(path, encoding="utf-8") as f:
+        saved = f.read()
+    for line in ("stone: Dawnstone", "land: the Weepingwold", "needs: climb, pound", "dark: yes"):
+        assert line in saved, (line, saved)
+    pygame.image.save(pygame.Surface((10, 10)), os.path.join(out, "Gemini_Image.png"))
+    assert polish.dropped(path).endswith("Gemini_Image.png")
+    if shutil.which("godot"):                   # the import needs Godot (it makes the WebP)
+        press_button("Polish")
+        assert "Painted!" in ed.message, ed.message
+        assert os.path.getsize(os.path.join(out, "painted.webp")) < polish.MAX_BYTES
+        assert polish.dropped(path) is None     # the big picture is gone, painted.webp stays
     ed.new_cave()
 
 

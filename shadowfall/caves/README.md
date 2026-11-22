@@ -54,6 +54,9 @@ Everything is drawn from C2's `art/` sheets. Tiles: `tiles_<theme>` (stone if th
 breaks. Letter -> tile is in `CaveArt.MAP_TILE` (in the TileMap) and `CaveArt.SPRITE` (drawn on top,
 animated at the sheet's fps). Parallax: `art/parallax/<theme>_{far,back,mid,front}` at 0, 0.25, 0.5 and
 1.4x; the front rocks only scroll sideways and are 60 % see-through so they never hide the floor.
+Painted backdrop: if `levels/polish/<cave file name>/painted.*` exists (made with Gemini, see
+`levels/README.md`), it is stretched over the cave's bounds behind the blocks (gloom applies) and the far,
+back and mid layers are hidden; the blocks stay crisp on top. `tests/test_cave_painting.gd`.
 Monsters: z `barrow_wight`, k `bone_crawler`, c `ember_imp`, x `cave_bat`; hurt = white flash, telegraph =
 attack pose pulsing red. Hero: `hero_side`, animation from its state; `crawl` on the floor while rock is within a tile above its head. Still
 drawn in code: the `<` `>` markers, geyser steam, ropes, arrows.

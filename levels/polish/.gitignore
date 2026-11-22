@@ -1,0 +1,6 @@
+# Made again by the Polish button: only the painting (and its "keep" import note) and the prompt are kept.
+*/*.png
+*/*.jpg
+*/*.jpeg
+*/*.webp
+!*/painted.webp

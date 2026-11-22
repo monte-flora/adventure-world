@@ -39,6 +39,19 @@ To play one in Shadowfall (the Godot rebuild): `pixi run godot-cave levels/caves
 Then run the tests: `pixi run test` sends a robot through every cave and castle level here.
 If it can't get through one, the test says which, before it goes on GitHub (and itch.io).
 
+## Polish a cave with Gemini
+
+Make Gemini paint a picture behind your cave (Shadowfall only; the blocks you stand on stay the same).
+
+1. Save your cave in the editor, then press **Polish**. It makes the folder `levels/polish/<cave>/`
+   with a map of your cave (`layout.png`), the words for Gemini (`prompt.txt`) and the steps (`README.txt`).
+2. In Gemini, drag in `layout.png`, paste all of `prompt.txt`, and send it.
+3. Download Gemini's picture into that folder (any name, .png, .jpg or .webp), then press **Polish** again.
+   It shrinks the picture into `painted.webp`, and the cave plays with it behind the blocks.
+
+Not happy with it? Ask Gemini again, or change `prompt.txt`. Delete `painted.webp` to go back to the
+normal look. Without the editor: `python shadowfall/tools/polish.py export|import levels/caves/<cave>.txt`.
+
 ## What's in a file
 
 The first lines are settings, then the drawing. Every row must be the same length.

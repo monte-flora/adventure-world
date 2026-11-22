@@ -59,3 +59,36 @@ static func layer(theme: String, which: String, speed: float) -> Parallax2D:
 		s.modulate.a = FRONT_ALPHA
 	p.add_child(s)
 	return p
+
+
+## Painted backdrops from Gemini (levels/README.md, "Polish a cave with Gemini"):
+## levels/polish/<cave file name>/painted.* fills the cave's bounds behind the blocks.
+static var polish_root := ""                      # tests point this somewhere else; "" = levels/polish
+const PAINTED := ["painted.webp", "painted.png", "painted.jpg", "painted.jpeg"]
+
+
+## The cave's painting, or null when it has none (then the parallax layers show as before).
+static func painting(cave_file: String) -> Texture2D:
+	if cave_file == "":
+		return null
+	var dir := (polish_root if polish_root != "" else Paths.level("polish")).path_join(cave_file.get_file().get_basename())
+	for n in PAINTED:
+		var path := dir.path_join(n)
+		if FileAccess.file_exists(path):              # the web build ships painted.webp as is ("keep")
+			var img := Image.new()                    # from bytes: also works in the pack, no warning
+			var bytes := FileAccess.get_file_as_bytes(path)
+			var err: Error = img.load_webp_from_buffer(bytes) if n.ends_with(".webp") else \
+				img.load_png_from_buffer(bytes) if n.ends_with(".png") else img.load_jpg_from_buffer(bytes)
+			if err == OK and not img.is_empty():
+				return ImageTexture.create_from_image(img)
+	return null
+
+
+## The painting as a sprite stretched over the cave: w x h blocks.
+static func backdrop(tex: Texture2D, w: int, h: int) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.name = "painting"
+	s.texture = tex
+	s.centered = false
+	s.scale = Vector2(w * TILE, h * TILE) / tex.get_size()
+	return s
