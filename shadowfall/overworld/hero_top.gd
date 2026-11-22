@@ -3,7 +3,7 @@ extends Node2D
 ## The hooded wanderer on the map (top-down), docs/teen/gameplay §4 "Overworld": 8-way walk at
 ## 5.5 squares/s (0→max 5 f, stop 3 f), sword arc on R, roll on SHIFT once Wraithstep (dash) is owned.
 ## Collides square by square with WorldMap.walkable(), so ability gates open the moment Game has the
-## ability. Placeholder art until art/ has the top-down sheet. B1 owns this file.
+## ability. Art: art/sheets/hero_top (AnimatedSprite2D, feet on the bottom of the box). B1 owns this file.
 
 const TILE := LevelFile.TILE
 const HALF := Vector2(10, 10)               # collision box half size (px)
@@ -33,6 +33,45 @@ var roll_dir := Vector2.ZERO
 var attack_frame := -1                      # -1 = not swinging
 var iframes := 0
 var lock_frames := 0
+var sprite: AnimatedSprite2D
+
+
+func _ready() -> void:
+	sprite = AnimatedSprite2D.new()
+	sprite.sprite_frames = ArtSheet.frames("hero_top")
+	sprite.offset = ArtSheet.offset("hero_top")
+	sprite.position = Vector2(0, HALF.y + 2)          # the feet, just below the box's middle
+	add_child(sprite)
+	sprite.play("idle_down")
+
+
+## The facing as a sheet suffix: _down, _up or _side (flip_h when facing left).
+func _dir() -> String:
+	if absf(facing.x) > absf(facing.y) + 0.01:
+		return "_side"
+	return "_up" if facing.y < 0 else "_down"
+
+
+func _animate() -> void:
+	if sprite == null:
+		return
+	var anim := "idle"
+	if lock_frames > 0:
+		anim = "hurt"
+	elif roll_frames > 0:
+		anim = "roll"
+	elif attack_frame >= 0:
+		anim = "attack"
+	elif velocity.length() > 8.0:
+		anim = "walk"
+	if anim != "hurt":
+		anim += _dir()
+	sprite.flip_h = facing.x < -0.01 and _dir() == "_side"
+	if sprite.animation != anim:
+		sprite.play(anim)
+	elif anim.begins_with("attack") and attack_frame == 0:
+		sprite.frame = 0
+	sprite.visible = not (iframes > 0 and (iframes / 4) % 2 == 0)
 
 
 func cell() -> Vector2i:
@@ -83,6 +122,7 @@ func _physics_process(dt: float) -> void:
 			swung.emit(position, facing)
 		if attack_frame >= ATTACK[0] + ATTACK[1] + ATTACK[2]:
 			attack_frame = -1
+	_animate()
 	queue_redraw()
 
 
@@ -157,13 +197,9 @@ func _fits(p: Vector2) -> bool:
 
 
 func _draw() -> void:
-	if iframes > 0 and (iframes / 4) % 2 == 0:
-		return
-	draw_circle(Vector2(0, 2), 11, Color("1c1a26"))                          # cloak
-	draw_circle(facing * 3 + Vector2(0, -3), 7, Color("3b3552"))              # hood
-	var lamp := facing.rotated(PI / 2) * 10 + facing * 4
-	draw_circle(lamp, 9, Color(1.0, 0.8, 0.4, 0.18))                          # lantern glow
-	draw_circle(lamp, 3, Color("f7c64a"))
-	if attack_frame > ATTACK[0] and attack_frame <= ATTACK[0] + ATTACK[1]:
+	if attack_frame > ATTACK[0] and attack_frame <= ATTACK[0] + ATTACK[1]:   # the blade's arc
 		var a := facing.angle()
-		draw_arc(Vector2.ZERO, REACH, a - ARC / 2.0, a + ARC / 2.0, 12, Color("e8e4d8"), 3.0)
+		var t := float(attack_frame - ATTACK[0]) / ATTACK[1]
+		var sweep := lerpf(-ARC / 2.0, ARC / 2.0, t)
+		draw_arc(Vector2.ZERO, REACH, a - ARC / 2.0, a + sweep, 12, Color("f4f1ea"), 3.0)
+		draw_arc(Vector2.ZERO, REACH - 4, a - ARC / 2.0, a + sweep, 12, Color("9c93b0"), 2.0)

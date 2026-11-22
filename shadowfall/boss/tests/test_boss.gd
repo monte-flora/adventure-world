@@ -137,3 +137,20 @@ func test_throne_screen_runs() -> void:
 		bot.drive(screen.fight)
 		await get_tree().physics_frame
 	check(screen.fight.time > 1.0, "the fight runs on the screen")
+
+
+func test_throne_art_in_place() -> void:
+	Scenes.goto("boss")
+	await physics_frames(2)
+	var screen = Scenes.screen
+	screen.set_meta("test", true)
+	check(screen.hero_spr.sprite_frames == ArtSheet.frames("hero_side"), "the hero uses the side sheet")
+	check(screen.king_spr.sprite_frames == ArtSheet.frames("shadow_king"), "the king uses his sheet")
+	check(screen.light is GloomLight and screen.stage.material == screen.light.world_material,
+		"GloomLight darkens the hall with the gloom")
+	check(screen.castle_tex != null, "castle tiles are loaded before drawing")
+	var before: int = screen.get_child_count()
+	screen._echo_ghost("rime_matriarch")
+	check(screen.get_child_count() == before + 1, "a lieutenant's echo shows its ghost")
+	for id in ThroneFight.LIEUTENANTS:
+		check(FileAccess.file_exists(ArtSheet.DIR + screen.ECHO_SHEET[id] + ".json"), id + " has a ghost sheet")

@@ -217,3 +217,40 @@ func test_nightfall_mirrors_the_centre() -> void:
 	check(night.land_name("nightfall") != "", "it has a name")
 	var ow = await _open({"realm": "nightfall"})
 	check(ow.world.nightfall and ow.map.get_used_cells().size() > 0, "the Umbral Reach opens")
+
+
+func test_realm_art_per_land() -> void:
+	var w := WorldMap.load_realm()
+	for id in w.lands:
+		var name: String = w.land_name(id)
+		check(name == Names.land(WorldMap.names_id(id)), "%s's banner comes from Names (%s)" % [id, name])
+	check_eq(w.land_name(w.land(w.home)), Names.HOME, "home is called " + Names.HOME)
+	var ow = await _open()
+	var t: RealmTiles = ow.tiles
+	check(t.tile_set.get_source_count() >= 7, "one tile source per land sheet (%d)" % t.tile_set.get_source_count())
+	for id in w.lands:
+		var sheet := t.sheet_at(w.lands[id].rect.position + Vector2i(1, 1))
+		check(FileAccess.file_exists(ArtSheet.DIR + sheet + ".json"), "%s draws from %s" % [id, sheet])
+	var tree := Vector2i(-1, -1)
+	for p in w.cells:
+		if w.cells[p] == "F" and w.at(p + Vector2i.DOWN) != "F":
+			tree = p
+			break
+	check(tree.x >= 0 and ow.objects.get_cell_source_id(tree) != -1, "a forest square has a tree")
+	check(ow.hero.sprite.sprite_frames == ArtSheet.frames("hero_top"), "the hero uses the top-down sheet")
+	for m in ow.monsters:
+		check(MapMonster.KINDS.has(m.kind) and m.sprite.sprite_frames == ArtSheet.frames("monster_" + m.kind),
+			"monster %s has its sheet" % m.kind)
+
+
+func test_gate_art_opens_with_the_ability() -> void:
+	var ow = await _open()
+	var gate := Vector2i(-1, -1)
+	for p in ow.world.cells:
+		if ow.world.cells[p] == "Y":
+			gate = p
+			break
+	check(gate.x >= 0 and ow.objects.get_cell_source_id(gate) != -1, "an ivy cliff is drawn while shut")
+	Game.take_stone("leaf")
+	Game.changed.emit()
+	check(ow.objects.get_cell_source_id(gate) == -1, "and gone once you can climb")
