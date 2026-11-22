@@ -34,6 +34,7 @@ var flash := 0.0
 var cam: Camera2D
 var dark_rect: ColorRect
 var glow: Node2D
+var king_spr: AnimatedSprite2D
 var hud: Control
 
 
@@ -52,7 +53,7 @@ func _start_castle() -> void:
 	level = clampi(level, 1, Castle.LEVELS)
 	if level == 1 and Game.stones.size() == Game.STONES.size() and Castle.forge_sunfang():
 		_say("The seven Light Stones burn together into one blade: %s." % Castle.display("SUNFANG", "", "Sunfang"))
-		Audio.play_sfx("forge")
+		_sfx("forge")
 	Scenes.args["file"] = Castle.file(level)      # the cave scene reads its file from here
 	cave = load("res://caves/cave.tscn").instantiate()
 	add_child(cave)
@@ -61,7 +62,7 @@ func _start_castle() -> void:
 		door = Rect2(Vector2(lf.find("D")[0]) * LevelFile.TILE, Vector2.ONE * LevelFile.TILE).grow(6)
 	if caption == "" and lf:
 		_say(lf.setting("name", "The Shadow Castle"))
-	Audio.play_music("castle")
+	_music("castle")
 
 
 func _castle_tick() -> void:
@@ -88,11 +89,22 @@ func _start_throne() -> void:
 	dark_rect.material = mat
 	dark_rect.visible = false
 	add_child(dark_rect)
+	king_spr = AnimatedSprite2D.new()            # art/sheets/shadow_king (B-Art), half size: 60 x 120 on screen
+	king_spr.sprite_frames = ArtSheet.frames("shadow_king")
+	king_spr.offset = ArtSheet.offset("shadow_king")
+	king_spr.scale = Vector2(0.5, 0.5)
+	king_spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(king_spr)
 	glow = Node2D.new()                          # what shows through the dark: eyes, telegraphs
 	glow.z_index = 20
 	glow.draw.connect(_draw_glow)
 	add_child(glow)
-	Audio.play_music("throne")
+	_music("throne")
+	Audio.play_sfx("king")                      # his motif: he is here
+
+
+func _exit_tree() -> void:
+	Audio.intensity = 0.0
 
 
 func _physics_process(dt: float) -> void:
@@ -121,10 +133,51 @@ func _physics_process(dt: float) -> void:
 	var k := shake_t / shake_len if shake_len > 0.0 else 0.0
 	cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_px * k
 	dark_rect.visible = fight.dark
+	Audio.intensity = 1.0 if fight.dark else (0.6 if fight.phase == 3 and not fight.won else 0.0)
+	_king_anim(fight)
 	if fight.dark:
 		dark_rect.material.set_shader_parameter("hero_px", fight.hero.pos)
 	queue_redraw()
 	glow.queue_redraw()
+
+
+## Boss sounds and tunes B6 hasn't made yet fall back to the nearest one it has (ask: B6).
+const SFX_LIKE := {"boss_glow": "king", "boss_slash": "swing", "boss_fire": "dash", "boss_aim": "king",
+	"boss_leap": "jump", "boss_land": "pound", "boss_shimmer": "king", "boss_beam": "die", "boss_hit": "hit",
+	"boss_phase": "king", "crown_hit": "hit", "sunfang": "stone", "clang": "land", "cut": "swing",
+	"pogo": "jump", "forge": "stone"}
+const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss"}
+
+
+func _sfx(name: String) -> void:
+	Audio.play_sfx(name if name in Audio.Sfx.NAMES else SFX_LIKE.get(name, "hit"))
+
+
+func _music(name: String) -> void:
+	Audio.play_music(name if Audio.Tunes.TUNES.has(name) else MUSIC_LIKE.get(name, "boss"))
+
+
+## Which row of his sheet fits what he is doing.
+func _king_anim(f: ThroneFight) -> void:
+	var anim := "idle"
+	if f.state in ["finale", "dead"]:
+		anim = "fade_out"
+	elif f.flash > 0.0:
+		anim = "hurt"
+	elif f.phase == 3:
+		anim = "cast" if f.state in ["beam_aim", "beam", "rain"] else "float"
+	elif f.state in ["glow", "slash", "stuck", "pull"]:
+		anim = "blade"
+	elif f.state in ["aim", "throw", "cast", "spent"]:
+		anim = "cast"
+	elif f.state in ["echo", "roar"]:
+		anim = "summon"
+	if king_spr.animation != anim:
+		king_spr.play(anim)
+	king_spr.position = f.king + Vector2(0, ThroneFight.KING_SIZE.y / 2.0)
+	king_spr.flip_h = f.facing < 0
+	king_spr.modulate = Color(1, 1, 1, f.alpha) if f.flash <= 0.0 else Color(2, 2, 2, f.alpha)
+	king_spr.visible = f.alpha > 0.01
 
 
 func _read_keys() -> void:
@@ -145,9 +198,9 @@ func _event(e: Dictionary) -> void:
 				shake_t = e["time"]
 				shake_len = e["time"]
 		"sfx":
-			Audio.play_sfx(e["name"])
+			_sfx(e["name"])
 		"music":
-			Audio.play_music(e["name"])
+			_music(e["name"])
 		"say":
 			_say(e["text"])
 		"echo":
@@ -158,10 +211,10 @@ func _event(e: Dictionary) -> void:
 				_say("His shadow armour turns your blade. Strike when he is open: when his sword sticks, when he tires.")
 		"phase":
 			flash = 0.25
-			Audio.play_sfx("boss_phase")
+			_sfx("boss_phase")
 		"sunfang":
 			flash = 1.2
-			Audio.play_sfx("sunfang")
+			_sfx("sunfang")
 		"lost":
 			end_t = 0.0
 			_say("The dark takes you... The lantern by the door flickers back to life.")
@@ -248,14 +301,8 @@ func _draw_king(f: ThroneFight) -> void:
 		return
 	var c := f.king
 	var a := f.alpha
-	var ink := INK0 if f.flash <= 0.0 else LIGHT
 	var hw := ThroneFight.KING_SIZE.x / 2.0
 	var hh := ThroneFight.KING_SIZE.y / 2.0
-	var cloak := PackedVector2Array([c + Vector2(-hw - 10, hh), c + Vector2(-hw + 4, -hh + 34),
-		c + Vector2(-14, -hh + 14), c + Vector2(14, -hh + 14), c + Vector2(hw - 4, -hh + 34), c + Vector2(hw + 10, hh)])
-	draw_colored_polygon(cloak, Color(ink, a))
-	draw_polyline(cloak, Color(EMBER1, 0.55 * a), 1.5)                     # rim light from behind
-	draw_circle(c + Vector2(0, -hh + 16), 15, Color(ink, a))                 # the hooded head
 	if f.crown_state == "on":
 		_draw_crown(c + Vector2(0, -hh - 2), a)
 	for i in 5:                                                             # smoke rising off him
