@@ -79,9 +79,17 @@ func build(w: WorldMap) -> void:
 	cam.position = hero.position
 	add_child(cam)
 	cam.reset_smoothing()
+	var light := GloomLight.new()
+	add_child(light)
+	map.material = light.world_material
+	light.follow(hero)
+	add_child(preload("res://ui/hud.tscn").instantiate())
 	var ui := CanvasLayer.new()
+	ui.layer = GloomLight.HUD_LAYER
 	banner = Label.new()
-	banner.position = Vector2(24, 20)
+	banner.position = Vector2(0, 20)          # top middle: the HUD has the corners
+	banner.size.x = 960
+	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_theme_font_size_override("font_size", 24)
 	ui.add_child(banner)
 	add_child(ui)

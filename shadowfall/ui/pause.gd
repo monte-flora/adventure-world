@@ -22,7 +22,7 @@ var _hint: Label
 
 
 func _ready() -> void:
-	layer = 100
+	layer = GloomLight.HUD_LAYER + 20
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	var dim := ColorRect.new()
 	dim.color = Color(UiStyle.INK0, 0.75)
