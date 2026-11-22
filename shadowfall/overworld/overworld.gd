@@ -6,6 +6,8 @@ extends Node2D
 ## Walk onto a Mine to play its cave; onto a waystone (L) to light it (heal, respawn point); G on a lit
 ## waystone travels to the next lit one. Ability gates (Y ivy cliff, O rubble, K shadow thorns, water,
 ## gate: lines) stay shut until Game.has_ability(). Tiles: art/sheets/realm_<land> (RealmTiles).
+## People (rules/data/people.json, Person) stand in the light realm's lands: face one and press G
+## (interact) to talk; the talk runs in ui/dialogue_box (music ducked), then may open the shop or forge.
 
 const TILE := LevelFile.TILE
 const MONSTERS_PER_LAND := 3
@@ -22,6 +24,10 @@ var banner: Label
 var monsters: Array[MapMonster] = []
 var respawn := Vector2i.ZERO
 var last_cell := Vector2i(-1, -1)
+var people: Array[Person] = []
+var box: CanvasLayer                          # ui/dialogue_box.tscn
+var talking := false
+const TALK_REACH := 1.4 * TILE                # px from the hero to a person you face
 var heal := LumenHeal.new()                   # Q, standing still: a Lumen charge becomes a heart
 ## Game feel (docs/teen/gameplay §4): hit-stop freezes hero and monsters for a few frames.
 const STOP_HIT := 3
@@ -67,6 +73,7 @@ func build(w: WorldMap) -> void:
 	respawn = w.home
 	add_child(hero)
 	_spawn_monsters()
+	_spawn_people()
 	add_child(canopy)
 	cam = Camera2D.new()
 	cam.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -102,6 +109,8 @@ func build(w: WorldMap) -> void:
 	hurt_edge = _hurt_edge()
 	ui.add_child(hurt_edge)
 	add_child(ui)
+	box = preload("res://ui/dialogue_box.tscn").instantiate()
+	add_child(box)
 	_arrive(hero.cell(), true)
 
 
@@ -111,7 +120,7 @@ func _physics_process(_dt: float) -> void:
 	cam.offset = shake.step(_dt)
 	if stop > 0:
 		stop -= 1
-		if stop == 0:
+		if stop == 0 and not talking:
 			_freeze(false)
 	cam.position = hero.position + (hero.velocity * LOOK_AHEAD).limit_length(LOOK_MAX)
 	heal.step(Input.is_action_pressed("heal"), hero.velocity.length() < 1.0)
@@ -186,8 +195,84 @@ func travel_from(c: Vector2i) -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact") and world.at(hero.cell()) == "L":
+	if not event.is_action_pressed("interact") or talking:
+		return
+	var p := person_in_front()
+	if p != null:
+		get_viewport().set_input_as_handled()
+		talk(p)
+	elif world.at(hero.cell()) == "L":
 		travel_from(hero.cell())
+
+
+## The nearest person the hero is facing and close to, or null.
+func person_in_front() -> Person:
+	var best: Person = null
+	for p in people:
+		var d := p.position - hero.position
+		if p.visible and d.length() <= TALK_REACH and d.normalized().dot(hero.facing) > 0.3 \
+				and (best == null or d.length() < (best.position - hero.position).length()):
+			best = p
+	return best
+
+
+## A whole talk with p: everyone stands still, the music dips; then the shop or forge if it says so.
+## Returns what the talk opened ("shop", "forge" or "").
+func talk(p: Person) -> String:
+	talking = true
+	hero.velocity = Vector2.ZERO
+	_freeze(true)
+	p.face(hero.position)
+	Audio.duck(true)
+	var then: String = await box.talk(Conversation.new(p.id))
+	Audio.duck(false)
+	_freeze(false)
+	talking = false
+	_show_people()
+	return then
+
+
+func _spawn_people() -> void:
+	if realm != "light":
+		return
+	var taken := {}
+	for d in RulesData.get_file("people").get("people", []):
+		var at := person_cell(d, taken)
+		if at.x < 0:
+			push_warning("overworld: no place for %s" % d.get("id"))
+			continue
+		taken[at] = true
+		var p := Person.new()
+		p.setup(d, at, world)
+		p.hero = hero
+		people.append(p)
+		add_child(p)
+	_show_people()
+
+
+## Where a person stands: their land's top-left plus their row and column, or the nearest open square.
+func person_cell(d: Dictionary, taken := {}) -> Vector2i:
+	var pl: Dictionary = d.get("place", {})
+	var id := str(pl.get("land", ""))
+	for key in [id, WorldMap.realm_id(id), WorldMap.names_id(id)]:
+		if world.lands.has(key):
+			var want: Vector2i = world.lands[key].rect.position + Vector2i(int(pl.get("col", 0)), int(pl.get("row", 0)))
+			for r in 5:
+				for dy in range(-r, r + 1):
+					for dx in range(-r, r + 1):
+						var q := want + Vector2i(dx, dy)
+						if maxi(absi(dx), absi(dy)) == r and _can_stand(q) and not taken.has(q):
+							return q
+	return Vector2i(-1, -1)
+
+
+func _can_stand(q: Vector2i) -> bool:
+	return world.walkable(q) and world.at(q) not in "MSPLHY" and not world.gates.has(q)
+
+
+func _show_people() -> void:
+	for p in people:
+		p.visible = Conversation.visible(p.id)
 
 
 ## Where this realm's Lost Light waits, or (-1, -1).
@@ -252,6 +337,8 @@ func hit_stop(frames: int) -> void:
 
 func _freeze(on: bool) -> void:
 	hero.set_physics_process(not on)
+	for p in people:
+		p.set_physics_process(not on)
 	for m in monsters:
 		if is_instance_valid(m):
 			m.set_physics_process(not on)
@@ -328,4 +415,5 @@ func _draw_marks() -> void:
 
 func _on_game_changed() -> void:
 	tiles.refresh(objects, waystone_lit)
+	_show_people()
 	gates_layer.queue_redraw()

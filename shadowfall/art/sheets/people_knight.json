@@ -1,0 +1,56 @@
+{
+ "image": "people_knight.png",
+ "kind": "sprite",
+ "cell": [
+  32,
+  48
+ ],
+ "origin": [
+  16,
+  46
+ ],
+ "anims": {
+  "idle_down": {
+   "row": 0,
+   "col": 0,
+   "frames": 4,
+   "fps": 3,
+   "loop": true
+  },
+  "idle_up": {
+   "row": 1,
+   "col": 0,
+   "frames": 4,
+   "fps": 3,
+   "loop": true
+  },
+  "idle_side": {
+   "row": 2,
+   "col": 0,
+   "frames": 4,
+   "fps": 3,
+   "loop": true
+  },
+  "walk_down": {
+   "row": 3,
+   "col": 0,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "walk_up": {
+   "row": 4,
+   "col": 0,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "walk_side": {
+   "row": 5,
+   "col": 0,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  }
+ }
+}

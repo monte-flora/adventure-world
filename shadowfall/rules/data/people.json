@@ -1,14 +1,14 @@
 {
- "about": "Everyone in the realm (rules/dialogue.gd runs their talk). 'place' is a village (a 'village:' line in levels/world/) plus rows and columns from its square, or a land id and a row and column. 'look' is a picture in art/. 'role' (shop or smith) opens a shop or the forge. 'show_if' hides them until true. 'talk' is nodes: 'start' first; each node is a list of variants, the first whose 'if' all pass is used. 'say' pages, 'do' effects, 'choices', 'next'. Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N, stones:N, flag:NAME, not:... Effects: start_quest|advance_quest|finish_quest:ID, give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:GOAL.",
+ "about": "Everyone in the realm (rules/conversation.gd runs their talk). 'place' is a realm land id (levels/realm/, e.g. emberhold) and a row and column in that land's own file (the nearest open square if it is blocked). 'move' is idle or pace (a few steps to and fro). 'look' is a picture in art/. 'role' (shop or smith) opens a shop or the forge. 'show_if' hides them until true. 'talk' is nodes: 'start' first; each node is a list of variants, the first whose 'if' all pass is used. 'say' pages, 'do' effects, 'choices', 'next'. Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N, stones:N, flag:NAME, gloom:N (the gloom stage is N or more), not:... Effects: start_quest|advance_quest|finish_quest:ID, give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:GOAL.",
  "people": [
   {
    "id": "maera",
    "name": "Warden Maera",
    "look": "warden",
    "place": {
-    "land": "home",
-    "row": 12,
-    "col": 12
+    "land": "emberhold",
+    "row": 26,
+    "col": 50
    },
    "talk": {
     "start": [
@@ -92,7 +92,8 @@
       "next": "menu"
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "garrick",
@@ -100,9 +101,9 @@
    "look": "smith",
    "role": "smith",
    "place": {
-    "land": "home",
-    "row": 10,
-    "col": 16
+    "land": "emberhold",
+    "row": 28,
+    "col": 53
    },
    "talk": {
     "start": [
@@ -174,7 +175,8 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "tamsin",
@@ -188,9 +190,9 @@
     "fortune"
    ],
    "place": {
-    "land": "home",
-    "row": 11,
-    "col": 8
+    "land": "emberhold",
+    "row": 28,
+    "col": 49
    },
    "talk": {
     "start": [
@@ -211,16 +213,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "wren",
    "name": "Wren",
    "look": "child",
    "place": {
-    "land": "home",
-    "row": 13,
-    "col": 6
+    "land": "emberhold",
+    "row": 31,
+    "col": 44
    },
    "talk": {
     "start": [
@@ -269,7 +272,8 @@
       ]
      }
     ]
-   }
+   },
+   "move": "pace"
   },
   {
    "id": "ash",
@@ -279,9 +283,9 @@
     "quest_step:lost_hound:0"
    ],
    "place": {
-    "land": "woods",
-    "row": 8,
-    "col": 30
+    "land": "weepingwold",
+    "row": 26,
+    "col": 16
    },
    "talk": {
     "start": [
@@ -294,16 +298,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "pace"
   },
   {
    "id": "wenna",
    "name": "Old Mother Wenna",
    "look": "elder",
    "place": {
-    "village": "Oakhollow",
-    "row": 1,
-    "col": 2
+    "land": "weepingwold",
+    "row": 24,
+    "col": 14
    },
    "talk": {
     "start": [
@@ -354,16 +359,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "corran",
    "name": "Corran the Ferryman",
    "look": "ferryman",
    "place": {
-    "village": "Lakeside",
-    "row": 0,
-    "col": 1
+    "land": "drowned_mere",
+    "row": 3,
+    "col": 48
    },
    "talk": {
     "start": [
@@ -413,16 +419,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "aldric",
    "name": "Ser Aldric",
    "look": "knight",
    "place": {
-    "land": "ruins",
-    "row": 7,
-    "col": 20
+    "land": "hollowcrown",
+    "row": 23,
+    "col": 8
    },
    "talk": {
     "start": [
@@ -472,16 +479,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "pace"
   },
   {
    "id": "hrefna",
    "name": "Hrefna the Huntress",
    "look": "hunter",
    "place": {
-    "village": "Snowcap",
-    "row": 0,
-    "col": 1
+    "land": "wintermarch",
+    "row": 29,
+    "col": 6
    },
    "talk": {
     "start": [
@@ -531,16 +539,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "sefa",
    "name": "Sefa of the Last Well",
    "look": "trader",
    "place": {
-    "village": "Sandwell",
-    "row": 1,
-    "col": 2
+    "land": "cinder_wastes",
+    "row": 3,
+    "col": 73
    },
    "talk": {
     "start": [
@@ -590,16 +599,17 @@
       ]
      }
     ]
-   }
+   },
+   "move": "idle"
   },
   {
    "id": "morwen",
    "name": "Morwen of the Mirefen",
    "look": "seer",
    "place": {
-    "village": "Bogwater",
-    "row": 0,
-    "col": 1
+    "land": "mirefen",
+    "row": 3,
+    "col": 41
    },
    "talk": {
     "start": [
@@ -646,6 +656,310 @@
      {
       "say": [
        "Not yet, child. Not yet."
+      ]
+     }
+    ]
+   },
+   "move": "idle"
+  },
+  {
+   "id": "bram",
+   "name": "Bram of the Wall",
+   "look": "watchman",
+   "place": {
+    "land": "emberhold",
+    "row": 23,
+    "col": 47
+   },
+   "move": "pace",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The watch-fires gutter faster every night.",
+       "I light them anyway. A man has to be doing something when the dark comes."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "Halt. Oh. You're the one Maera sent below.",
+       "Mind the road past the Ember Beacon. Things walk it now that never used to."
+      ],
+      "if": [
+       "first_time"
+      ]
+     },
+     {
+      "say": [
+       "Eyes open, {hero}. The dark is patient. Be more patient."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "isolde",
+   "name": "Isolde Greymantle",
+   "look": "mourner",
+   "place": {
+    "land": "emberhold",
+    "row": 30,
+    "col": 50
+   },
+   "move": "idle",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "My brother went into the Mine with a torch and a song.",
+       "They found the torch."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "I come to the Mine's mouth every evening. I tell myself it is to keep watch.",
+       "Go on. Do not let me keep you."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "tollan",
+   "name": "Tollan Furrow",
+   "look": "peasant",
+   "place": {
+    "land": "emberhold",
+    "row": 24,
+    "col": 55
+   },
+   "move": "pace",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "Three Stones, they're saying in the tavern. Three!",
+       "The barley came up green this morning. Green, {hero}. I near wept."
+      ],
+      "if": [
+       "stones:3"
+      ]
+     },
+     {
+      "say": [
+       "Crops won't take. Seed rots in the furrow like the ground's gone sour.",
+       "Find those Stones before we all starve, eh?"
+      ],
+      "if": [
+       "gloom:1"
+      ]
+     },
+     {
+      "say": [
+       "Fine morning. Grey, but fine. We take what the sky gives us now."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "oswin",
+   "name": "Oswin Hollowbark",
+   "look": "peasant",
+   "place": {
+    "land": "weepingwold",
+    "row": 23,
+    "col": 15
+   },
+   "move": "idle",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The trees moan louder when the gloom thickens. Don't answer them."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "The Grieving Oak lost its last leaf the night the Gate opened.",
+       "I cut deadwood now. There's no shortage of it."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "brother_cael",
+   "name": "Brother Cael",
+   "look": "pilgrim",
+   "place": {
+    "land": "hollowcrown",
+    "row": 26,
+    "col": 9
+   },
+   "move": "pace",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The kings in their barrows grow restless. I hear them turn in the stone.",
+       "Pray they stay asleep, {hero}. Pray hard."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "I walk to the Watch of Kings and back, every day, for the old crowns.",
+       "Someone must remember them. The dark would rather nobody did."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "nessa",
+   "name": "Nessa Saltwake",
+   "look": "ferryman",
+   "place": {
+    "land": "drowned_mere",
+    "row": 5,
+    "col": 53
+   },
+   "move": "idle",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The lighthouse lamp went out last night. Nobody climbed up to light it.",
+       "Nobody climbs up anymore."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "Bells ring under the Mere when the wind is wrong.",
+       "A drowned town, my granddam said. Its bells still call the hour for the dead."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "jorund",
+   "name": "Jorund Icebeard",
+   "look": "watchman",
+   "place": {
+    "land": "wintermarch",
+    "row": 32,
+    "col": 5
+   },
+   "move": "pace",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "Skaldra's frost creeps further south each night. My beard froze to my helm this morning."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "Wintermarch holds. Wintermarch always holds.",
+       "Mostly because nothing else wants it."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "vesh",
+   "name": "Vesh the Ash-Walker",
+   "look": "pilgrim",
+   "place": {
+    "land": "cinder_wastes",
+    "row": 6,
+    "col": 78
+   },
+   "move": "pace",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "The ash falls black now. Even the wyrms have gone quiet."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "I walk the Wastes barefoot. The ash remembers fire, and so should we.",
+       "Drink when you can, {hero}. The Cinder Wastes take water first and then everything else."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "grub",
+   "name": "Old Grub",
+   "look": "peasant",
+   "place": {
+    "land": "mirefen",
+    "row": 5,
+    "col": 41
+   },
+   "move": "idle",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "Lanterns out on the water again. Don't follow them. Never follow them."
+      ],
+      "if": [
+       "gloom:2"
+      ]
+     },
+     {
+      "say": [
+       "Peat for the fire, eel for the pot. That's the Mirefen.",
+       "And a lantern in the fog that no one is holding. That's the Mirefen too."
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "deserter",
+   "name": "Hollow-Eyed Deserter",
+   "look": "mourner",
+   "place": {
+    "land": "shadowgate",
+    "row": 1,
+    "col": 3
+   },
+   "move": "idle",
+   "talk": {
+    "start": [
+     {
+      "say": [
+       "I stood at the Gate the night it opened. I ran.",
+       "Seven Stones, they say, and it closes. Bring them, and maybe I'll stop running."
       ]
      }
     ]

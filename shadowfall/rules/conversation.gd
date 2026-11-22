@@ -5,7 +5,7 @@ extends RefCounted
 ## choose(i). When done is true the talk is over; `then` says what opens after ("shop", "forge").
 ##   var c := Conversation.new("maera")
 ## Conditions: first_time, quest_new|quest_active|quest_done:ID, quest_step:ID:N, has:ITEM:N,
-## stones:N, flag:NAME, not:<condition>. Effects: start_quest|advance_quest|finish_quest:ID,
+## stones:N, flag:NAME, gloom:N (the gloom stage is N or more), not:<condition>. Effects: start_quest|advance_quest|finish_quest:ID,
 ## give|take:ITEM:N, set_flag:NAME, open:shop|forge, event:<quest event>.
 
 var person: Dictionary
@@ -139,6 +139,7 @@ static func check_condition(cond: String, first: bool) -> bool:
 		"has": return Vitals.count(a[1]) >= int(a[2])
 		"stones": return Game.stones.size() >= int(a[1])
 		"flag": return Game.flags.has(cond.substr(5))
+		"gloom": return Game.gloom_stage() >= int(a[1])
 	push_warning("unknown condition: " + cond)
 	return false
 
