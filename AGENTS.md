@@ -5,13 +5,16 @@ Read `HANDOFF.md` to see where things stand, and `TODO.md` for everything still 
 
 ## How we work
 - **TODO.md is the one to-do list.** Add each new ask to it before you build it. Mark an item `[~]` while you build it and `[x] YYYY-MM-DD` once it is verified.
-- **Commit or push only when the user asks.** Once the user OKs a change, commit it, push it and open a PR.
+- **Commit and push freely on `phase-2`.** Agents may commit, push and open PRs into `phase-2` on their own. A PR into `main` (Classic; its merge publishes to itch.io) needs the user's OK.
 - **Never merge by hand.** `.github/workflows/auto-merge.yml` merges a PR when all of its checks are green: `tests` ×2 and `build-web`. It then deletes the branch and publishes the game to itch.io. To stop a merge, add the `hold` label or open the PR as a draft. Merge by hand (`gh pr merge N --merge --delete-branch`) only if the workflow skips a green PR and the user says to.
 - **Keep the user's hand edits** to level files and settings (for example `START_HEALTH`). A dirty `levels/` file is the user's work, so don't revert it.
 - **Decide, don't grill.** Act on your recommended choice and note what you assumed. Ask only when the decision really is the user's.
 - **Be very concise.** Give times in US Eastern, 12-hour am/pm.
-- **Context limit** (every Orca session; user-level hook): 120K finish the step, 150K or a milestone restart from files (`coord.yaml` `restart`: main says "Ready. Type /clear, then /coord-main", same chat; a worker asks the coordinator), 180K only the hand-off runs; never `/compact`.
+- **Context limit:** at about 120K, a worker writes `.handoff/<branch>.md` (done, in flight, next, the user's words), commits, pushes and asks the coordinator for a restart in the same worktree. The coordinator rewrites `HANDOFF.md` and a fresh chat reads it. Never `/compact`.
 - **The itch.io page stays Restricted.** Never enter API keys, tokens or passwords.
+- **Orchestration is plain Orca** (`orca orchestration worker-start|send|check --wait`), not the grafite-coord kit: this project has no coord.yaml and its `.claude/settings.json` turns hooks off.
+- **Silent runs:** the user listens to their own music. Every local run: Godot `--audio-driver Dummy` (or `--headless`), pygame `SDL_AUDIODRIVER=dummy`.
+- **Usage cap:** a low-priority project. At 50 % of the 5-hour Claude window, pause every worker (push WIP + `.handoff/`) until the reset.
 - **Parallel work:** run one agent per worktree. Two agents never edit the same files at once (`game.py`, `caves.py` and `rules.py` are hot spots). Only the coordinating agent edits TODO.md, unless the task's PR owns that edit.
 
 ## Commands (pixi)
