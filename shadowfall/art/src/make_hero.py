@@ -1,34 +1,47 @@
-"""The Hero: a hooded wanderer with a lantern (deep-blue cloak, ember scarf, gold lantern).
-Side sheet 48x64 (caves, faces right) and top-down sheet 32x48 (the realm). Original art."""
+"""The Hero, the Lanternbearer (docs/teen/art/ref/lanternbearer_concept.jpg): a midnight-blue hood up, the face
+in shadow but for pale eyes, a long torn cloak, dark leather and chainmail, one steel pauldron and steel vambraces
+on the sword arm, a blood-red sash, muddy boots, and an iron-caged lantern on the belt (the brightest thing on
+screen; it swings). Side sheet 48x64 (caves, faces right) and top-down sheet 32x48 (the realm). Original art."""
 import math
 
 from sfart import Sheet, circle, ellipse, flash, line, outline, poly, poof, px, rect, surf
 
-CLOAK = ("water1", "water2", "water3")  # shadow, base, light
-SCARF = ("ember1", "ember2")
+CLOAK = ("water0", "water1", "water2")  # shadow, base, light: deep midnight blue
+SASH = ("ember1", "ember2")
 SKIN = ("earth2", "earth3")
 BOOT = ("earth0", "earth1")
+LEATHER = ("earth0", "earth1", "earth2")
+STEEL = ("ink4", "ink5", "ink6")
+MAIL = ("ink2", "ink3")
 
 
 def lantern(s, x, y, glow=True):
-    """Hangs from (x, y): ring, cap, glass, base. ~6x10."""
-    line(s, "ink4", (x, y), (x, y + 2))
-    rect(s, "ink3", x - 3, y + 2, 7, 2)
+    """An iron-caged lantern hanging from (x, y): ring, cap, flame behind bars, base. ~7x11."""
+    line(s, "ink4", (x, y), (x, y + 1))
+    poly(s, "ink3", [(x - 2, y + 2), (x + 2, y + 2), (x + 3, y + 3), (x - 3, y + 3)])
     rect(s, "light0", x - 2, y + 4, 5, 5)
     if glow:
         rect(s, "light1", x - 1, y + 5, 3, 3)
+        px(s, "ink7", x, y + 6)
+    for bx in (x - 3, x + 3):
+        line(s, "ink2", (bx, y + 4), (bx, y + 8))
+    line(s, "ink3", (x, y + 4), (x, y + 4))
     rect(s, "ink3", x - 3, y + 9, 7, 2)
 
 
-def sword(s, hx, hy, ang, length=20):
-    """Hilt at (hx, hy), pointing at angle ang (degrees, 0 = right, 90 = down)."""
+def sword(s, hx, hy, ang, length=20, runes=False):
+    """A plain longsword, hilt at (hx, hy), pointing at ang (degrees, 0 = right, 90 = down)."""
     a = math.radians(ang)
     dx, dy = math.cos(a), math.sin(a)
     tip = (hx + dx * length, hy + dy * length)
-    line(s, "ink6", (hx + dx * 3, hy + dy * 3), tip, 3)
+    line(s, "ink5", (hx + dx * 3, hy + dy * 3), tip, 3)
     line(s, "ink7", (hx + dx * 4 - dy, hy + dy * 4 + dx), (tip[0] - dy, tip[1] + dx))
-    line(s, "earth1", (hx - dx * 3, hy - dy * 3), (hx, hy), 2)
-    line(s, "light0", (hx + dx * 2 - dy * 3, hy + dy * 2 + dx * 3), (hx + dx * 2 + dy * 3, hy + dy * 2 - dx * 3), 2)
+    if runes:  # Sunfang: ember runes down the fuller
+        for k in range(4, int(length) - 2, 4):
+            px(s, "ember3", hx + dx * k, hy + dy * k)
+    line(s, "earth0", (hx - dx * 3, hy - dy * 3), (hx, hy), 2)
+    px(s, "ink5", hx - dx * 4, hy - dy * 4)
+    line(s, "ink4", (hx + dx * 2 - dy * 3, hy + dy * 2 + dx * 3), (hx + dx * 2 + dy * 3, hy + dy * 2 - dx * 3), 2)
 
 
 def slash(s, cx, cy, r, a0, a1):
@@ -39,54 +52,99 @@ def slash(s, cx, cy, r, a0, a1):
             px(s, "light1" if k else "ink7", cx + math.cos(a) * (r - k), cy + math.sin(a) * (r - k))
 
 
-def leg(s, hip, foot, col):
+def torn(x0, x1, y, n, depth, seed=0):
+    """A ragged hem from (x0, y) to (x1, y): n teeth hanging down by up to depth."""
+    pts = []
+    for k in range(n + 1):
+        x = x0 + (x1 - x0) * k / n
+        pts.append((x, y + (depth if (k + seed) % 2 else depth // 3) + ((k * 7 + seed) % 3) - 1))
+    return pts
+
+
+def leg(s, hip, foot, near):
     knee = ((hip[0] + foot[0]) / 2 + 2, (hip[1] + foot[1]) / 2)
-    line(s, col, hip, knee, 5)
-    line(s, col, knee, foot, 4)
-    rect(s, BOOT[1] if col == CLOAK[1] else BOOT[0], foot[0] - 2, foot[1] - 2, 7, 4)
+    pants = "earth1" if near else "ink2"
+    line(s, pants, hip, knee, 5)
+    line(s, pants, knee, foot, 4)
+    bt = BOOT[1] if near else BOOT[0]
+    rect(s, bt, foot[0] - 2, foot[1] - 7, 5, 6)
+    rect(s, bt, foot[0] - 2, foot[1] - 2, 7, 3)
+    if near:
+        rect(s, "earth0", foot[0] - 2, foot[1] - 7, 5, 1)  # boot cuff
+        px(s, "earth2", foot[0] + 2, foot[1] - 1)          # mud
+        px(s, "earth2", foot[0] - 1, foot[1] - 4)
 
 
 def side(bob=0, front=(3, 0), back=(-3, 0), sway=0, scarf=0, hand=(9, 38), lamp=True,
-         sword_ang=None, arc=None, crouch=0, lean=0, hood_back=0):
-    """One side-view frame. Feet offsets are from the standing spot; hand is the lantern hand."""
+         sword_ang=None, arc=None, crouch=0, lean=0, hood_back=0, lamp_hand=False):
+    """One side-view frame. Feet offsets are from the standing spot; hand is the sword hand. sway streams the
+    cloak back, scarf the sash tail. lamp_hand: the lantern is held up in the hand instead of on the belt."""
     s = surf(48, 64)
     cx, g = 24 + lean, 62
-    hip = (24, 46 + bob + crouch)
-    # back leg, back cloak, scarf tail
-    leg(s, hip, (24 + back[0], g + back[1]), CLOAK[0])
-    top = 23 + bob + crouch
-    hem = 52 + bob + crouch // 2
-    tail = [(cx - 3, top + 2), (cx - 12 - scarf, top + 4 + scarf // 2), (cx - 16 - scarf, top + 9 - scarf // 3),
-            (cx - 9, top + 6)]
-    poly(s, SCARF[0], tail)
-    poly(s, CLOAK[1], [(cx - 6, top), (cx + 7, top), (cx + 10, hem - 2), (cx + 4, hem), (cx - 9 - sway, hem + 1),
-                       (cx - 11 - sway, hem - 3)])
-    poly(s, CLOAK[0], [(cx - 6, top + 2), (cx - 2, top + 3), (cx - 3, hem), (cx - 9 - sway, hem + 1),
-                       (cx - 11 - sway, hem - 3)])
-    line(s, CLOAK[2], (cx + 6, top + 2), (cx + 8, hem - 4), 2)
-    # front leg
-    leg(s, hip, (24 + front[0], g + front[1]), CLOAK[1])
-    # belt
-    rect(s, "earth1", cx - 6, hip[1] - 9, 13, 2)
-    px(s, "light0", cx + 3, hip[1] - 9)
-    # hood
-    hy = 9 + bob + crouch
-    ellipse(s, CLOAK[1], cx - 8 - hood_back, hy, 17, 16)
-    poly(s, CLOAK[1], [(cx - 8 - hood_back, hy + 6), (cx - 13 - hood_back, hy + 2), (cx - 6, hy + 2)])
-    ellipse(s, CLOAK[2], cx - 5, hy + 1, 9, 4)
-    ellipse(s, "ink1", cx + 1, hy + 5, 8, 9)
-    px(s, SKIN[1], cx + 7, hy + 10)
-    px(s, SKIN[0], cx + 6, hy + 12)
-    rect(s, "light1", cx + 5, hy + 8, 2, 1)
-    # scarf wrap
-    rect(s, SCARF[1], cx - 6, top - 1, 14, 3)
-    rect(s, SCARF[0], cx - 6, top + 1, 6, 2)
-    # lantern arm (front)
-    sh = (cx + 4, top + 5)
-    hx, hy2 = cx + hand[0] - 9 + 9, hand[1] + bob + crouch
-    line(s, CLOAK[1], sh, (hx, hy2), 4)
-    rect(s, SKIN[1], hx - 1, hy2 - 1, 3, 3)
-    if lamp:
+    hip = (24, 45 + bob + crouch)
+    top = 22 + bob + crouch
+    hem = 57 + bob + crouch // 2
+    # the cloak's back half, behind everything: long, torn, streaming
+    back_hem = torn(cx - 13 - sway * 2, cx - 1, hem - sway // 2, 5, 4, seed=sway)
+    poly(s, CLOAK[0], [(cx - 5, top - 1), (cx + 1, top)] + back_hem[::-1] +
+         [(cx - 12 - sway * 2, hem - 8 - sway), (cx - 9 - sway, top + 8)])
+    line(s, CLOAK[1], (cx - 6, top + 2), (cx - 10 - sway * 2, hem - 6 - sway // 2))
+    leg(s, hip, (24 + back[0], g + back[1]), False)
+    # body: leather jerkin over chainmail, the mail skirt torn at the hem
+    poly(s, MAIL[0], torn(cx - 5, cx + 6, hip[1] + 5, 4, 3, 1)[::-1] + [(cx - 5, top + 4), (cx + 6, top + 4)])
+    for y in range(top + 5, hip[1] + 6, 2):
+        for x in range(cx - 4 + (y // 2) % 2, cx + 6, 2):
+            px(s, MAIL[1], x, y)
+    poly(s, LEATHER[1], [(cx - 5, top + 2), (cx + 5, top + 2), (cx + 6, hip[1] - 4), (cx - 5, hip[1] - 4)])
+    line(s, LEATHER[2], (cx + 4, top + 3), (cx + 5, hip[1] - 5))
+    line(s, LEATHER[0], (cx - 4, top + 3), (cx + 4, hip[1] - 7), 1)  # cross strap
+    leg(s, hip, (24 + front[0], g + front[1]), True)
+    # blood-red sash with a fluttering tail, belt buckle
+    rect(s, SASH[1], cx - 5, hip[1] - 6, 12, 4)
+    rect(s, SASH[0], cx - 5, hip[1] - 3, 12, 1)
+    poly(s, SASH[0], [(cx - 4, hip[1] - 4), (cx - 1, hip[1] - 3), (cx - 6 - scarf, hip[1] + 6 - scarf // 2),
+                      (cx - 8 - scarf, hip[1] + 4 - scarf // 2)])
+    px(s, "ink5", cx + 3, hip[1] - 4)
+    # the lantern on the belt, swinging
+    if lamp and not lamp_hand:
+        lantern(s, cx + 6 - round(sway / 2), hip[1] - 3)
+    # the cloak over the back shoulder
+    poly(s, CLOAK[1], [(cx - 6, top - 1), (cx + 3, top - 1), (cx + 1, top + 6), (cx - 2, hem - 12),
+                       (cx - 7 - sway, hem - 9 - sway // 2), (cx - 8 - sway, top + 6)])
+    line(s, CLOAK[2], (cx - 7 - sway // 2, top + 4), (cx - 6 - sway, hem - 11))
+    # hood, peak trailing back, face in shadow, pale eyes
+    hy = 7 + bob + crouch
+    hb = hood_back
+    ellipse(s, CLOAK[1], cx - 8 - hb, hy, 17, 17)
+    poly(s, CLOAK[1], [(cx - 7 - hb, hy + 3), (cx - 12 - hb - sway // 2, hy + 9), (cx - 5, hy + 11)])
+    poly(s, CLOAK[0], [(cx - 9 - hb, hy + 10), (cx - 12 - hb - sway // 2, hy + 9), (cx - 4, hy + 16), (cx - 6, hy + 17)])
+    line(s, CLOAK[2], (cx - 5 - hb, hy + 1), (cx + 3, hy + 1))
+    line(s, CLOAK[2], (cx + 5, hy + 3), (cx + 8, hy + 7))
+    ellipse(s, "ink0", cx + 1, hy + 5, 8, 11)
+    ellipse(s, "ink1", cx + 3, hy + 8, 6, 8)
+    px(s, "ink6", cx + 5, hy + 9)
+    px(s, "ink7", cx + 6, hy + 9)
+    px(s, SKIN[0], cx + 7, hy + 12)
+    px(s, SKIN[0], cx + 6, hy + 14)
+    px(s, CLOAK[2], cx - 2, hy + 15)                   # cloak clasp
+    # the sword arm: steel pauldron, vambrace, gloved hand
+    sh = (cx + 4, top + 6)
+    if lamp_hand:
+        hx, hy2 = cx + hand[0] - 9 + 9, hand[1] + bob + crouch
+    elif sword_ang is not None:
+        hx, hy2 = cx + 2 + round(math.cos(math.radians(sword_ang)) * 3), top + 10 + round(math.sin(math.radians(sword_ang)) * 3)
+    else:
+        hx, hy2 = cx + hand[0] - 3, hand[1] + bob + crouch - 2
+    el = ((sh[0] + hx) / 2 + 1, (sh[1] + hy2) / 2 + 1)
+    line(s, LEATHER[1], sh, el, 4)
+    line(s, STEEL[1], el, (hx, hy2), 4)
+    line(s, STEEL[2], (el[0] + 1, el[1] - 1), (hx + 1, hy2 - 1))
+    rect(s, LEATHER[1], hx - 1, hy2 - 1, 3, 3)
+    ellipse(s, STEEL[0], sh[0] - 4, sh[1] - 3, 8, 7)
+    ellipse(s, STEEL[1], sh[0] - 3, sh[1] - 3, 6, 4)
+    px(s, STEEL[2], sh[0] - 1, sh[1] - 2)
+    px(s, STEEL[2], sh[0], sh[1] - 2)
+    if lamp_hand:
         lantern(s, hx, hy2 + 1)
     if sword_ang is not None:
         sword(s, cx + 2, top + 10, sword_ang)
@@ -130,7 +188,8 @@ def side_sheet():
                     for k in range(3)], 14, False)
     sh.add("swim", [side(bob=6, front=(8, -10 + 4 * (i % 2)), back=(-9, -10 + 4 * ((i + 1) % 2)), sway=6,
                          scarf=7, lamp=True, hand=(12, 34)) for i in range(4)], 8)
-    sh.add("lantern_raise", [side(hand=(8, 30)), side(hand=(7, 20)), side(hand=(6, 8))], 10, False)
+    sh.add("lantern_raise", [side(hand=(8, 30), lamp_hand=True), side(hand=(7, 20), lamp_hand=True),
+                             side(hand=(6, 8), lamp_hand=True)], 10, False)
     base = side()
     sh.add("hurt", [flash(base), side(lean=-3, sway=-3, hand=(8, 40))], 12, False)
     death = [side(crouch=4, lean=-2, hand=(8, 42)), side(crouch=8, front=(6, 0), back=(-6, 0), hand=(9, 46), lamp=True)]
