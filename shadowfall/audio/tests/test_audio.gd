@@ -1,5 +1,5 @@
 extends TestCase
-## Audio: the stems follow the gloom, the tunes loop on whole bars, every sound is made and fits.
+## Audio: the stems follow the gloom, the recorded stems loop in step, the synth fallback works, it all fits.
 
 const Synth := preload("res://audio/synth.gd")
 const Tunes := preload("res://audio/tunes.gd")
@@ -47,14 +47,36 @@ func test_each_screen_picks_its_tune() -> void:
 		check(Audio._music.playing, screen + ": the music player runs")
 
 
-func test_tunes_loop_on_whole_bars() -> void:
+## The music is sampled instruments: both stems of every tune are .ogg files, the same length,
+## exactly 8 bars, looping from the start (so they stay in step in the AudioStreamSynchronized).
+func test_recorded_stems_loop_in_step() -> void:
+	var bytes := 0
 	for tune in Tunes.TUNES:
 		var s: AudioStreamSynchronized = Audio.music_stream(tune)
-		var base: AudioStreamWAV = s.get_sync_stream(0)
-		var dark: AudioStreamWAV = s.get_sync_stream(1)
-		check_eq(base.data.size(), dark.data.size(), tune + ": stems the same length")
+		var bar := Tunes.step_of(tune) * Tunes.STEPS_PER_BAR
+		for i in 2:
+			var stem = s.get_sync_stream(i)
+			check(stem is AudioStreamOggVorbis, "%s stem %d is a recorded .ogg" % [tune, i])
+			if not stem is AudioStreamOggVorbis:
+				continue
+			check(stem.loop and stem.loop_offset == 0.0, "%s stem %d loops from the start" % [tune, i])
+			check(absf(stem.get_length() - 8 * bar) < 0.001, "%s stem %d: %.4f s = 8 bars" % [tune, i, stem.get_length()])
+		check(is_equal_approx(s.get_sync_stream(0).get_length(), s.get_sync_stream(1).get_length()),
+			tune + ": stems the same length")
+		for stem in ["base", "dark"]:
+			bytes += FileAccess.get_file_as_bytes("%s%s_%s.ogg" % [Audio.MUSIC_DIR, tune, stem]).size()
+	check(bytes > 0 and bytes < 8 * 1024 * 1024, "music files %d KB, under 8 MB" % (bytes / 1024))
+
+
+## A missing stem file: the tune falls back to the code synth, which also loops on whole bars.
+func test_synth_fallback_loops_on_whole_bars() -> void:
+	for tune in Tunes.TUNES:
+		check(Audio.recorded_stems(tune, "res://no_such_dir/").is_empty(), tune + ": no files, no stems")
+		var t := Tunes.make(tune)
+		var base := Synth.to_stream(t["base"], true)
+		var dark := Synth.to_stream(t["dark"], true)
+		check_eq(base.data.size(), dark.data.size(), tune + ": synth stems the same length")
 		check_eq(base.loop_mode, AudioStreamWAV.LOOP_FORWARD, tune + ": base loops")
-		check_eq(dark.loop_mode, AudioStreamWAV.LOOP_FORWARD, tune + ": dark loops")
 		var bar := int(Synth.RATE * Tunes.step_of(tune)) * Tunes.STEPS_PER_BAR
 		check_eq(base.loop_end % bar, 0, tune + ": whole bars")
 		check(base.loop_end / bar >= 4, tune + ": at least 4 bars")
