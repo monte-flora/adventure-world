@@ -286,3 +286,23 @@ func test_decor_iwf_is_just_for_looks() -> void:
 	await _hold(h, 1.0, 0.0, 40)
 	check(h.position.x > 6.0 * T, "walk past torch, window and banner (%.0f)" % h.position.x)
 	check_eq(Game.hearts, Game.START_HEARTS, "they don't hurt")
+
+
+func test_hero_crawls_under_a_low_ceiling() -> void:
+	var h := await _open("theme: stone\n##########\n#S.......#\n#....#####\n#........#\n##########")
+	await physics_frames(10)
+	check(h.is_on_floor() and not h.low_ceiling(), "stands where the roof is high")
+	check_eq(h.sprite.animation, "idle", "idle in the open")
+	await _hold(h, 1.0, 0.0, 50)                       # walk into the one-tile tunnel on row 3
+	h.ix = 1.0
+	await physics_frames(2)
+	check(_cell(h).y == 3 and h.low_ceiling(), "rock within a tile above the head (cell %s)" % _cell(h))
+	check_eq(h.sprite.animation, "crawl", "crawls in the tunnel")
+	h.ix = 0.0
+
+
+func test_n_thorns_have_a_tile_in_every_cave_sheet() -> void:
+	check_eq(CaveArt.MAP_TILE.get("n", ""), "thorns", "n is drawn from the sheet")
+	for theme in CaveTiles.THEMES:
+		var s := CaveArt.sheet(theme)
+		check(ArtSheet.meta(s)["anims"].has("thorns"), s + " has a thorns tile")

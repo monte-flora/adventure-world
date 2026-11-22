@@ -7,10 +7,10 @@ const VIEW := Vector2(960, 540)
 ## Cave monster letter -> art sheet (z Zombie, k Skeleton, c Ember Skull, x Spider).
 const MONSTER := {"z": "monster_barrow_wight", "k": "monster_bone_crawler", "c": "monster_ember_imp",
 	"x": "monster_cave_bat"}
-## Letters in the TileMap -> tile. # and F pick solid_<bits> from their neighbours; < > n are drawn in code.
+## Letters in the TileMap -> tile. # and F pick solid_<bits> from their neighbours; the < > markers are drawn in code.
 const MAP_TILE := {"B": "cracked", "M": "geyser", "G": "gate", "%": "climb_wall", "I": "ice",
 	"o": "mushroom", "*": "ore_diamond", "s": "ore_sun", "=": "ledge", "-": "ledge_crumbly",
-	"<": "solid_15", ">": "solid_15"}
+	"<": "solid_15", ">": "solid_15", "n": "thorns"}
 ## Letters drawn over the TileMap -> tile (animated ones play at the sheet's fps).
 const SPRITE := {"^": "spikes", "!": "fire", "~": "lava", "J": "flame_jet", "$": "gem", "T": "chest",
 	"E": "door", "H": "ladder", "V": "vine", "i": "torch", "w": "window", "f": "banner", "L": "lever"}

@@ -101,15 +101,22 @@
    "fps": 10,
    "loop": false
   },
-  "hurt": {
+  "crawl": {
    "row": 13,
+   "col": 0,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "hurt": {
+   "row": 14,
    "col": 0,
    "frames": 2,
    "fps": 12,
    "loop": false
   },
   "death": {
-   "row": 14,
+   "row": 15,
    "col": 0,
    "frames": 6,
    "fps": 8,
