@@ -2,14 +2,17 @@ class_name LanternLight
 extends PointLight2D
 ## A warm lamp light (PointLight2D, works in the Compatibility renderer and the web build). The
 ## Lanternbearer's "old light" is HERO: the strongest light in the realm. Torches and small lanterns
-## carried by people use NPC, so the hero stays the focal point.
+## carried by people use NPC, TORCH or CANDLE (all far weaker and smaller), so the hero stays the focal point.
 ##   add_child(LanternLight.new(LanternLight.HERO))
 ## In full daylight (no CanvasModulate, or a bright one) it fades to a faint glow; the darker the
 ## dusk (RealmLight's CanvasModulate), the stronger it burns: that scales the colour, and light/flicker.gd
 ## (Flicker) wobbles the energy like fire.
 
 const HERO := {"radius": 176.0, "energy": 1.4, "color": Color("f7b24a")}
-const NPC := {"radius": 72.0, "energy": 0.5, "color": Color("f0904a")}
+const NPC := {"radius": 72.0, "energy": 0.5, "color": Color("f0904a")}        # a person's hand lantern
+const TORCH := {"radius": 84.0, "energy": 0.7, "color": Color("f0784a")}      # redder, a little wider
+const CANDLE := {"radius": 44.0, "energy": 0.35, "color": Color("f7c64a")}
+const UNLIT := {"radius": 40.0, "energy": 0.2, "color": Color("d9a95f")}      # no flame: just enough to see a face
 const DAY_SHARE := 0.3                      # of the energy left in full daylight
 const TEX := 128                            # px across the light texture
 
