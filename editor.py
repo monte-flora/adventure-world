@@ -1411,7 +1411,13 @@ def main():
     parser = argparse.ArgumentParser(description="Cave Editor: draw your own caves!")
     parser.add_argument("cave", nargs="?", help="a cave to open (for example my_caves/lava_tower.txt)")
     parser.add_argument("--quiet", action="store_true", help="no sound")
+    parser.add_argument("--realm", metavar="LAND", help="the prop editor for a realm land (levels/realm/...)")
     args = parser.parse_args()
+    if args.realm:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "shadowfall", "tools"))
+        import realm_editor
+        realm_editor.main([args.realm])
+        return
     Editor(args.cave, sound=not args.quiet).run()
 
 
