@@ -46,8 +46,8 @@ func test_boot_to_first_stone_and_back() -> void:
 		m.queue_free()
 
 	var stone: String = cave.stone_id()
-	if any_stone:                             # strict once levels/ has a stone cave on the map
-		check(stone != "", "the robot's cave holds a Light Stone")
+	check(any_stone, "levels/ has a Light Stone cave on the map")
+	check_eq(stone, "dawn", "the nearest Stone cave holds the %s" % Names.STONE["dawn"])
 	var diamonds := cave.level.find("*")
 	check(diamonds.size() > 0, "the cave has a diamond")
 	if diamonds.is_empty():
@@ -59,6 +59,7 @@ func test_boot_to_first_stone_and_back() -> void:
 	if stone != "":
 		check(Game.stones.has(stone), "the robot took the %s" % Names.STONE[stone])
 		check(Game.has_ability(Game.ABILITY_OF[stone]), "the Stone gives its ability")
+		check(Game.has_save(), "taking the Stone saves")
 	check(Game.flags.get("cave_done:" + cave.file, false), "the cave counts as done")
 	var exits := cave.level.find("E")
 	check(exits.size() > 0, "the cave has an exit")
