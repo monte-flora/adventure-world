@@ -1,0 +1,1 @@
+levels/stone/4_the_drowned_bell_road.txt OK {'lever': True, 'diamond': True, 'exit': True, 'stuck_at': None, 'chests': [{'row': 26, 'column': 32, 'ok': True, 'gave_up': False}], 'seconds': 65.0}

@@ -1,0 +1,1 @@
+45 14 {'exit': False, 'stuck_at': [55.25, 8.52], 'gave_up': True, 'seconds': 0.0, 'tries': 230877} 100

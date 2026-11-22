@@ -1,0 +1,1 @@
+out4.txt (23, 38) {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 6.0, 'tries': 869} 1

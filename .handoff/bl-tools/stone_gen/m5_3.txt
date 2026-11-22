@@ -1,0 +1,1 @@
+~~~~##M#~~~~~#### {'exit': True, 'stuck_at': None, 'gave_up': False, 'seconds': 6.2, 'tries': 1719} 1

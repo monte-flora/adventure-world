@@ -1,0 +1,1 @@
+levels/stone/2_the_weeping_deep.txt OK {'lever': True, 'diamond': True, 'exit': True, 'stuck_at': None, 'chests': [{'row': 24, 'column': 34, 'ok': True, 'gave_up': False}], 'seconds': 42.9}
