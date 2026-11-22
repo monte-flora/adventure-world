@@ -20,6 +20,7 @@ const BINDINGS := {
 	"tool": [[KEY_E], [], [JOY_AXIS_TRIGGER_LEFT, 1.0]],
 	"map": [[KEY_TAB], [JOY_BUTTON_BACK], []],
 	"pause": [[KEY_ESCAPE], [JOY_BUTTON_START], []],
+	"mute": [[KEY_M], [], []],
 }
 
 

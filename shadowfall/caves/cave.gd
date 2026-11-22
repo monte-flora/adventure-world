@@ -44,6 +44,7 @@ var jets: Array[Vector2i] = []                   # J
 var lava_rises := false
 var lava_top := INF                              # top of the rising lava, in pixels
 var leaving := false
+var heal := LumenHeal.new()                      # Q, standing still: a Lumen charge becomes a heart
 var _solid_index := {}
 
 
@@ -261,7 +262,10 @@ func arrow_moved(a) -> void:
 
 
 func hurt_hero(from: Vector2, amount := 1) -> void:
-	if hero.hurt(from, amount) and Game.hearts <= 0:
+	if not hero.hurt(from, amount):
+		return
+	heal.hit()
+	if Game.hearts <= 0:
 		_wake_at_checkpoint()
 
 
@@ -275,6 +279,7 @@ func _physics_process(_dt: float) -> void:
 	if lava_top < INF:
 		lava_top -= LAVA_RISE / 60.0
 	_attack()
+	heal.step(Input.is_action_pressed("heal"), hero.is_on_floor() and absf(hero.velocity.x) < 1.0)
 	_touch()
 	overlay.queue_redraw()
 
@@ -288,6 +293,9 @@ func _touch() -> void:
 		_hazard(hero.position)
 		return
 	var inner := r.grow(-3.0)
+	var ll := lost_light_spot()
+	if ll.x < INF and inner.intersects(Rect2(ll - Vector2.ONE * TILE / 2.0, Vector2.ONE * TILE)):
+		Vitals.recover_lost_light()
 	for cell in cells_in(r.grow(2.0)):
 		var ch := letter(cell)
 		var cr := cell_rect(cell)
@@ -301,6 +309,7 @@ func _touch() -> void:
 					checkpoint = _cell_spot(cell)
 					Game.hearts = Game.max_hearts
 					Game.changed.emit()
+					Game.save()                    # a lantern shrine keeps your journey
 			"$", "T", "*", "s":
 				if inner.intersects(cr):
 					_take(cell, ch)
@@ -349,6 +358,7 @@ func _cell_spot(cell: Vector2i) -> Vector2:
 func _hazard(from: Vector2) -> void:
 	if not hero.hurt(from, 1):
 		return
+	heal.hit()
 	if Game.hearts <= 0:
 		_wake_at_checkpoint()
 	else:
@@ -356,9 +366,14 @@ func _hazard(from: Vector2) -> void:
 		hero.velocity = Vector2.ZERO
 
 
+## Your last heart: the gold stays here as a Lost Light (on safe ground if you fell out of the
+## world), and you wake at the last lantern shrine.
 func _wake_at_checkpoint() -> void:
-	Game.hearts = Game.max_hearts
-	Game.changed.emit()
+	var at := hero.position
+	if not Rect2(Vector2.ZERO, Vector2(level.width, level.height) * TILE).has_point(at):
+		at = hero.safe_spot
+	Vitals.die({"scene": "cave", "file": file, "x": at.x, "y": at.y})
+	heal.hit()
 	hero.position = checkpoint
 	hero.velocity = Vector2.ZERO
 	hero.safe_spot = checkpoint
@@ -367,6 +382,15 @@ func _wake_at_checkpoint() -> void:
 	for m in monsters.get_children():
 		m.queue_free()
 	_spawn_monsters()
+
+
+## Where this cave's Lost Light waits, or INF if it is somewhere else (or there is none).
+func lost_light_spot() -> Vector2:
+	var ll := Vitals.lost_light()
+	var w: Dictionary = ll.get("where", {})
+	if w.get("scene", "") != "cave" or w.get("file", "") != file:
+		return Vector2.INF
+	return Vector2(w.x, w.y)
 
 
 func _take(cell: Vector2i, ch: String) -> void:
@@ -385,6 +409,7 @@ func _take(cell: Vector2i, ch: String) -> void:
 			else:
 				Game.gold += DIAMOND_GOLD
 			Game.flags["cave_done:" + file] = true
+			Game.save()
 			if lava_rises:
 				lava_top = level.height * TILE
 		"s":
@@ -416,6 +441,7 @@ func _attack() -> void:
 		hero.attack_hits.append(m)
 		if m is CaveMonster:
 			m.hit(hero.position)
+			Vitals.lumen_hit()
 			bounced = true
 		elif not m.reflected:
 			m.reflected = true
@@ -677,5 +703,9 @@ func _draw_overlay() -> void:
 				pass
 			_:
 				overlay.draw_rect(Rect2(p + Vector2(4, 4), Vector2(24, 24)), Color.MAGENTA)  # an unknown letter
+	var ll := lost_light_spot()
+	if ll.x < INF:                                   # your Lost Light: the gold you dropped
+		overlay.draw_circle(ll, 10.0 + (clock / 10) % 2 * 2, Color(1.0, 0.85, 0.4, 0.35))
+		overlay.draw_circle(ll, 5.0, Color("ffe08a"))
 	if lava_top < INF:
 		overlay.draw_rect(Rect2(Vector2(0, lava_top), Vector2(level.width * TILE, level.height * TILE - lava_top + 64)), Color(0.88, 0.27, 0.2, 0.9))
