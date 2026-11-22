@@ -48,6 +48,16 @@ Not cave letters: `K` `D` `+` are the castle's (`boss/`). The README has no wate
 Differences from pygame on purpose: 1 heart per hazard (teen hearts), no stomp (the down-strike pogo
 replaces it), touching a chest opens it, bumping ore takes it (pygame needs the pickaxe).
 
+## Art (`cave_art.gd`)
+Everything is drawn from C2's `art/` sheets. Tiles: `tiles_<theme>` (stone if the theme has none); rock
+(`#`, and `F` without collision) picks `solid_<bits>` from its neighbours and redraws when a neighbour
+breaks. Letter -> tile is in `CaveArt.MAP_TILE` (in the TileMap) and `CaveArt.SPRITE` (drawn on top,
+animated at the sheet's fps). Parallax: `art/parallax/<theme>_{far,back,mid,front}` at 0, 0.25, 0.5 and
+1.4x; the front rocks only scroll sideways and are 60 % see-through so they never hide the floor.
+Monsters: z `barrow_wight`, k `bone_crawler`, c `ember_imp`, x `cave_bat`; hurt = white flash, telegraph =
+attack pose pulsing red. Hero: `hero_side`, animation from its state. Still drawn in code: shadow thorns
+`n`, the `<` `>` markers, geyser steam, ropes, arrows.
+
 ## The cave robot (`robot/cave_robot.gd`)
 
 Plays a cave with real physics: it only presses the Hero's buttons. It plans a route over cells you

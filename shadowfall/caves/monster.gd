@@ -39,6 +39,7 @@ var act := 0                                      # frames left of the attack it
 var flash := 0
 var knock := 0.0
 var dropping := false
+var sprite: AnimatedSprite2D
 
 
 func setup(letter: String, at: Vector2, c) -> void:
@@ -56,6 +57,13 @@ func setup(letter: String, at: Vector2, c) -> void:
 	r.size = size
 	shape.shape = r
 	add_child(shape)
+	var sheet: String = CaveArt.MONSTER[kind]
+	sprite = AnimatedSprite2D.new()
+	sprite.sprite_frames = ArtSheet.frames(sheet)
+	sprite.offset = ArtSheet.offset(sheet)
+	sprite.position = Vector2(0, size.y / 2.0)       # feet on the bottom of the box
+	add_child(sprite)
+	sprite.play("move")
 	if kind == "x":                               # a spider hangs from the roof above its letter
 		position = c.roof_above(at) + Vector2(0, size.y / 2.0)
 		home = position
@@ -92,7 +100,22 @@ func _physics_process(dt: float) -> void:
 	if not flying():
 		velocity.y = minf(velocity.y + GRAVITY * dt, 640.0)
 	move_and_slide()
+	_animate(side)
 	queue_redraw()
+
+
+## Hurt flash (white), the telegraph (attack pose, pulsing red), else moving; faces the Hero.
+func _animate(side: float) -> void:
+	sprite.flip_h = side < 0.0
+	var anim := "hurt" if flash > 0 else ("attack" if tell > 0 or act > 0 else "move")
+	if sprite.animation != anim:
+		sprite.play(anim)
+	if flash > 0:
+		sprite.modulate = Color(4, 4, 4)
+	elif tell > 0:
+		sprite.modulate = Color.WHITE.lerp(Color(2.0, 0.5, 0.5), 0.8 if (tell / 4) % 2 == 0 else 0.3)
+	else:
+		sprite.modulate = Color.WHITE
 
 
 func _zombie(to: Vector2, side: float) -> void:
@@ -186,19 +209,10 @@ func hit(from: Vector2) -> bool:
 
 
 func _draw() -> void:
-	var c := Color.WHITE if flash > 0 else color
-	if tell > 0:
-		c = c.lerp(Color("ff4040"), 0.6 if (tell / 4) % 2 == 0 else 0.2)
-	if kind == "x":
+	if kind == "x":                                  # the spider's thread
 		draw_line(Vector2(0, home.y - position.y - size.y / 2.0), Vector2(0, -size.y / 2.0), Color(1, 1, 1, 0.4), 1.0)
-	if kind == "c":
-		draw_circle(Vector2.ZERO, size.x / 2.0, c)
-		if tell > 0:
-			draw_arc(Vector2.ZERO, SKULL_BLAST * (1.0 - tell / float(SKULL_FLARE)), 0, TAU, 32, Color(1, 0.6, 0.2, 0.5), 2.0)
-	else:
-		draw_rect(Rect2(-size / 2.0, size), c)
-	draw_rect(Rect2(Vector2(-6, -size.y / 2.0 + 4), Vector2(3, 3)), Color("ff3030"))
-	draw_rect(Rect2(Vector2(3, -size.y / 2.0 + 4), Vector2(3, 3)), Color("ff3030"))
+	if kind == "c" and tell > 0:                     # how far the Ember Skull's blast will reach
+		draw_arc(Vector2.ZERO, SKULL_BLAST * (1.0 - tell / float(SKULL_FLARE)), 0, TAU, 32, Color(1, 0.6, 0.2, 0.5), 2.0)
 
 
 ## A skeleton's arrow. R reflects it: then it flies back and hurts monsters.
