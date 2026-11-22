@@ -43,3 +43,63 @@ func test_light_follows_the_lantern_and_the_dusk() -> void:
 func test_sunfang_runes_show_while_walking() -> void:
 	for a in ["idle_down", "walk_side", "attack_up"]:
 		check(ArtSheet.frames("hero_top").has_animation(a + "_sunfang"), "hero_top has %s_sunfang" % a)
+
+
+func _person(ow, id: String) -> Person:
+	for p in ow.people:
+		if p.id == id:
+			return p
+	return null
+
+
+func test_people_do_not_all_look_alike() -> void:
+	var all: Array = RulesData.get_file("people").get("people", [])
+	var looks := {}
+	var kits := {}
+	for d in all:
+		looks[d.look] = true
+		kits[str(d.look) + str(d.get("gear", []))] = true
+		for item in d.get("gear", []):
+			var sheet := "gear_" + str(item)
+			check(not ArtSheet.meta(sheet).is_empty(), "%s's %s has art (%s)" % [d.id, item, sheet])
+	check(looks.size() >= 16, "%d different looks among %d people" % [looks.size(), all.size()])
+	check_eq(kits.size(), all.size(), "no two people share a look and the same gear")
+
+
+func test_gear_sheets_match_the_people_sheets() -> void:
+	var body: Dictionary = ArtSheet.meta("people_peasant")
+	for n in ArtSheet.names():
+		if not n.begins_with("gear_"):
+			continue
+		var m: Dictionary = ArtSheet.meta(n)
+		check_eq(ArtSheet.cell(n), ArtSheet.cell("people_peasant"), n + " cell")
+		check_eq(m.origin, body.origin, n + " origin")
+		check(m.get("slot", "") in ["main", "off", "back"], n + " has a slot")
+		for a in body.anims:
+			check(m.anims.has(a) and m.anims[a].frames == body.anims[a].frames, "%s/%s frames" % [n, a])
+
+
+func test_entity_toggles_equipment() -> void:
+	var ow = await _open()
+	var bram := _person(ow, "bram")
+	check(bram is Entity and ow.hero is Entity, "people and the hero are Entities")
+	check(bram.has_gear("spear") and bram.has_gear("torch"), "Bram carries his spear and torch from people.json")
+	var spear: Sprite2D = bram.sprite.get_node("Gear_spear")
+	check(spear.visible and spear.region_enabled, "the spear is a Sprite2D over the body")
+	check(bram.equip("shield") and bram.has_gear("shield"), "a shield can be switched on")
+	check(bram.toggle("shield") and not bram.has_gear("shield"), "and off again")
+	check(not bram.equip("no_such_thing"), "an item with no art is refused")
+	bram.equip("pack")
+	bram.face(bram.position + Vector2(0, 40))
+	bram.sprite.frame = 2
+	bram._sync_gear()
+	var pack: Sprite2D = bram.sprite.get_node("Gear_pack")
+	check_eq(Rect2i(spear.region_rect), ArtSheet.region("gear_spear", "idle_down", 2), "gear follows the body's frame")
+	check(pack.show_behind_parent and not spear.show_behind_parent, "facing you: the pack is behind, the spear in front")
+	bram.face(bram.position + Vector2(0, -40))
+	bram._sync_gear()
+	check(not pack.show_behind_parent and spear.show_behind_parent, "facing away: the pack is on top")
+	bram.face(bram.position + Vector2(-40, 0))
+	bram._sync_gear()
+	check(spear.flip_h, "gear flips with the body")
+	check(not ow.hero.equip("shield"), "the hero's sheet is taller: no gear art for him yet")

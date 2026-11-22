@@ -1,162 +1,197 @@
-"""The realm's people, top-down like the hero (32x48 cells, feet at 16,46): hooded, grim, each with
-one thing you know them by (the smith's hammer, the pedlar's pack, the knight's helm). One sheet per
-look, people_<look>: idle_down/up/side and walk_down/up/side (side faces right; the game flips).
-The look names are rules/data/people.json's 'look'. Original art."""
-from make_hero import lantern, torn
+"""The realm's people, top-down, built on the same lean figure as the hero (body.py) but a head shorter
+(32x48 cells, feet at 16,46). No two look alike: villagers in earth and rust browns, travellers in forest
+green, fighters in steel grey, river folk in faded blue; helms, hats, bare heads with hair and beards.
+One sheet per look, people_<look>: idle_down/up/side and walk_down/up/side (side faces right; the game
+flips). The look names are rules/data/people.json's 'look'.
+
+What they carry is not drawn on them: each item is its own sheet, gear_<item>, with the same cells and
+animations, drawn from the figure's hand, shoulder and hip anchors. overworld/entity.gd lays the sheets
+of a person's 'gear' over the body, so one body sheet makes many different people. Original art."""
+from body import figure
+from make_hero import lantern
 from sfart import Sheet, ellipse, line, outline, poly, px, rect, surf
 
-SKIN = ("earth2", "earth3")
-STEEL = ("ink4", "ink5", "ink6")
+EARTH = ("earth0", "earth1", "earth2")
+RUST = ("earth1", "earth2", "earth3")
+GREEN = ("moss0", "moss1", "moss2")
+GREY = ("ink2", "ink3", "ink4")
+PALE = ("ink3", "ink4", "ink5")
+BLUE = ("water1", "water2", "water3")
+BLACK = ("ink0", "ink1", "ink2")
+VIOLET = ("shadow0", "shadow1", "shadow2")
+DARK_SKIN, FAIR_SKIN = ("earth1", "earth2"), ("earth3", "earth4")
 
-# cloak (shadow, base, light), the garment under it, then extras
 LOOKS = {
-    "warden":   {"cloak": ("ink1", "ink2", "ink3"), "under": "ink3", "trim": "ember1", "spear": True, "mail": True},
-    "smith":    {"cloak": ("earth0", "earth1", "earth2"), "under": "earth2", "trim": "ember2", "hood": False,
-                 "apron": True, "hammer": True, "beard": "ink2"},
-    "trader":   {"cloak": ("moss0", "moss1", "moss2"), "under": "earth1", "trim": "light0", "pack": True},
-    "child":    {"cloak": ("earth1", "earth2", "earth3"), "under": "ink3", "trim": "ember1", "small": True},
-    "elder":    {"cloak": ("shadow0", "shadow1", "ink3"), "under": "ink2", "trim": "ink6", "staff": True,
-                 "hair": "ink6"},
-    "ferryman": {"cloak": ("water0", "water1", "ink3"), "under": "ink2", "trim": "water3", "pole": True,
-                 "lamp": True},
-    "knight":   {"cloak": ("ember0", "ember1", "ember2"), "under": "ink4", "trim": "light0", "hood": False,
-                 "helm": True, "mail": True},
-    "hunter":   {"cloak": ("moss0", "moss1", "earth1"), "under": "earth1", "trim": "ink6", "fur": True,
-                 "bow": True},
-    "seer":     {"cloak": ("shadow0", "shadow1", "shadow2"), "under": "ink1", "trim": "light1", "candle": True},
-    "watchman": {"cloak": ("ink1", "ink2", "ink4"), "under": "earth1", "trim": "ember1", "spear": True,
-                 "lamp": True},
-    "mourner":  {"cloak": ("ink0", "ink1", "ink2"), "under": "ink1", "trim": "ink5", "veil": True},
-    "peasant":  {"cloak": ("earth0", "earth1", "earth3"), "under": "moss1", "trim": "earth3"},
-    "pilgrim":  {"cloak": ("ink3", "ink4", "ink5"), "under": "ink2", "trim": "earth3", "staff": True},
+    # fighters: steel grey, helms and plate
+    "warden":   {"head": "nasal", "hair": "earth1", "style": "long", "chest": "plate", "tunic": GREY,
+                 "cloak": GREY, "belt": "ember1", "pants": "ink2", "clasp": "light0"},
+    "knight":   {"head": "great", "chest": "tabard", "tunic": PALE, "sleeve": "ink4", "glove": "ink5",
+                 "belt": "earth0", "pants": "ink3", "boots": ("ink3", "ink4")},
+    "watchman": {"head": "kettle", "hair": "earth1", "beard": "earth1", "chest": "mail", "tunic": RUST,
+                 "belt": "earth0", "pants": "ink2"},
+    "northman": {"head": "fur", "head_col": PALE, "hair": "ink6", "beard": "ink6", "beard_len": 3,
+                 "skin": FAIR_SKIN, "chest": "mail", "tunic": GREY, "fur": True, "cloak": PALE, "cloak_up": 4,
+                 "belt": "earth1", "pants": "ink3"},
+    "deserter": {"hair": "earth1", "beard": "earth1", "chest": "plate",
+                 "tunic": BLACK, "sleeve": "ink2", "mail_hem": True, "pants": "ink1", "mud": "earth2"},
+    # villagers: earth and rust browns, bare heads
+    "smith":    {"hair": "ink1", "beard": "ink1", "beard_len": 3, "skin": DARK_SKIN, "chest": "apron",
+                 "tunic": RUST, "sleeve": "earth2", "belt": "earth0", "pants": "earth0"},
+    "peasant":  {"hair": "earth1", "tunic": RUST, "belt": "earth0", "pants": "moss1", "mud": "earth2"},
+    "child":    {"size": "small", "hair": "earth1", "tunic": ("ember0", "ember1", "ember2"),
+                 "pants": "earth1", "skirt": 2},
+    "elder":    {"hair": "ink6", "style": "bun", "robe": True, "tunic": EARTH, "cloak": PALE, "cloak_up": 6,
+                 "belt": "earth3"},
+    "woodsman": {"head": "cap", "head_col": GREEN, "feather": "ember3", "hair": "earth2", "beard": "earth2",
+                 "tunic": GREEN, "sleeve": "earth1", "belt": "earth1", "pants": "earth0"},
+    "bogger":   {"head": "straw", "head_col": ("earth2", "earth3", "earth4"), "beard": "ink5", "beard_len": 2,
+                 "skin": DARK_SKIN, "tunic": EARTH, "sleeve": "moss1", "pants": "moss0", "mud": "moss2"},
+    # travellers: forest green and road-worn rust, hats, packs
+    "trader":   {"head": "wide", "head_col": GREEN, "band": "light0", "hair": "earth3", "style": "long",
+                 "tunic": GREEN, "straps": "earth0", "belt": "earth2", "buckle": "light0", "pants": "earth0"},
+    "wayfarer": {"head": "wide", "head_col": EARTH, "band": "ember1", "skin": DARK_SKIN, "tunic": PALE,
+                 "cloak": ("ember0", "earth1", "earth2"), "straps": "earth0", "belt": "earth0", "pants": "ink2"},
+    "hunter":   {"hood": GREEN, "eyes": "ink7", "fur": True, "tunic": EARTH, "cross": "earth0",
+                 "cloak": GREEN, "cloak_up": 5, "belt": "earth0", "pants": "earth0"},
+    # river folk: faded blue
+    "ferryman": {"head": "wide", "head_col": ("water0", "water1", "water2"), "beard": "ink5", "beard_len": 2,
+                 "tunic": BLUE, "sleeve": "water1", "belt": "earth1", "pants": "ink2"},
+    "fisher":   {"hair": "earth0", "style": "long", "skin": DARK_SKIN, "tunic": BLUE, "robe": True,
+                 "sleeve": "water2", "belt": "earth3"},
+    # the few who keep their hoods up, and a monk
+    "seer":     {"hood": VIOLET, "eyes": "light1", "robe": True, "tunic": VIOLET, "belt": "light0"},
+    "mourner":  {"hood": BLACK, "veil": True, "robe": True, "tunic": BLACK, "cloak": BLACK},
+    "pilgrim":  {"hair": "earth1", "style": "tonsure", "robe": True, "tunic": PALE, "belt": "earth3"},
 }
+
+STEEL = ("ink4", "ink5", "ink6")
+# item -> where it hangs: main / off = that hand; back = on the back (behind the body when they face you)
+GEAR = {"spear": "main", "staff": "main", "hammer": "main", "axe": "main", "shield": "off", "torch": "off",
+        "lantern": "off", "candle": "off", "sword_back": "back", "bow": "back", "pack": "back"}
+LIT = ("torch", "lantern", "candle")       # these give light: the JSON says where the flame is
+
+
+def gear(item, d, A, flick=0):
+    """One frame of an item on a clear cell, from the figure's anchors A. Returns (frame, flame x y or None)."""
+    s = surf(32, 48)
+    cx, top, sh, hip, g = A["cx"], A["top"], A["sh"], A["hip"], A["g"]
+    hx, hy = A["main"]
+    ox, oy = A["off"]
+    flame = None
+    lean = 6 if d == "side" else 0           # from the side a long shaft rests back on the shoulder
+    if item == "spear":                      # ash shaft, a leaf blade over the head
+        tx = hx - lean
+        line(s, "earth1", (tx, top - 2), (hx + lean // 3, g - 1))
+        poly(s, STEEL[1], [(tx - 2, top - 2), (tx + 2, top - 2), (tx, top - 7)])
+        px(s, STEEL[2], tx, top - 5)
+        rect(s, "ember1", tx - 1, top - 1, 3, 1)
+    elif item == "staff":                    # a walking staff, gnarled at the top
+        tx = hx - lean
+        line(s, "earth1", (tx, top + 3), (hx + lean // 3, g - 1), 2)
+        rect(s, "earth2", tx - 2, top, 4, 4)
+        px(s, "earth3", tx - 1, top + 1)
+    elif item in ("hammer", "axe"):          # held low, head down
+        line(s, "earth1", (hx, hy), (hx, hy + 8), 2)
+        if item == "hammer":
+            rect(s, STEEL[0], hx - 3, hy + 7, 7, 4)
+            rect(s, STEEL[2], hx - 3, hy + 7, 7, 1)
+        else:
+            poly(s, STEEL[1], [(hx, hy + 5), (hx + 5, hy + 3), (hx + 5, hy + 10), (hx, hy + 9)])
+            line(s, STEEL[2], (hx + 5, hy + 4), (hx + 5, hy + 9))
+    elif item == "shield":                   # a round shield, iron rim and boss, a red field
+        w = 5 if d == "side" else 9
+        x0 = ox - w // 2 + (1 if d == "side" else 0)
+        ellipse(s, STEEL[0], x0, oy - 7, w, 11)
+        ellipse(s, "ember1", x0 + 1, oy - 6, w - 2, 9)
+        rect(s, STEEL[2], x0 + w // 2, oy - 3, 1 if d == "side" else 2, 2)
+        px(s, "ember2", x0 + 2, oy - 5)
+    elif item == "torch":                    # held up; the flame leaps
+        line(s, "earth1", (ox, oy + 1), (ox, oy - 6), 2)
+        rect(s, "ember2", ox - 2, oy - 10 - flick, 4, 4 + flick)
+        rect(s, "ember3", ox - 1, oy - 9, 3, 3)
+        px(s, "light0", ox - 1, oy - 8)
+        px(s, "light1", ox, oy - 8)
+        px(s, "ember3", ox - flick, oy - 11 - flick)
+        flame = (ox, oy - 8)
+    elif item == "lantern":
+        lantern(s, ox, oy + 1)
+        flame = (ox, oy + 7)
+    elif item == "candle":
+        rect(s, "ink6", ox - 1, oy - 1, 3, 5)
+        rect(s, "earth2", ox - 2, oy + 3, 5, 1)
+        px(s, "light0", ox, oy - 2)
+        px(s, "light1", ox, oy - 3 - flick)
+        flame = (ox, oy - 2)
+    elif item == "sword_back":               # a sheathed longsword slung across the back
+        if d == "side":
+            a, b = (cx - 5, sh - 3), (cx - 7, hip + 5)
+        else:
+            m = 1 if d == "up" else -1
+            a, b = (cx - 6 * m, sh - 4), (cx + 6 * m, hip + 5)
+        line(s, "earth0", a, b, 2)
+        px(s, STEEL[1], b[0], b[1] + 1)
+        line(s, STEEL[1], (a[0] - 2, a[1] + 1), (a[0] + 2, a[1] + 1))
+        rect(s, "earth2", a[0], a[1] - 3, 1, 3)
+        px(s, STEEL[2], a[0], a[1] - 4)
+    elif item == "bow":                      # a yew bow and a quiver of grey-fletched arrows
+        if d == "side":
+            for y in range(sh - 5, hip + 6):
+                px(s, "earth2", cx - 7 - (2 if abs(y - sh - 3) < 5 else 1 if abs(y - sh - 3) < 8 else 0), y)
+            line(s, "ink6", (cx - 6, sh - 5), (cx - 6, hip + 5))
+            rect(s, "earth1", cx - 5, sh - 1, 2, 8)
+            px(s, "ink6", cx - 5, sh - 3)
+        else:
+            m = 1 if d == "up" else -1
+            line(s, "earth2", (cx - 8 * m, sh - 5), (cx + 8 * m, hip + 4), 2)
+            line(s, "ink6", (cx - 6 * m, sh - 6), (cx + 9 * m, hip + 2))
+            line(s, "earth1", (cx + 4 * m, sh - 4), (cx + 1 * m, sh + 5), 3)
+            for k in (0, 2):
+                px(s, "ink6", cx + (5 + k) * m, sh - 6)
+    elif item == "pack":                     # a bulky pack, a bedroll lashed on top, a tin cup
+        if d == "side":
+            rect(s, "earth1", cx - 10, sh, 7, 12)
+            rect(s, "earth0", cx - 10, sh + 8, 7, 1)
+            rect(s, "moss1", cx - 10, sh - 4, 8, 4)
+            px(s, "moss2", cx - 9, sh - 3)
+            px(s, STEEL[1], cx - 10, sh + 10)
+        else:
+            rect(s, "earth1", cx - 6, sh - 1, 13, 13)
+            rect(s, "earth2", cx - 5, sh, 11, 2)
+            rect(s, "earth0", cx - 6, sh + 7, 13, 1)
+            rect(s, "moss1", cx - 9, sh - 5, 19, 4)
+            rect(s, "moss2", cx - 9, sh - 5, 19, 1)
+            for x in (cx - 5, cx + 5):
+                rect(s, "earth0", x, sh - 5, 1, 4)
+            rect(s, STEEL[1], cx + 7, sh + 8, 2, 3)
+    return outline(s), flame
+
+
+IDLE = ((0, 0), (0, 1), (1, 1), (1, 0))                         # bob, sway
+WALK = ((2, 0, 1), (0, -1, 0), (-2, 0, -1), (0, -1, 0))         # step, bob, sway
+DIRS = ("down", "up", "side")
 
 
 def person(look, d, step=0, bob=0, sway=0):
-    k = LOOKS[look]
-    C = k["cloak"]
-    s = surf(32, 48)
-    cx = 16
-    sm = 6 if k.get("small") else 0          # the child stands lower and narrower
-    w = 9 if sm else 11
-    t, h = 19 + bob + sm, 42 + bob
-    if k.get("pole") and d != "up":          # the ferryman's pole, held upright behind him
-        line(s, "earth1", (cx + 9, 2 + bob), (cx + 9, 44 + bob), 2)
-    for i, fx in enumerate((-5, 2)):         # boots
-        st = step if i == 0 else -step
-        if d == "side":
-            rect(s, "earth0" if i else "earth1", cx - 3 + st * 2, 42 + bob, 6, 4)
-        else:
-            fy = 41 + bob + (st if d == "down" else -st)
-            rect(s, "earth1", cx + fx + (1 if sm else 0), fy, 4 - (1 if sm else 0), 5)
-            rect(s, "earth0", cx + fx + (1 if sm else 0), fy, 4 - (1 if sm else 0), 1)
-    if k.get("pack") and d != "down":        # the pedlar's pack, lashed high on the back
-        bx = cx - 6 if d == "up" else cx - 11
-        rect(s, "earth1", bx, t - 2, 12 if d == "up" else 8, 13)
-        rect(s, "earth2", bx + 1, t - 1, 10 if d == "up" else 6, 2)
-        line(s, "earth0", (bx, t + 5), (bx + (11 if d == "up" else 7), t + 5))
-        px(s, "light0", bx + 2, t + 7)
-    hem = torn(cx - w + sway, cx + w + sway, h - 3, 6, 3, seed=step + sway + len(look))
-    poly(s, C[1], [(cx - 7, t), (cx + 7, t)] + hem[::-1])
-    poly(s, C[0], [(cx - 7, t), (cx - 4, t)] + [(x, y) for x, y in hem[:3]][::-1])
-    line(s, C[2], (cx + 5, t + 2), (cx + 8 + sway, h - 4))
-    if d == "down":                          # the front: what they wear under the cloak
-        poly(s, k["under"], [(cx - 4, t + 2), (cx + 4, t + 2)] + torn(cx + 4, cx - 4, h - 4, 3, 2))
-        if k.get("mail"):
-            for y in range(t + 6, h - 4, 2):
-                for x in range(cx - 3 + (y // 2) % 2, cx + 4, 2):
-                    px(s, "ink4", x, y)
-        if k.get("apron"):
-            rect(s, "earth0", cx - 4, t + 4, 8, h - t - 8)
-            px(s, "ember3", cx - 1, t + 9); px(s, "ember2", cx + 1, t + 12)   # forge burns
-        rect(s, k["trim"], cx - 4, t + 9, 8, 2)                                  # belt or sash
-        if k.get("pack"):
-            line(s, "earth0", (cx - 4, t + 1), (cx - 3, t + 8))
-            line(s, "earth0", (cx + 4, t + 1), (cx + 3, t + 8))
-            rect(s, "earth2", cx + 3, t + 11, 3, 3); px(s, "light0", cx + 4, t + 12)   # coin purse
-    elif d == "side":
-        rect(s, k["under"], cx + 1, t + 3, 5, 9)
-        rect(s, k["trim"], cx, t + 9, 7, 2)
-    else:
-        line(s, C[0], (cx, t + 3), (cx + sway, h - 4), 2)
-    if k.get("fur"):                         # a pale wolf-fur collar
-        rect(s, "ink5", cx - 7, t - 1, 14, 3)
-        px(s, "ink6", cx - 5, t - 1); px(s, "ink6", cx + 2, t)
-    if k.get("bow") and d != "down":
-        line(s, "earth2", (cx - 8, t - 3), (cx + 6, t + 16))
-        line(s, "ink6", (cx - 6, t - 4), (cx + 8, t + 15))
-    # the head
-    hy = 3 + bob + sm
-    hw = 14 if sm else 16
-    hx = cx - hw // 2
-    if k.get("helm"):                        # a closed steel helm, a slit for the eyes, a crest
-        ellipse(s, STEEL[0], hx + 1, hy + 1, hw - 2, 16)
-        ellipse(s, STEEL[1], hx + 2, hy + 2, hw - 5, 10)
-        px(s, STEEL[2], hx + 5, hy + 4)
-        line(s, k["trim"], (cx, hy - 2), (cx, hy + 3), 2)
-        if d == "down":
-            line(s, "ink0", (cx - 4, hy + 9), (cx + 3, hy + 9))
-            line(s, "ink0", (cx, hy + 9), (cx, hy + 13))
-            px(s, "ink6", cx - 2, hy + 9)
-        elif d == "side":
-            line(s, "ink0", (cx + 2, hy + 9), (cx + 7, hy + 9))
-    elif k.get("hood", True):
-        ellipse(s, C[1], hx, hy, hw, 17)
-        poly(s, C[1], [(cx - 3, hy + 1), (cx + 3, hy + 1), (cx, hy - 2)])
-        ellipse(s, C[2], hx + 3, hy + 1, 8, 3)
-        if d == "down":
-            ellipse(s, "ink0", cx - 5, hy + 5, 10, 11)
-            ellipse(s, "ink1", cx - 4, hy + 8, 8, 7)
-            if k.get("veil"):                 # the mourner: a grey veil, no eyes at all
-                for y in range(hy + 6, hy + 15, 2):
-                    line(s, "ink2", (cx - 3, y), (cx + 3, y))
-            else:
-                px(s, "ink6", cx - 2, hy + 9); px(s, "ink6", cx + 1, hy + 9)
-                for fx, fy in ((-1, 12), (0, 12), (-1, 13), (0, 13)):
-                    px(s, SKIN[0], cx + fx, hy + fy)
-            if k.get("hair"):                 # the elder's white braids from under the hood
-                line(s, k["hair"], (cx - 5, hy + 10), (cx - 5, hy + 18))
-                line(s, k["hair"], (cx + 4, hy + 10), (cx + 4, hy + 18))
-        elif d == "side":
-            ellipse(s, "ink0", cx + 1, hy + 5, 8, 10)
-            ellipse(s, "ink1", cx + 3, hy + 7, 5, 7)
-            if not k.get("veil"):
-                px(s, "ink6", cx + 6, hy + 9)
-        else:
-            line(s, C[0], (cx, hy + 5), (cx, hy + 15), 2)
-    else:                                    # bare head: the smith, soot-dark hair and beard
-        ellipse(s, SKIN[0], hx + 2, hy + 3, hw - 4, 14)
-        ellipse(s, "ink1", hx + 2, hy + 2, hw - 4, 6)
-        if d == "down":
-            ellipse(s, SKIN[1], cx - 4, hy + 6, 8, 6)
-            px(s, "ink0", cx - 2, hy + 8); px(s, "ink0", cx + 1, hy + 8)
-            ellipse(s, k.get("beard", "ink2"), cx - 5, hy + 11, 10, 8)
-        elif d == "side":
-            px(s, "ink0", cx + 4, hy + 8)
-            ellipse(s, k.get("beard", "ink2"), cx + 1, hy + 11, 7, 7)
-        else:
-            ellipse(s, "ink1", hx + 2, hy + 3, hw - 4, 10)
-    if k.get("trim") and not k.get("helm"):
-        px(s, k["trim"], cx, t)              # the clasp
-    # what they carry (in the near hand)
-    hand = {"down": (cx + 8, t + 9), "side": (cx + 6, t + 9), "up": (cx - 8, t + 9)}[d]
-    if k.get("spear"):
-        line(s, "earth1", (hand[0], 4 + bob), (hand[0], 44 + bob))
-        poly(s, STEEL[1], [(hand[0] - 2, 6 + bob), (hand[0] + 2, 6 + bob), (hand[0], bob)])
-        px(s, STEEL[2], hand[0], 2 + bob)
-    if k.get("staff"):
-        line(s, "earth1", (hand[0], 6 + bob), (hand[0], 44 + bob), 2)
-        ellipse(s, "earth2", hand[0] - 2, 4 + bob, 5, 4)
-    if k.get("hammer") and d != "up":
-        line(s, "earth1", hand, (hand[0], hand[1] + 9), 2)
-        rect(s, STEEL[0], hand[0] - 3, hand[1] + 8, 7, 5)
-        line(s, STEEL[2], (hand[0] - 3, hand[1] + 8), (hand[0] + 3, hand[1] + 8))
-    if k.get("candle") and d != "up":
-        rect(s, "ink6", hand[0] - 1, hand[1] + 1, 3, 5)
-        px(s, "light0", hand[0], hand[1] - 1); px(s, "light1", hand[0], hand[1])
-    if k.get("lamp") and d != "up":
-        lantern(s, hand[0] - (3 if k.get("spear") else 0), hand[1] + 1)
-    return outline(s)
+    return outline(figure(LOOKS[look], d, step=step, bob=bob, sway=sway, hem=len(look))[0])
+
+
+def gear_sheet(item):
+    """gear_<item>: the people's animations, the item alone. 'light' is the flame's place in the cell."""
+    sh = Sheet("gear_" + item, 32, 48, origin=[16, 46])
+    ref = LOOKS["peasant"]                  # every grown person has the same anchors
+    light = {}
+    for d in DIRS:
+        fr = [gear(item, d, figure(ref, d, bob=b)[1], i % 2) for i, (b, _) in enumerate(IDLE)]
+        sh.add("idle_" + d, [f for f, _ in fr], 3)
+        if fr[0][1]:
+            light[d] = list(fr[0][1])
+    for d in DIRS:
+        sh.add("walk_" + d, [gear(item, d, figure(ref, d, step=st, bob=b)[1], i % 2)[0]
+                             for i, (st, b, _) in enumerate(WALK)], 6)
+    sh.extra = {"slot": GEAR[item]}
+    if light:
+        sh.extra["light"] = light
+    sh.save()
 
 
 def hound(d, step=0, bob=0):
@@ -194,27 +229,23 @@ def hound(d, step=0, bob=0):
     return outline(s)
 
 
-IDLE = ((0, 0), (0, 1), (1, 1), (1, 0))
-WALK = ((2, 0, 1), (0, -1, 0), (-2, 0, -1), (0, -1, 0))
-
-
 def main():
     for look in LOOKS:
         sh = Sheet("people_" + look, 32, 48, origin=[16, 46])
-        for d in ("down", "up", "side"):
+        for d in DIRS:
             sh.add("idle_" + d, [person(look, d, bob=b, sway=w) for b, w in IDLE], 3)
-        for d in ("down", "up", "side"):
+        for d in DIRS:
             sh.add("walk_" + d, [person(look, d, step=st, bob=b, sway=w) for st, b, w in WALK], 6)
         sh.save()
+    for item in GEAR:
+        gear_sheet(item)
     sh = Sheet("people_hound", 32, 48, origin=[16, 46])
-    for d in ("down", "up", "side"):
+    for d in DIRS:
         sh.add("idle_" + d, [hound(d, bob=b) for b, _ in IDLE], 3)
-    for d in ("down", "up", "side"):
+    for d in DIRS:
         sh.add("walk_" + d, [hound(d, step=st, bob=b) for st, b, _ in WALK], 8)
     sh.save()
 
 
 if __name__ == "__main__":
-    import pygame
-    pygame.init()
     main()
