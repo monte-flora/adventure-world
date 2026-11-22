@@ -1,0 +1,308 @@
+{
+ "image": "realm_cinder_wastes.png",
+ "kind": "tileset",
+ "cell": [
+  32,
+  32
+ ],
+ "origin": [
+  0,
+  0
+ ],
+ "anims": {
+  "ground_0": {
+   "row": 0,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ground_1": {
+   "row": 0,
+   "col": 1,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ground_2": {
+   "row": 0,
+   "col": 2,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "path_0": {
+   "row": 0,
+   "col": 3,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "path_1": {
+   "row": 0,
+   "col": 4,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "path_2": {
+   "row": 0,
+   "col": 5,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "water": {
+   "row": 0,
+   "col": 6,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_0": {
+   "row": 0,
+   "col": 8,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_1": {
+   "row": 0,
+   "col": 10,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_2": {
+   "row": 0,
+   "col": 12,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_3": {
+   "row": 0,
+   "col": 14,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_4": {
+   "row": 1,
+   "col": 0,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_5": {
+   "row": 1,
+   "col": 2,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_6": {
+   "row": 1,
+   "col": 4,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_7": {
+   "row": 1,
+   "col": 6,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_8": {
+   "row": 1,
+   "col": 8,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_9": {
+   "row": 1,
+   "col": 10,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_10": {
+   "row": 1,
+   "col": 12,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_11": {
+   "row": 1,
+   "col": 14,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_12": {
+   "row": 2,
+   "col": 0,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_13": {
+   "row": 2,
+   "col": 2,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "shore_14": {
+   "row": 2,
+   "col": 4,
+   "frames": 2,
+   "fps": 2,
+   "loop": true
+  },
+  "tree_top": {
+   "row": 2,
+   "col": 6,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "tree": {
+   "row": 2,
+   "col": 7,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "rock": {
+   "row": 2,
+   "col": 8,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "cliff_face": {
+   "row": 2,
+   "col": 9,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "reeds": {
+   "row": 2,
+   "col": 10,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "bush": {
+   "row": 2,
+   "col": 11,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "house": {
+   "row": 2,
+   "col": 12,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "mine": {
+   "row": 2,
+   "col": 13,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "portal": {
+   "row": 2,
+   "col": 14,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "castle": {
+   "row": 2,
+   "col": 15,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "sign": {
+   "row": 3,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "chest": {
+   "row": 3,
+   "col": 1,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "vent": {
+   "row": 3,
+   "col": 2,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "waystone": {
+   "row": 3,
+   "col": 3,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "waystone_lit": {
+   "row": 3,
+   "col": 4,
+   "frames": 2,
+   "fps": 4,
+   "loop": true
+  },
+  "bridge": {
+   "row": 3,
+   "col": 6,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "bridge_broken": {
+   "row": 3,
+   "col": 7,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "gate_ivy": {
+   "row": 3,
+   "col": 8,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "gate_rubble": {
+   "row": 3,
+   "col": 9,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "gate_thorns": {
+   "row": 3,
+   "col": 10,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  }
+ }
+}

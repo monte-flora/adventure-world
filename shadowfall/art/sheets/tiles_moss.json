@@ -1,0 +1,385 @@
+{
+ "image": "tiles_moss.png",
+ "kind": "tileset",
+ "cell": [
+  32,
+  32
+ ],
+ "origin": [
+  0,
+  0
+ ],
+ "anims": {
+  "solid_0": {
+   "row": 0,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_1": {
+   "row": 0,
+   "col": 1,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_2": {
+   "row": 0,
+   "col": 2,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_3": {
+   "row": 0,
+   "col": 3,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_4": {
+   "row": 0,
+   "col": 4,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_5": {
+   "row": 0,
+   "col": 5,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_6": {
+   "row": 0,
+   "col": 6,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_7": {
+   "row": 0,
+   "col": 7,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_8": {
+   "row": 0,
+   "col": 8,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_9": {
+   "row": 0,
+   "col": 9,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_10": {
+   "row": 0,
+   "col": 10,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_11": {
+   "row": 0,
+   "col": 11,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_12": {
+   "row": 0,
+   "col": 12,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_13": {
+   "row": 0,
+   "col": 13,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_14": {
+   "row": 0,
+   "col": 14,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "solid_15": {
+   "row": 0,
+   "col": 15,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "cracked": {
+   "row": 1,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ore_diamond": {
+   "row": 1,
+   "col": 1,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ore_sun": {
+   "row": 1,
+   "col": 2,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ledge": {
+   "row": 1,
+   "col": 3,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ledge_crumbly": {
+   "row": 1,
+   "col": 4,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "spikes": {
+   "row": 1,
+   "col": 5,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "spike_trap": {
+   "row": 1,
+   "col": 6,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "fire": {
+   "row": 1,
+   "col": 10,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "lava": {
+   "row": 2,
+   "col": 0,
+   "frames": 4,
+   "fps": 4,
+   "loop": true
+  },
+  "chest": {
+   "row": 2,
+   "col": 4,
+   "frames": 2,
+   "fps": 1,
+   "loop": false
+  },
+  "gem": {
+   "row": 2,
+   "col": 6,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "door": {
+   "row": 2,
+   "col": 10,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "mushroom": {
+   "row": 2,
+   "col": 11,
+   "frames": 2,
+   "fps": 6,
+   "loop": false
+  },
+  "ladder": {
+   "row": 2,
+   "col": 13,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "vine": {
+   "row": 2,
+   "col": 14,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "rope": {
+   "row": 2,
+   "col": 15,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "climb_wall": {
+   "row": 3,
+   "col": 0,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "ice": {
+   "row": 3,
+   "col": 1,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "spring": {
+   "row": 3,
+   "col": 2,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "lever": {
+   "row": 3,
+   "col": 6,
+   "frames": 2,
+   "fps": 1,
+   "loop": false
+  },
+  "gate": {
+   "row": 3,
+   "col": 8,
+   "frames": 2,
+   "fps": 1,
+   "loop": false
+  },
+  "flame_jet": {
+   "row": 3,
+   "col": 10,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "flame": {
+   "row": 3,
+   "col": 11,
+   "frames": 4,
+   "fps": 10,
+   "loop": true
+  },
+  "geyser": {
+   "row": 4,
+   "col": 0,
+   "frames": 3,
+   "fps": 6,
+   "loop": true
+  },
+  "platform": {
+   "row": 4,
+   "col": 3,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "checkpoint": {
+   "row": 4,
+   "col": 4,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "checkpoint_lit": {
+   "row": 4,
+   "col": 5,
+   "frames": 2,
+   "fps": 4,
+   "loop": true
+  },
+  "crystal": {
+   "row": 4,
+   "col": 7,
+   "frames": 2,
+   "fps": 3,
+   "loop": true
+  },
+  "torch": {
+   "row": 4,
+   "col": 9,
+   "frames": 4,
+   "fps": 8,
+   "loop": true
+  },
+  "window": {
+   "row": 4,
+   "col": 13,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "banner": {
+   "row": 4,
+   "col": 14,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "key": {
+   "row": 4,
+   "col": 15,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "light_shard": {
+   "row": 5,
+   "col": 0,
+   "frames": 4,
+   "fps": 6,
+   "loop": true
+  },
+  "back_wall": {
+   "row": 5,
+   "col": 4,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "stalactite": {
+   "row": 5,
+   "col": 5,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "tuft": {
+   "row": 5,
+   "col": 6,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  },
+  "skull": {
+   "row": 5,
+   "col": 7,
+   "frames": 1,
+   "fps": 1,
+   "loop": false
+  }
+ }
+}
