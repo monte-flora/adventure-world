@@ -138,6 +138,8 @@ func _animate() -> void:
 		sprite.speed_scale = 1.0 if absf(velocity.x) > 10.0 else 0.0
 	elif absf(velocity.x) > 10.0:
 		anim = "run"
+	if attack_t >= 0 and anim in ["attack", "air_attack", "pogo"] and Forge.tier() >= Forge.SUNFANG_TIER:
+		anim += "_sunfang"                           # Sunfang's runes glow along the blade
 	if sprite.animation != anim:
 		sprite.play(anim)
 	if anim == "jump":                               # rise, apex, fall by speed

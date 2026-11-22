@@ -318,6 +318,12 @@ func shoot(from: Vector2, v: Vector2, _by: Node) -> void:
 	monsters.add_child(a)
 
 
+## Cave hp is counted in Wanderer's-Blade hits, so the forge adds to that: 1 at tier 0, +1 a tier
+## (and Keen Edge), 6 with Sunfang (rules/forge.gd).
+static func sword_damage() -> int:
+	return maxi(1, Forge.sword_damage() - Forge.DAMAGE[0] + 1)
+
+
 func arrow_moved(a) -> void:
 	if a.reflected:
 		for m in monsters.get_children():
@@ -534,7 +540,7 @@ func _attack() -> void:
 			continue
 		hero.attack_hits.append(m)
 		if m is CaveMonster:
-			juice.hit(m, m.hit(hero.position))
+			juice.hit(m, m.hit(hero.position, sword_damage()))
 			Vitals.lumen_hit()
 			bounced = true
 		elif not m.reflected:
