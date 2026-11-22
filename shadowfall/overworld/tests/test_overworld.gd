@@ -254,3 +254,33 @@ func test_gate_art_opens_with_the_ability() -> void:
 	Game.take_stone("leaf")
 	Game.changed.emit()
 	check(ow.objects.get_cell_source_id(gate) == -1, "and gone once you can climb")
+
+
+func test_hits_stop_shake_and_burst() -> void:
+	var ow = await _open()
+	var h: HeroTop = ow.hero
+	ow.hit_stop(3)
+	check(not h.is_physics_processing(), "hit-stop freezes the hero")
+	await physics_frames(4)
+	check(h.is_physics_processing(), "and lets go after 3 frames")
+	ow.shake.add(5, 12)
+	check(ow.shake.step(0.0) != Vector2.ZERO, "a hurt shakes the camera")
+	UiSettings.screen_shake = false
+	check(ow.shake.step(0.0) == Vector2.ZERO, "never with screen shake off")
+	var was: String = UiSettings.path
+	UiSettings.path = "user://test_juice_settings.cfg"
+	UiSettings.save()
+	UiSettings.load_and_apply()
+	check(not UiSettings.screen_shake, "the shake switch is saved")
+	UiSettings.reset()
+	UiSettings.path = was
+	var m: MapMonster = ow.monsters[0]
+	m.hp = 2
+	ow._hit_fx(m, m.hit(2, h.position))
+	var poof := false
+	var motes := false
+	for n in ow.get_children():
+		poof = poof or (n is AnimatedSprite2D and n.animation == "poof")
+		motes = motes or n is CPUParticles2D
+	check(poof and motes, "a kill plays the poof and lets out motes")
+	check(ow.stop == ow.STOP_KILL, "and stops longer than a hit (%d)" % ow.stop)

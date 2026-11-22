@@ -23,6 +23,15 @@ var monsters: Array[MapMonster] = []
 var respawn := Vector2i.ZERO
 var last_cell := Vector2i(-1, -1)
 var heal := LumenHeal.new()                   # Q, standing still: a Lumen charge becomes a heart
+## Game feel (docs/teen/gameplay §4): hit-stop freezes hero and monsters for a few frames.
+const STOP_HIT := 3
+const STOP_KILL := 6
+const STOP_HURT := 10
+const LOOK_AHEAD := 0.12                      # s of the hero's speed the camera leads by
+const LOOK_MAX := 40.0                        # px
+var stop := 0                                 # hit-stop frames left
+var shake := Juice.Shake.new()
+var hurt_edge: TextureRect                    # red at the screen's edges when you are hit
 
 
 func _ready() -> void:
@@ -90,6 +99,8 @@ func build(w: WorldMap) -> void:
 	banner.add_theme_constant_override("outline_size", 6)
 	banner.position.y = 56
 	ui.add_child(banner)
+	hurt_edge = _hurt_edge()
+	ui.add_child(hurt_edge)
 	add_child(ui)
 	_arrive(hero.cell(), true)
 
@@ -97,7 +108,12 @@ func build(w: WorldMap) -> void:
 func _physics_process(_dt: float) -> void:
 	if hero == null:
 		return
-	cam.position = hero.position
+	cam.offset = shake.step(_dt)
+	if stop > 0:
+		stop -= 1
+		if stop == 0:
+			_freeze(false)
+	cam.position = hero.position + (hero.velocity * LOOK_AHEAD).limit_length(LOOK_MAX)
 	heal.step(Input.is_action_pressed("heal"), hero.velocity.length() < 1.0)
 	var c := hero.cell()
 	if c != last_cell:
@@ -184,6 +200,10 @@ func lost_light_cell() -> Vector2i:
 
 func _on_hurt(hearts_left: int) -> void:
 	heal.hit()
+	hit_stop(STOP_HURT)
+	shake.add(5, 12)
+	hurt_edge.modulate.a = 1.0
+	hurt_edge.create_tween().tween_property(hurt_edge, "modulate:a", 0.0, 0.4)
 	if hearts_left <= 0:                      # no lives: the gold stays as a Lost Light; wake at the last lantern
 		var c := hero.cell()
 		Vitals.die({"scene": "overworld", "realm": realm, "x": c.x, "y": c.y})
@@ -197,9 +217,64 @@ func _on_swing(at: Vector2, _facing: Vector2) -> void:
 	for m in monsters.duplicate():
 		if is_instance_valid(m) and hero.sword_hits(m.position):
 			var fresh: bool = m.flash <= 0
-			m.hit(2, at)
+			var killed: bool = m.hit(2, at)
 			if fresh:
 				Vitals.lumen_hit()
+				_hit_fx(m, killed)
+
+
+## A sword hit lands: sparks, a short stop and a tap of shake; a kill stops longer, shakes harder,
+## plays the monster's poof and lets its light out as motes.
+func _hit_fx(m: MapMonster, killed: bool) -> void:
+	if not killed:
+		hit_stop(STOP_HIT)
+		shake.add(1, 4)
+		Juice.burst(self, m.position, Color("fff2a8"), 6, 90.0, 0.2)
+		return
+	hit_stop(STOP_KILL)
+	shake.add(2, 6)
+	var poof := AnimatedSprite2D.new()
+	poof.sprite_frames = m.sprite.sprite_frames
+	poof.offset = m.sprite.offset
+	poof.position = m.position + m.sprite.position
+	poof.animation_finished.connect(poof.queue_free)
+	add_child(poof)
+	poof.play("poof")
+	Juice.burst(self, m.position, Color("f7c64a"), 16, 70.0, 0.9, 2.0, -40.0)
+
+
+## Freeze the hero and the monsters for `frames` physics frames (a longer stop is never cut short).
+func hit_stop(frames: int) -> void:
+	if frames > stop:
+		stop = frames
+		_freeze(true)
+
+
+func _freeze(on: bool) -> void:
+	hero.set_physics_process(not on)
+	for m in monsters:
+		if is_instance_valid(m):
+			m.set_physics_process(not on)
+			m.sprite.speed_scale = 0.0 if on else 1.0
+
+
+func _hurt_edge() -> TextureRect:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 1.0])
+	g.colors = PackedColorArray([Color(0.76, 0.23, 0.23, 0.0), Color(0.76, 0.23, 0.23, 0.7)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.1, 0.5)
+	var r := TextureRect.new()
+	r.texture = tex
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.modulate.a = 0.0
+	return r
 
 
 func _spawn_monsters() -> void:

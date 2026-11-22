@@ -1,5 +1,5 @@
 class_name UiSettings
-## Player settings the pause screen changes: the 3 volumes and remapped keys.
+## Player settings the pause screen changes: the 3 volumes, remapped keys and screen shake on/off.
 ## Kept in user://shadowfall_settings.cfg (per machine, not per save file), applied on the title.
 ## Volumes in steps of 10% (docs/teen/audio/README.md). A bus that doesn't exist yet is skipped.
 
@@ -16,6 +16,7 @@ const REMAPPABLE := {
 
 static var volume := DEFAULT_VOLUME.duplicate()
 static var keys := {}     # action -> physical keycode the player chose
+static var screen_shake := true   # accessibility: false = the camera never shakes (overworld/juice.gd)
 static var path := PATH   # tests point this elsewhere
 
 
@@ -78,6 +79,7 @@ static func reset_controls() -> void:
 
 static func reset() -> void:
 	volume = DEFAULT_VOLUME.duplicate()
+	screen_shake = true
 	keys.clear()
 	Controls.setup()
 	for b in BUSES:
@@ -90,6 +92,7 @@ static func save() -> bool:
 		c.set_value("volume", b, volume[b])
 	for a in keys:
 		c.set_value("keys", a, int(keys[a]))
+	c.set_value("access", "screen_shake", screen_shake)
 	return c.save(path) == OK
 
 
@@ -101,6 +104,7 @@ static func load_and_apply() -> void:
 		return
 	for b in BUSES:
 		set_volume(b, float(c.get_value("volume", b, DEFAULT_VOLUME[b])))
+	screen_shake = bool(c.get_value("access", "screen_shake", true))
 	if c.has_section("keys"):
 		for a in c.get_section_keys("keys"):
 			if REMAPPABLE.has(a):
