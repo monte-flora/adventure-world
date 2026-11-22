@@ -3,7 +3,8 @@ extends Node2D
 ##   Scenes.goto("boss", {"castle": 1..5})   a castle level (played in B2's cave scene); its door
 ##                                           leads to the next level, the last one to the throne
 ##   Scenes.goto("boss")                      the Shadow King (ThroneFight), drawn here
-## Placeholder art (shapes in the art palette) until B-Art's boss sheets land.
+## Art: shadow_king, hero_side, tiles_castle (walls, floor, platforms), lieutenant echoes from the
+## monster sheets; the hall's windows, pillars and braziers are drawn in the palette. GloomLight on top.
 
 const INK0 := Color("0d0a14")
 const INK1 := Color("1a1424")
@@ -35,7 +36,18 @@ var cam: Camera2D
 var dark_rect: ColorRect
 var glow: Node2D
 var king_spr: AnimatedSprite2D
+var hero_spr: AnimatedSprite2D
+var stage: Node2D                       # the hall (or the void): darkens with the gloom stage
+var light: GloomLight
+var castle_tex: Texture2D               # tiles_castle, loaded before any draw (loading inside a draw call shows nothing)
 var hud: Control
+
+## Which monster sheet each lieutenant's echo borrows (tinted in its colour).
+const ECHO_SHEET := {
+	"thornwarden": "monster_stone_warden", "loom_widow": "monster_shade", "bellwarden": "monster_barrow_wight",
+	"rust_regent": "monster_cinder_drake", "rime_matriarch": "monster_frost_matriarch",
+	"glass_wyrm": "monster_sand_wyrm", "mire_lantern": "monster_bog_wisp",
+}
 
 
 func _ready() -> void:
@@ -89,12 +101,27 @@ func _start_throne() -> void:
 	dark_rect.material = mat
 	dark_rect.visible = false
 	add_child(dark_rect)
+	castle_tex = ArtSheet.texture("tiles_castle")
+	stage = Node2D.new()
+	stage.z_index = -1
+	stage.draw.connect(_draw_stage)
+	add_child(stage)
 	king_spr = AnimatedSprite2D.new()            # art/sheets/shadow_king (B-Art), half size: 60 x 120 on screen
 	king_spr.sprite_frames = ArtSheet.frames("shadow_king")
 	king_spr.offset = ArtSheet.offset("shadow_king")
 	king_spr.scale = Vector2(0.5, 0.5)
 	king_spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(king_spr)
+	hero_spr = AnimatedSprite2D.new()
+	hero_spr.sprite_frames = ArtSheet.frames("hero_side")
+	hero_spr.offset = ArtSheet.offset("hero_side")
+	hero_spr.play("idle")
+	add_child(hero_spr)
+	light = GloomLight.new()
+	add_child(light)
+	stage.material = light.world_material
+	light.follow(hero_spr)
+	add_child(preload("res://ui/hud.tscn").instantiate())
 	glow = Node2D.new()                          # what shows through the dark: eyes, telegraphs
 	glow.z_index = 20
 	glow.draw.connect(_draw_glow)
@@ -137,7 +164,9 @@ func _physics_process(dt: float) -> void:
 	_king_anim(fight)
 	if fight.dark:
 		dark_rect.material.set_shader_parameter("hero_px", fight.hero.pos)
+	_hero_anim(fight.hero)
 	queue_redraw()
+	stage.queue_redraw()
 	glow.queue_redraw()
 
 
@@ -180,6 +209,50 @@ func _king_anim(f: ThroneFight) -> void:
 	king_spr.visible = f.alpha > 0.01
 
 
+## Which row of the hero's side sheet fits what ArenaHero is doing.
+func _hero_anim(h: ArenaHero) -> void:
+	var anim := "idle"
+	if fight.lost:
+		anim = "death"
+	elif h.lock > 0.0:
+		anim = "hurt"
+	elif h.dashing():
+		anim = "dash"
+	elif h.swinging():
+		anim = "pogo" if h.swing_down else ("attack" if h.on_floor else "air_attack")
+	elif not h.on_floor:
+		anim = "jump" if h.vel.y < 0.0 else "fall"
+	elif absf(h.vel.x) > 10.0:
+		anim = "run"
+	if hero_spr.animation != anim:
+		hero_spr.play(anim)
+	hero_spr.position = h.pos + Vector2(0, ArenaHero.SIZE.y / 2.0)
+	hero_spr.flip_h = h.facing < 0
+	hero_spr.visible = not (h.safe > 0.0 and int(h.safe * 20.0) % 2 == 0)
+
+
+## A fallen lieutenant's ghost rises at the wall for a moment when he calls its echo.
+func _echo_ghost(id: String) -> void:
+	if not ECHO_SHEET.has(id):
+		return
+	var g := AnimatedSprite2D.new()
+	g.sprite_frames = ArtSheet.frames(ECHO_SHEET[id])
+	g.offset = ArtSheet.offset(ECHO_SHEET[id])
+	g.play("attack")
+	var col := Color(ThroneFight.LIEUTENANTS[id]["color"])
+	g.modulate = Color(col.r * 1.4, col.g * 1.4, col.b * 1.4, 0.0)
+	var side := -1.0 if fight.hero.pos.x > ThroneFight.W / 2.0 else 1.0
+	g.position = Vector2(ThroneFight.W / 2.0 + side * 330.0, ThroneFight.FLOOR_Y)   # the far side from you
+	g.flip_h = side > 0                          # face the hero (sheets face right)
+	g.scale = Vector2(1.5, 1.5) if ArtSheet.cell(ECHO_SHEET[id]).x < 96 else Vector2.ONE
+	add_child(g)
+	var t := g.create_tween()
+	t.tween_property(g, "modulate:a", 0.55, 0.3)
+	t.parallel().tween_property(g, "position:y", g.position.y - 12.0, 1.4)
+	t.tween_property(g, "modulate:a", 0.0, 0.6)
+	t.tween_callback(g.queue_free)
+
+
 func _read_keys() -> void:
 	var h := fight.hero
 	h.ix = Input.get_axis("move_left", "move_right")
@@ -205,6 +278,7 @@ func _event(e: Dictionary) -> void:
 			_say(e["text"])
 		"echo":
 			_say("An echo of %s rises!" % e["name"])
+			_echo_ghost(e.get("id", ""))
 		"clang":
 			if not told_clang:
 				told_clang = true
@@ -243,57 +317,83 @@ func _draw() -> void:
 	if fight == null:
 		return
 	var f := fight
-	if f.phase < 3:
-		_draw_hall(f)
-	else:
-		_draw_void(f)
 	_draw_king(f)
 	for z in f.hazards:
 		_draw_hazard(z, false)
 	_draw_hero(f.hero)
 
 
+func _draw_stage() -> void:
+	if fight == null:
+		return
+	if fight.phase < 3:
+		_draw_hall(fight)
+	else:
+		_draw_void(fight)
+
+
+## A wall, floor or platform as castle tiles (tiles_castle solid_<bits>, bits N1 E2 S4 W8 = solid there).
+func _draw_solid(ci: CanvasItem, r: Rect2, solids: Array[Rect2]) -> void:
+	var T := float(LevelFile.TILE)
+	var tex := castle_tex
+	var y := r.position.y
+	while y < r.end.y - 0.5:
+		var x := r.position.x
+		while x < r.end.x - 0.5:
+			var size := Vector2(minf(T, r.end.x - x), minf(T, r.end.y - y))
+			var mid := Vector2(x, y) + size / 2.0
+			var bits := 0
+			for i in 4:
+				var q: Vector2 = mid + [Vector2(0, -T), Vector2(T, 0), Vector2(0, T), Vector2(-T, 0)][i]
+				if q.y >= ThroneFight.H or q.y < 0.0 or q.x < 0.0 or q.x >= ThroneFight.W or solids.any(func(s): return s.has_point(q)):
+					bits |= 1 << i
+			var reg := Rect2(ArtSheet.region("tiles_castle", "solid_%d" % bits))
+			ci.draw_texture_rect_region(tex, Rect2(Vector2(x, y), size), Rect2(reg.position, size))
+			x += T
+		y += T
+
+
 func _draw_hall(f: ThroneFight) -> void:
-	draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.H), INK1)
+	stage.draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.H), INK1)
 	for i in 6:                                  # tall arched windows, a cold moon behind
 		var x := 90.0 + i * 160.0
-		draw_rect(Rect2(x, 70, 44, 220), INK0)
-		draw_circle(Vector2(x + 22, 70), 22, INK0)
-		draw_rect(Rect2(x + 4, 90, 36, 196), Color(SHADOW1, 0.18))
+		stage.draw_rect(Rect2(x, 70, 44, 220), INK0)
+		stage.draw_circle(Vector2(x + 22, 70), 22, INK0)
+		stage.draw_rect(Rect2(x + 4, 90, 36, 196), Color(SHADOW1, 0.18))
 	for x in [150.0, 400.0, 560.0, 810.0]:      # pillars with braziers
-		draw_rect(Rect2(x - 22, 40, 44, ThroneFight.FLOOR_Y - 40), INK2)
-		draw_rect(Rect2(x - 26, ThroneFight.FLOOR_Y - 20, 52, 20), STONE)
+		stage.draw_rect(Rect2(x - 22, 40, 44, ThroneFight.FLOOR_Y - 40), INK2)
+		stage.draw_rect(Rect2(x - 26, ThroneFight.FLOOR_Y - 20, 52, 20), STONE)
 		if not f.dark:
 			var flick := 6.0 + sin(f.time * 9.0 + x) * 2.0
-			draw_circle(Vector2(x, 236), 34, Color(EMBER1, 0.08))
-			draw_circle(Vector2(x, 240), flick, EMBER1)
-			draw_circle(Vector2(x, 242), flick * 0.5, EMBER2)
-		draw_rect(Rect2(x - 12, 248, 24, 10), STONE_HI)
-	draw_colored_polygon(PackedVector2Array([Vector2(820, ThroneFight.FLOOR_Y), Vector2(830, 230),
+			stage.draw_circle(Vector2(x, 236), 34, Color(EMBER1, 0.08))
+			stage.draw_circle(Vector2(x, 240), flick, EMBER1)
+			stage.draw_circle(Vector2(x, 242), flick * 0.5, EMBER2)
+		stage.draw_rect(Rect2(x - 12, 248, 24, 10), STONE_HI)
+	stage.draw_colored_polygon(PackedVector2Array([Vector2(820, ThroneFight.FLOOR_Y), Vector2(830, 230),
 		Vector2(850, 190), Vector2(870, 230), Vector2(880, ThroneFight.FLOOR_Y)]), INK0)   # the throne
-	draw_rect(Rect2(0, ThroneFight.FLOOR_Y, ThroneFight.W, ThroneFight.H - ThroneFight.FLOOR_Y), STONE)
-	draw_line(Vector2(0, ThroneFight.FLOOR_Y + 1), Vector2(ThroneFight.W, ThroneFight.FLOOR_Y + 1), STONE_HI, 2)
-	draw_rect(Rect2(0, 0, ThroneFight.WALL_L, ThroneFight.H), INK2)
-	draw_rect(Rect2(ThroneFight.WALL_R, 0, ThroneFight.W - ThroneFight.WALL_R, ThroneFight.H), INK2)
-	draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.CEIL_Y), INK2)
+	for s in f.solids:
+		_draw_solid(stage, s, f.solids)
 
 
 func _draw_void(f: ThroneFight) -> void:
-	draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.H), Color("07050c"))
+	stage.draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.H), Color("07050c"))
 	for i in 40:                                 # motes rising out of the void
 		var x := fmod(i * 97.0, ThroneFight.W)
 		var y := ThroneFight.H - fmod(f.time * (20.0 + i % 5 * 8.0) + i * 53.0, ThroneFight.H)
-		draw_rect(Rect2(x, y, 2, 2), Color(SHADOW2, 0.35))
+		stage.draw_rect(Rect2(x, y, 2, 2), Color(SHADOW2, 0.35))
 	for s in f.solids:
-		if s.position.y == ThroneFight.FLOOR_Y:
-			draw_rect(s, STONE)
-			draw_line(s.position + Vector2(0, 1), Vector2(s.end.x, s.position.y + 1), STONE_HI, 2)
-			draw_colored_polygon(PackedVector2Array([Vector2(s.position.x, s.end.y), Vector2(s.end.x, s.end.y),
+		if s.position.y == ThroneFight.FLOOR_Y:          # broken rock hanging under each platform
+			stage.draw_colored_polygon(PackedVector2Array([Vector2(s.position.x, s.end.y), Vector2(s.end.x, s.end.y),
 				Vector2(s.get_center().x + 14, s.end.y + 40), Vector2(s.get_center().x - 10, s.end.y + 28)]), STONE)
-		else:
-			draw_rect(s, INK2)
+		_draw_solid(stage, s, f.solids)
+	var ledge := castle_tex
+	var lr := Rect2(ArtSheet.region("tiles_castle", "ledge"))
 	for l in f.ledges:
-		draw_rect(l, STONE_HI)
+		var x := l.position.x
+		while x < l.end.x - 0.5:
+			var w := minf(lr.size.x, l.end.x - x)
+			stage.draw_texture_rect_region(ledge, Rect2(Vector2(x, l.position.y), Vector2(w, lr.size.y)), Rect2(lr.position, Vector2(w, lr.size.y)))
+			x += lr.size.x
 
 
 func _draw_king(f: ThroneFight) -> void:
@@ -303,8 +403,6 @@ func _draw_king(f: ThroneFight) -> void:
 	var a := f.alpha
 	var hw := ThroneFight.KING_SIZE.x / 2.0
 	var hh := ThroneFight.KING_SIZE.y / 2.0
-	if f.crown_state == "on":
-		_draw_crown(c + Vector2(0, -hh - 2), a)
 	for i in 5:                                                             # smoke rising off him
 		var p := c + Vector2(sin(f.time * 2.0 + i) * hw, -hh - fmod(f.time * 30.0 + i * 17.0, 50.0))
 		draw_circle(p, 3, Color(INK2, 0.5 * a))
@@ -325,8 +423,6 @@ func _draw_sword(f: ThroneFight, a: float) -> void:
 		"slash":
 			draw_arc(Vector2(c.x + d * 30, ThroneFight.FLOOR_Y - 40), 100, -PI / 2 if d > 0 else PI / 2,
 				PI / 2 * d if d > 0 else PI * 1.5, 16, Color(EMBER2, 0.8), 8)
-		_:
-			draw_line(c + Vector2(d * 22, -10), c + Vector2(d * 40, -90), Color(col, a), 5)
 
 
 func _draw_crown(p: Vector2, a: float, ci: CanvasItem = self) -> void:
@@ -365,11 +461,7 @@ func _draw_hazard(z: Dictionary, glowing: bool, ci: CanvasItem = self) -> void:
 			ci.draw_rect(r, Color(LIGHT, 0.5), false, 1)
 
 
-func _draw_hero(h: ArenaHero) -> void:
-	if h.safe > 0.0 and int(h.safe * 20.0) % 2 == 0:
-		return
-	draw_rect(h.rect(), HERO)
-	draw_rect(Rect2(h.pos + Vector2(h.facing * 4 - 2, -9), Vector2(4, 4)), INK0)
+func _draw_hero(h: ArenaHero) -> void:            # the sprite is hero_spr; this is the blade's flash
 	if h.swinging():
 		var b := h.blade()
 		draw_rect(b, Color(GOLD, 0.35))
@@ -425,6 +517,7 @@ func _draw_glow() -> void:
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
+	layer.layer = GloomLight.HUD_LAYER + 1
 	add_child(layer)
 	hud = Control.new()
 	hud.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -434,13 +527,10 @@ func _build_hud() -> void:
 
 
 func _draw_hud() -> void:
-	var font := ThemeDB.fallback_font
+	var font: Font = UiStyle.font("body")
 	if flash > 0.0:
 		hud.draw_rect(Rect2(0, 0, ThroneFight.W, ThroneFight.H), Color(LIGHT, minf(0.9, flash)))
 	if fight:
-		for i in Game.max_hearts:                # hearts (B5's HUD will replace this)
-			var col := Color("d9455f") if i < Game.hearts else INK2
-			hud.draw_circle(Vector2(28 + i * 22, 26), 8, col)
 		var bar := Rect2(180, 500, 600, 10)      # his bar, split into the 3 phases
 		hud.draw_rect(bar.grow(2), INK0)
 		hud.draw_rect(Rect2(bar.position, Vector2(bar.size.x * fight.hp_share(), bar.size.y)), SHADOW1)
@@ -449,7 +539,7 @@ func _draw_hud() -> void:
 				Vector2(bar.position.x + bar.size.x * cut, bar.end.y + 3), GOLD, 2)
 		var title := Castle.display("BOSS", "", "The Shadow King").to_upper()
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, LIGHT)
-		var phase_name: String = ["", "I · BLADE", "II · ECLIPSE", "III · FALL"][fight.phase]
+		var phase_name: String = ["", "I - BLADE", "II - ECLIPSE", "III - FALL"][fight.phase]
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), phase_name, HORIZONTAL_ALIGNMENT_RIGHT, bar.size.x, 14, SHADOW2)
 		if fight.state == "finale" and fight.t < 2.2:
 			var word := Castle.display("SUNFANG", "", "Sunfang").to_upper()
