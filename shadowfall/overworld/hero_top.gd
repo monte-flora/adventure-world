@@ -243,7 +243,7 @@ func _fits(p: Vector2) -> bool:
 		var q: Vector2 = p + corner * (HALF - Vector2(0.01, 0.01))
 		if not world.walkable(Vector2i(floor(q.x / TILE), floor(q.y / TILE))):
 			return false
-	return true
+	return not world.prop_blocks(Rect2(p - HALF, HALF * 2.0))
 
 
 func _draw() -> void:

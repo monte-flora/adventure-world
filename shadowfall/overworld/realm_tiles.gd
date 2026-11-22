@@ -102,6 +102,10 @@ func object(p: Vector2i) -> String:
 		return "" if world.gate_open(p) else "rock"
 	if GATE.has(ch):
 		return "" if world.walkable(p) else GATE[ch]
+	if world.prop_cover.has(p) and ch in "FHMS":  # a prop stands here or hides it (G1): it is the art
+		return ""
+	if ch == "F" and painted(p):              # painted lands get their trees from props
+		return ""
 	match ch:
 		"F":                                  # canopy over the trunks; the bottom row shows trunks
 			return "tree_top" if world.at(p + Vector2i.DOWN) == "F" else "tree"
@@ -114,6 +118,11 @@ func object(p: Vector2i) -> String:
 		"L":
 			return "waystone"
 	return OBJECT.get(ch, "")
+
+
+## Is square p in a land drawn with the painted ground (`ground: painted`, RealmGround)?
+func painted(p: Vector2i) -> bool:
+	return not world.nightfall and world.lands.get(world.land(p), {}).get("ground", "") == "painted"
 
 
 ## Fills the layers for the whole realm (sea included). canopy (over the hero) gets the tree crown

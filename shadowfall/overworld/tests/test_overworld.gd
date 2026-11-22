@@ -233,10 +233,10 @@ func test_realm_art_per_land() -> void:
 		check(FileAccess.file_exists(ArtSheet.DIR + sheet + ".json"), "%s draws from %s" % [id, sheet])
 	var tree := Vector2i(-1, -1)
 	for p in w.cells:
-		if w.cells[p] == "F" and w.at(p + Vector2i.DOWN) != "F":
+		if w.cells[p] == "F" and w.at(p + Vector2i.DOWN) != "F" and not t.painted(p):   # painted lands: props
 			tree = p
 			break
-	check(tree.x >= 0 and ow.objects.get_cell_source_id(tree) != -1, "a forest square has a tree")
+	check(tree.x >= 0 and ow.objects.get_cell_source_id(tree) != -1, "a forest square (outside painted lands) has a tree")
 	check(ow.hero.sprite.sprite_frames == ArtSheet.frames("hero_top"), "the hero uses the top-down sheet")
 	for m in ow.monsters:
 		check(MapMonster.KINDS.has(m.kind) and m.sprite.sprite_frames == ArtSheet.frames("monster_" + m.kind),

@@ -40,6 +40,8 @@ All 3 kinds of gate letter (`Y` `O` `K`) border Emberhold, so you see them from 
     village: Emberwick 27 50         a village: name, then the middle of its square
     mine: stone/1_the_crumbling_vigil.txt 23 8     the cave under the Mine (M or S) at that square
     gate: Riven Gap 10 50 dash       a rock (X) that opens with that ability
+    ground: painted                  draw this land with the painted ground textures (shadowfall/realm/ground/)
+    prop: oak 12 30                  a prop (a tree, house, lamppost ...): its name, then row and column
 
 Numbers are the land's own rows and columns (row 0, column 0 = its top-left letter). `mine:` and `gate:` can repeat.
 The Umbral Reach also has `world: umbral_reach`, `mirror:` (the screens it mirrors) and `castle:` (the castle's first level).
@@ -50,3 +52,15 @@ The `../world/` letters (`G` grass, `F` forest, `X` rock, `W` water, `R` path, `
 `S` Secret Mine, `T` chest, `+` signpost, `P` the Portal, `I` ice, `B` reeds, `V` steam vent, `#` bridge, `C` castle),
 plus the ability gates: `Y` ivy cliff (climb), `O` rubble (pound), `K` shadow thorns (flare). Open water needs swim.
 `.` means "not this land". Here `O` is rubble, not the pygame map's bubbles.
+
+## Props and the painted ground
+
+`prop: <name> <row> <column>` puts a picture from `shadowfall/realm/props/` on the land (the list of names
+is `shadowfall/realm/gemini/assets.json`). Its foot (the bottom middle of the part you bump into) sits on the
+middle of that square; decimals move it part of a square (`prop: cottage_a 24.5 48` is half a square up).
+Repeat the line for each one. The prop's `.json` says what you bump into and where its lights are.
+
+- A prop never blocks a Mine, waystone, house, chest, sign or Portal square (`M S L H T + P`).
+- Its picture replaces the tree, house or Mine tile it stands on or covers.
+- `ground: painted` lands get their trees only from props (an `F` still marks the forest for the monsters).
+- Place them with the prop editor: `pixi run realm-editor` (or by hand). Make the art: `shadowfall/realm/gemini/README.txt`.

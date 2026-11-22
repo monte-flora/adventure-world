@@ -1,28 +1,28 @@
 {
  "name": "cottage_b",
  "size": [
-  144,
-  128
+  96,
+  94
  ],
  "placeholder": true,
  "keep": false,
  "front": 0,
  "lights": [
   [
-   89,
-   92,
+   60,
+   68,
    44
   ]
  ],
  "foot": [
-  6,
-  64,
-  132,
-  64
+  4,
+  52,
+  88,
+  42
  ],
  "anchor": [
-  72,
-  128
+  48,
+  94
  ],
- "base": 128
+ "base": 94
 }

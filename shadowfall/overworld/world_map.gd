@@ -34,6 +34,14 @@ var cave_of := {}                       # Mine cell -> cave file inside levels/ 
 var waystones := {}                     # cell -> land id (each land's L)
 var gates := {}                         # cell -> {"name", "needs"}: an ability id or a number of stones
 var nightfall := false
+## Props (levels/README.md "Props on the realm"): {"name", "at": Vector2 px (the prop's anchor), "meta"}.
+var props: Array[Dictionary] = []
+var prop_rects: Array[Rect2] = []       # footprints in realm px
+var prop_solid: Array[Rect2] = []       # footprint parts inside blocked squares: the hero bumps into these
+var prop_cells := {}                    # squares whose middle is under a footprint: nobody walks there
+var prop_cover := {}                    # squares a prop stands on or hides: no tree, house or Mine tile there
+const OPEN := "MSPLHT+"                 # squares a prop never blocks (Mines, waystones, houses, chests ...)
+const PROP_DIR := "res://realm/props/"
 var errors: PackedStringArray = []
 
 
@@ -83,7 +91,7 @@ func stitch(texts: Dictionary) -> void:
 		if names_id(id) == "home" and _names("HOME") != "":
 			display = _names("HOME")
 		lands[id] = {"name": display, "file": f, "rect": Rect2i(origin, Vector2i(lf.width, lf.height)),
-			"says": lf.setting("says")}
+			"says": lf.setting("says"), "ground": lf.setting("ground")}
 		for r in lf.height:
 			for c in lf.width:
 				var ch := lf.at(c, r)
@@ -111,6 +119,8 @@ func stitch(texts: Dictionary) -> void:
 			if parts.size() >= 4:
 				var cell := origin + Vector2i(int(parts[-2]), int(parts[-3]))
 				gates[cell] = {"name": " ".join(parts.slice(0, parts.size() - 3)), "needs": parts[-1]}
+		for line in lf.all("prop"):
+			add_prop(line, origin, f)
 	if home.x < 0:
 		home = _first("H")
 	for p in cells:
@@ -163,6 +173,61 @@ func mirror() -> WorldMap:
 	return wm
 
 
+## One `prop: oak 12 30` line (the land's row and column; decimals move it part of a square): its
+## anchor sits on the middle of that square. Unknown props are reported in errors and skipped.
+func add_prop(line: String, origin: Vector2i, file := "") -> void:
+	var parts := line.split(" ", false)
+	if parts.size() != 3 or not parts[1].is_valid_float() or not parts[2].is_valid_float():
+		errors.append("%s: `prop: %s` wants a name, a row and a column" % [file, line])
+		return
+	var meta := prop_meta(parts[0])
+	if meta.is_empty():
+		errors.append("%s: no prop called %s in realm/props/" % [file, parts[0]])
+		return
+	var pos := (Vector2(origin) + Vector2(float(parts[2]), float(parts[1])) + Vector2(0.5, 0.5)) * LevelFile.TILE
+	props.append({"name": parts[0], "at": pos, "meta": meta})
+	var t := float(LevelFile.TILE)
+	var anchor: Array = meta.anchor
+	var art := Rect2(pos - Vector2(anchor[0], anchor[1]), Vector2(meta.size[0], meta.size[1]))
+	prop_cover[Vector2i(floori(pos.x / t), floori(pos.y / t))] = true
+	for row in range(floori(art.position.y / t), ceili(art.end.y / t)):
+		for col in range(floori(art.position.x / t), ceili(art.end.x / t)):
+			if art.has_point((Vector2(col, row) + Vector2(0.5, 0.5)) * t):
+				prop_cover[Vector2i(col, row)] = true
+	var foot: Array = meta.get("foot", [])
+	if foot.size() != 4:
+		return
+	var r := Rect2(pos + Vector2(foot[0] - anchor[0], foot[1] - anchor[1]), Vector2(foot[2], foot[3]))
+	prop_rects.append(r)
+	for row in range(floori(r.position.y / t), ceili(r.end.y / t)):
+		for col in range(floori(r.position.x / t), ceili(r.end.x / t)):
+			var c := Vector2i(col, row)
+			if r.grow(1.0).has_point((Vector2(c) + Vector2(0.5, 0.5)) * t) and at(c) not in OPEN:
+				prop_cells[c] = true
+				prop_solid.append(r.intersection(Rect2(Vector2(c) * t, Vector2(t, t))))
+
+
+static var _meta := {}
+
+
+## A prop's JSON from realm/props/ (cached), or {} if there is none.
+static func prop_meta(name: String) -> Dictionary:
+	if not _meta.has(name):
+		var p := PROP_DIR + name + ".json"
+		var d = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
+		_meta[name] = d if d is Dictionary else {}
+	return _meta[name]
+
+
+## Does a prop's footprint stop the hero's box (realm px)? Only inside the squares it blocks, so a
+## walk from square middle to square middle (WorldMap.path) never snags on one.
+func prop_blocks(box: Rect2) -> bool:
+	for r in prop_solid:
+		if r.intersects(box):
+			return true
+	return false
+
+
 func at(p: Vector2i) -> String:
 	return cells.get(p, ".")
 
@@ -181,6 +246,8 @@ func walkable(p: Vector2i) -> bool:
 		return false
 	if gates.has(p):
 		return gate_open(p)
+	if prop_cells.has(p):
+		return false
 	var ch := at(p)
 	if ch in SOLID:
 		return false

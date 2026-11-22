@@ -1,22 +1,22 @@
 {
  "name": "oak",
  "size": [
-  112,
-  128
+  96,
+  108
  ],
  "placeholder": true,
  "keep": false,
  "front": 0,
  "lights": [],
  "foot": [
-  40,
-  110,
-  31,
-  18
+  35,
+  93,
+  27,
+  15
  ],
  "anchor": [
-  55,
-  128
+  48,
+  108
  ],
- "base": 128
+ "base": 108
 }
