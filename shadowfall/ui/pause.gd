@@ -10,6 +10,7 @@ const BOX := Rect2(80, 40, 800, 460)
 const GRID := Vector2i(6, 5)          # the realm's screen grid (B1)
 const CELL := Vector2(56, 40)
 const COLUMN := 200                   # width of the name column in menu rows
+const PORTRAIT := "res://art/ui/hero_portrait.png"  # the Lanternbearer, on the JOURNEY tab
 
 var tab := 0
 var cursor := 0
@@ -18,6 +19,7 @@ var remapping := ""                   # action waiting for a key, or ""
 var _content: VBoxContainer
 var _tabs: Label
 var _hint: Label
+var _portrait: TextureRect
 
 
 func _ready() -> void:
@@ -44,6 +46,13 @@ func _ready() -> void:
 	_hint = UiStyle.label("Q/E tab   UP/DOWN choose   LEFT/RIGHT change   SPACE ok   ESC back", "small", UiStyle.INK4)
 	_hint.position = BOX.position + Vector2(16, BOX.size.y - 20)
 	add_child(_hint)
+	_portrait = TextureRect.new()
+	_portrait.name = "Portrait"
+	_portrait.texture = load(PORTRAIT)
+	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_portrait.size = _portrait.texture.get_size()
+	_portrait.position = BOX.end - _portrait.size - Vector2(24, 28)
+	add_child(_portrait)
 	show_tab(0)
 
 
@@ -51,6 +60,7 @@ func show_tab(i: int) -> void:
 	tab = posmod(i, TABS.size())
 	cursor = 0
 	remapping = ""
+	_portrait.visible = tab == 0
 	_build()
 
 
@@ -230,6 +240,7 @@ func capture(event: InputEvent) -> bool:
 	UiSettings.save()
 	var keep := cursor
 	remapping = ""
+	_portrait.visible = tab == 0
 	_build()
 	cursor = keep
 	_draw_rows()
