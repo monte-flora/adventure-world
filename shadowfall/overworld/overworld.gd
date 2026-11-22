@@ -31,6 +31,7 @@ var banner: Label
 var monsters: Array[MapMonster] = []
 var respawn := Vector2i.ZERO
 var last_cell := Vector2i(-1, -1)
+var heal := LumenHeal.new()                   # Q, standing still: a Lumen charge becomes a heart
 
 
 func _ready() -> void:
@@ -100,6 +101,7 @@ func _physics_process(_dt: float) -> void:
 	if hero == null:
 		return
 	cam.position = hero.position
+	heal.step(Input.is_action_pressed("heal"), hero.velocity.length() < 1.0)
 	var c := hero.cell()
 	if c != last_cell:
 		last_cell = c
@@ -108,6 +110,8 @@ func _physics_process(_dt: float) -> void:
 
 ## The hero just stepped onto square c (or starts there: then a Portal or Mine underfoot waits for a step).
 func _arrive(c: Vector2i, starting := false) -> void:
+	if c == lost_light_cell():
+		Vitals.recover_lost_light()
 	var id := world.land(c)
 	if id != "" and not Game.flags.get("seen_land_" + id, false):
 		Game.flags["seen_land_" + id] = true
@@ -163,9 +167,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		travel_from(hero.cell())
 
 
+## Where this realm's Lost Light waits, or (-1, -1).
+func lost_light_cell() -> Vector2i:
+	var w: Dictionary = Vitals.lost_light().get("where", {})
+	if w.get("scene", "") != "overworld" or w.get("realm", "") != realm:
+		return Vector2i(-1, -1)
+	return Vector2i(w.x, w.y)
+
+
 func _on_hurt(hearts_left: int) -> void:
-	if hearts_left <= 0:                      # no lives: wake at the last lantern, hearts full
-		Game.hearts = Game.max_hearts
+	heal.hit()
+	if hearts_left <= 0:                      # no lives: the gold stays as a Lost Light; wake at the last lantern
+		var c := hero.cell()
+		Vitals.die({"scene": "overworld", "realm": realm, "x": c.x, "y": c.y})
 		hero.place(respawn)
 		hero.iframes = HeroTop.HURT_IFRAMES
 		last_cell = respawn
@@ -175,7 +189,10 @@ func _on_hurt(hearts_left: int) -> void:
 func _on_swing(at: Vector2, _facing: Vector2) -> void:
 	for m in monsters.duplicate():
 		if is_instance_valid(m) and hero.sword_hits(m.position):
+			var fresh: bool = m.flash <= 0
 			m.hit(2, at)
+			if fresh:
+				Vitals.lumen_hit()
 
 
 func _spawn_monsters() -> void:
@@ -217,6 +234,11 @@ func _portal_in_light() -> Vector2i:
 
 
 func _draw_marks() -> void:
+	var ll := lost_light_cell()
+	if ll.x >= 0:                             # your Lost Light: the gold you dropped
+		var at := Vector2(ll) * TILE + Vector2.ONE * TILE / 2.0
+		gates_layer.draw_circle(at, 12, Color(1.0, 0.85, 0.4, 0.35))
+		gates_layer.draw_circle(at, 5, Color("ffe08a"))
 	for p in world.waystones:                 # lanterns: dim until lit
 		var lit := waystone_lit(p)
 		var mid := Vector2(p) * TILE + Vector2.ONE * TILE / 2.0
