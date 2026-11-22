@@ -61,6 +61,11 @@ func standable(c: Vector2i) -> bool:
 	return c.x >= 0 and _free(c) and (_support(c + Vector2i.DOWN) or _l(c) in CaveTiles.CLIMB)
 
 
+## Walk, drop or jump here and you stand on something (a ladder's middle you only reach by climbing).
+func _landable(c: Vector2i) -> bool:
+	return standable(c) and _support(c + Vector2i.DOWN)
+
+
 ## Where the Hero stands now (its cell), or the cell below if it is still in the air.
 func here() -> Vector2i:
 	return cave.cell_of(h.position + Vector2(0, HeroSide.SIZE.y / 2.0 - 4))
@@ -73,7 +78,7 @@ func moves(c: Vector2i) -> Array:
 	var out := []
 	for d in [-1, 1]:
 		var n := c + Vector2i(d, 0)
-		if standable(n):
+		if _landable(n):
 			out.append(["walk", n])
 		elif _free(n):
 			var f := n
@@ -81,12 +86,14 @@ func moves(c: Vector2i) -> Array:
 				f += Vector2i.DOWN
 				if not _free(f):
 					break
-				if standable(f):
+				if _landable(f):
 					out.append(["drop", f])
 					break
 	var below := _l(c + Vector2i.DOWN)
 	var lift := 3
-	if below == "o":
+	if not _support(c + Vector2i.DOWN):             # off a ladder you jump at 0.8 speed
+		lift = 2
+	elif below == "o":
 		lift = 6
 	elif below == "M":
 		lift = 7
@@ -97,7 +104,7 @@ func moves(c: Vector2i) -> Array:
 			if absi(dx) <= 1 and dy == 0:
 				continue
 			var t := c + Vector2i(dx, -dy)
-			if standable(t) and _arc_clear(c, t, maxi(dy, 0)):
+			if _landable(t) and _arc_clear(c, t, maxi(dy, 0)):
 				out.append(["launch" if lift > 3 else "jump", t])
 	if _l(c) in CaveTiles.CLIMB or _l(c + Vector2i.DOWN) in CaveTiles.CLIMB:
 		var u := c
@@ -158,7 +165,9 @@ func _box_clear(a: Vector2i, b: Vector2i) -> bool:
 
 
 func _pass(c: Vector2i) -> bool:
-	return _free(c) or _l(c) in "=-" + CaveTiles.CLIMB
+	if _l(c) == "B":                                  # you dig cracked rock on foot, not mid-jump
+		return false
+	return _free(c) or (_jet_fire(c) and _l(c) != "J") or _l(c) in "=-" + CaveTiles.CLIMB
 
 
 ## Breadth-first route to any goal cell: a list of [kind, cell].
@@ -238,6 +247,13 @@ func do_move(kind: String, t: Vector2i) -> void:
 		await _wait_trap_safe()
 		if _done():
 			return
+	for b in [t, t + Vector2i.UP]:
+		if _l(b) == "B" and absi(b.x - from.x) <= 1:            # cracked rock in the way: strike it, dig it
+			h.iy = float(signi(b.y - from.y))
+			await _clear_ahead(float(b.x - from.x) if b.x != from.x else float(h.facing))
+			if _done():
+				return
+			h.iy = 0.0
 	var tx := _cx(t)
 	var floor_y := (t.y + 1) * T
 	match kind:
@@ -257,8 +273,10 @@ func do_move(kind: String, t: Vector2i) -> void:
 			h.iy = -1.0 if t.y < from.y else 1.0
 			for i in 240:
 				await _frames()
-				if _done() or (h.state == HeroSide.NORMAL and i > 2):
+				if _done() or (h.state == HeroSide.NORMAL and i > 2) or here().y == t.y:
 					break
+			if _done():
+				return
 			h.iy = 0.0
 			for i in 40:
 				h.ix = clampf((tx - h.position.x) / 8.0, -1.0, 1.0)
@@ -274,6 +292,8 @@ func do_move(kind: String, t: Vector2i) -> void:
 					if _done():
 						return
 			else:
+				if h.state == HeroSide.CLIMB:            # off a ladder: the steer at the press is your run
+					h.ix = signf(tx - h.position.x)
 				h.jump_pressed = true
 			h.jump_held = true
 			var wide := t.y >= from.y or _box_clear(from, t)   # else rise first, then steer over the lip
@@ -360,6 +380,7 @@ func run(tc, max_moves := 400) -> bool:
 	for n in max_moves:
 		if _done():
 			break
+		_dig_ok = false
 		var goals := _goals_next_to("*") if _has("*") else _goals_on("E")
 		var path := route(goals)
 		if path.is_empty() and _has("G"):
@@ -368,6 +389,7 @@ func run(tc, max_moves := 400) -> bool:
 				pass
 		if path.is_empty():
 			_dig_ok = true
+			goals = _goals_next_to("*") if _has("*") else _goals_on("E")
 			path = route(goals)
 		if path.is_empty() and here() in goals:
 			path = []
