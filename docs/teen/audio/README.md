@@ -2,6 +2,8 @@
 
 **Recommendation:** keep making every note in code. Use a "NES rules, modern room" sound: 4 chip voices per tune, plus echo, low-pass and stems. Two original leitmotifs. Music layers follow `game.gloom`. CC0 packs only for the few sounds that synthesis does badly, and each one is logged.
 
+> **Update, Wave C3 (2026-11-22):** the user asked for a more authentic sound, so the **music** is now our own tunes (`shadowfall/audio/tunes.gd`) rendered on sampled orchestra instruments: `pixi run -e music render-music` (`shadowfall/audio/render/render_music.py`, FluidSynth + the MIT MuseScore_General SoundFont, downloaded, not committed) writes the base + dark `.ogg` stems to `shadowfall/audio/music/`. The code synth stays for SFX, the King sting and as the music fallback. Rule (d) below allows it.
+
 Prototype: `spikes/audio/make_audio.py` (standard library only, about 3 s of CPU) → `spikes/audio/out/`, 11 files, **492 KB** in total.
 
 ## 1. How the game makes sound today
@@ -31,7 +33,7 @@ Gaps: no volume sliders, no layers, no echo or filter (so it sounds "toy"), no s
 | D. CC0 packs (Kenney: CC0, no credit) | 0 | Low if CC0 only. Freesound needs the **CC0** filter (CC BY needs credit, NC is not allowed). Sonniss is **not CC0** (no redistribution in a public repo) | .ogg | Only for wind and water ambience if synthesis sounds bad. Log each file in `CREDITS-audio.md` |
 | E. Paid or AI music | $ / unclear | Unclear ownership | | **No** |
 
-**Rule for Wave B:** an audio file may enter the repo only if (a) a script in the repo makes it, (b) a tracker source file we wrote sits next to it, or (c) it is CC0 and has a line in `CREDITS-audio.md` with its URL and licence.
+**Rule for Wave B:** an audio file may enter the repo only if (a) a script in the repo makes it, (b) a tracker source file we wrote sits next to it, or (c) it is CC0 and has a line in `CREDITS-audio.md` with its URL and licence. (d) (added in Wave C3) it is rendered by a script in the repo from samples or a SoundFont under a permissive licence (CC0, MIT, BSD, zlib or similar: shipping in a public repo and a game allowed, no NC/ND), with the source, licence, URL and any required notice in `CREDITS-audio.md`. Download the samples in the script; commit only the rendered files.
 
 ## 4. The prototype (all original; listen in `spikes/audio/out/`)
 | File | Seconds | KB | What it shows |

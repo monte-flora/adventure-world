@@ -9,8 +9,9 @@ extends Node
 ## Every tune plays as one AudioStreamSynchronized with 2 stems, base and dark, started together.
 ## The dark stem fades in with Game.gloom: dark = smoothstep(0.3, 0.9, gloom). As it does, the base
 ## stem drops to 75% and the Music bus low-pass closes from 8 kHz to 1.8 kHz. The gains change at
-## most 10 times a second, ramped (a full swing takes 2 s). Every sound is made in code at first
-## use and kept (nothing is downloaded or sampled; see CREDITS-audio.md).
+## most 10 times a second, ramped (a full swing takes 2 s). The stems are real sampled instruments,
+## audio/music/<tune>_<stem>.ogg (made by audio/render/render_music.py, see CREDITS-audio.md); a tune
+## with a stem file missing falls back to the code synth. The SFX are made in code at first use.
 
 const Synth := preload("res://audio/synth.gd")
 const Tunes := preload("res://audio/tunes.gd")
@@ -29,6 +30,7 @@ const CROSSFADE := 0.9
 const DUCK := 0.3
 const SFX_VOICES := 8
 const SILENT_DB := -80.0
+const MUSIC_DIR := "res://audio/music/"
 
 var track := ""                  # the tune playing now ("" = none)
 var intensity := 0.0             # extra darkness from the game, 0..1 (the dark stem follows the larger)
@@ -101,16 +103,35 @@ func stop_music(fade := 0.4) -> void:
 	_swap_players(fade)
 
 
-## A tune's stream (made on first use): stem 0 = base, stem 1 = dark.
+## A tune's stream (made on first use): stem 0 = base, stem 1 = dark. The .ogg stems if both are
+## there, else the code synth.
 func music_stream(tune: String) -> AudioStreamSynchronized:
 	if not _streams.has(tune):
-		var t := Tunes.make(tune)
+		var stems := recorded_stems(tune)
+		if stems.is_empty():
+			var t := Tunes.make(tune)
+			stems = [Synth.to_stream(t["base"], true), Synth.to_stream(t["dark"], true)]
 		var s := AudioStreamSynchronized.new()
 		s.stream_count = 2
-		s.set_sync_stream(0, Synth.to_stream(t["base"], true))
-		s.set_sync_stream(1, Synth.to_stream(t["dark"], true))
+		s.set_sync_stream(0, stems[0])
+		s.set_sync_stream(1, stems[1])
 		_streams[tune] = s
 	return _streams[tune]
+
+
+## The tune's sampled-instrument stems [base, dark] from audio/music/, looping; [] if one is missing.
+static func recorded_stems(tune: String, dir := MUSIC_DIR) -> Array:
+	var out := []
+	for stem in ["base", "dark"]:
+		var path := "%s%s_%s.ogg" % [dir, tune, stem]
+		if not ResourceLoader.exists(path):
+			return []
+		# A deep copy, not the cached file: Godot leaks the synchronized playback at quit and would
+		# report the file "still in use".
+		var s: AudioStreamOggVorbis = load(path).duplicate(true)
+		s.loop = true
+		out.append(s)
+	return out
 
 
 func play_sfx(sound: String, pitch := 1.0) -> void:

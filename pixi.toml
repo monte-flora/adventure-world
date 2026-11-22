@@ -45,5 +45,21 @@ pygame-ce = ">=2.5"
 [feature.web.tasks]
 build-web = { cmd = "python web/build_web.py", description = "Make the web-browser version of the game (it goes in web/build)" }
 
+# ----- Shadowfall music: real sampled instruments (see shadowfall/audio/README.md) -----
+# FluidSynth plays the tunes on a free (MIT) orchestra SoundFont; ffmpeg makes the .ogg stems.
+#     pixi run -e music render-music
+[feature.music]
+platforms = ["osx-arm64", "osx-64", "linux-64"]  # no FluidSynth build for Windows on conda-forge
+
+[feature.music.dependencies]
+python = ">=3.13.18,<3.14"
+fluidsynth = "*"
+ffmpeg = "*"
+numpy = "*"
+
+[feature.music.tasks]
+render-music = { cmd = "python shadowfall/audio/render/render_music.py", description = "Shadowfall: play the tunes on sampled instruments and save the .ogg music stems" }
+
 [environments]
 web = { features = ["web"], no-default-feature = true }
+music = { features = ["music"], no-default-feature = true }
