@@ -60,6 +60,21 @@ static func active() -> Array:
 	return _all().keys().filter(func(id): return status(id) == "active")
 
 
+## The quest log: [{id, title, text, done, main}], quests you are on first (main quest on top),
+## then the ones you finished. text is the step you are on ("" when done).
+static func log_entries() -> Array:
+	var on := []
+	var done := []
+	for id in _all():
+		var s := status(id)
+		if s == "new":
+			continue
+		var e := {"id": id, "title": quest(id).get("title", id), "text": step_text(id), "done": s == "done", "main": is_main(id)}
+		(done if e.done else on).append(e)
+	on.sort_custom(func(a, b): return a.main and not b.main)
+	return on + done
+
+
 static func is_main(id: String) -> bool:
 	return quest(id).get("main", false)
 

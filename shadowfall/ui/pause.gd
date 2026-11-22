@@ -2,9 +2,8 @@ extends CanvasLayer
 ## The pause screen, opened by Scenes.pause() (ESC / Start; ESC again resumes).
 ## Tabs: JOURNEY (resume, save and quit, quest log) · MAP · SIGILS · SOUND · CONTROLS (remap).
 ## Q / E (LB / LT) change tab, UP/DOWN choose, LEFT/RIGHT change a value, SPACE / G confirm.
-## TAB opens straight on the map. Reads quests and sigils from rules/ when B4's files exist,
-## else from Game.flags ("quests": {id: "active"|"done"}, "sigils": [ids], "map_screen": [x, y],
-## "map_seen": [[x, y], ...]).
+## TAB opens straight on the map. Quests come from Quests.log_entries(), sigils from Sigils
+## (rules/), the map from Game.flags ("map_screen": [x, y], "map_seen": [[x, y], ...]).
 
 const TABS := ["JOURNEY", "MAP", "SIGILS", "SOUND", "CONTROLS"]
 const BOX := Rect2(80, 40, 800, 460)
@@ -146,13 +145,24 @@ func _tab_map() -> void:
 
 
 func _tab_sigils() -> void:
-	var equipped := sigils_equipped()
-	var n := sigil_slots()
-	_note("SIGILS  %d of %d slots" % [equipped.size(), n], UiStyle.INK7)
+	var worn := sigils_equipped()
+	_note("SIGILS  %d of %d slots" % [Sigils.used_slots(), sigil_slots()], UiStyle.INK7)
 	_note("Swap sigils when you rest at a lantern.", UiStyle.INK5, "small")
-	for i in n:
-		var s: String = equipped[i] if i < equipped.size() else ""
-		_note(("%d  %s" % [i + 1, UiStyle.name_of("SIGIL", s)]) if s != "" else "%d  - empty -" % (i + 1), UiStyle.SHADOW2 if s != "" else UiStyle.INK3)
+	if worn.is_empty():
+		_note("- none worn -", UiStyle.INK3)
+	for s in worn:
+		_note(_sigil_line(s), UiStyle.SHADOW2)
+	var carried := Sigils.owned().filter(func(s): return s not in worn)
+	if not carried.is_empty():
+		_note("")
+		_note("CARRIED", UiStyle.INK6)
+		for s in carried:
+			_note(_sigil_line(s), UiStyle.INK4)
+
+
+func _sigil_line(id: String) -> String:
+	var what: String = Sigils.ALL[id][2] if Sigils.ALL.has(id) else ""
+	return "%s  (%d)  %s" % [Sigils.display_name(id), Sigils.cost(id), what]
 
 
 func _tab_sound() -> void:
@@ -219,45 +229,17 @@ func capture(event: InputEvent) -> bool:
 
 # --- data ----------------------------------------------------------------------------------
 
-## Quest log entries [{title, text, done}]: rules/quests.gd log_entries() if B4 has made it.
+## Quest log entries [{title, text, done}].
 func quest_entries() -> Array:
-	var r = _rules("res://rules/quests.gd", "log_entries")
-	if r is Array:
-		return r
-	var out := []
-	var q = Game.flags.get("quests", {})
-	if q is Dictionary:
-		for id in q:
-			out.append({"title": UiStyle.name_of("QUEST", id), "done": q[id] == "done"})
-	return out
+	return Quests.log_entries()
 
 
 func sigil_slots() -> int:
-	var r = _rules("res://rules/sigils.gd", "slots")
-	if r is int:
-		return r
-	var n := 3   # +1 at stones 2, 4 and 6 (docs/teen/gameplay/README.md)
-	for at in [2, 4, 6]:
-		if Game.stones.size() >= at:
-			n += 1
-	return n
+	return Sigils.slots()
 
 
 func sigils_equipped() -> Array:
-	var r = _rules("res://rules/sigils.gd", "equipped")
-	if r is Array:
-		return r
-	return Game.flags.get("sigils", [])
-
-
-func _rules(path: String, method: String) -> Variant:
-	if not ResourceLoader.exists(path):
-		return null
-	var s: Script = load(path)
-	for m in s.get_script_method_list():
-		if m.name == method and m.flags & METHOD_FLAG_STATIC:
-			return s.call(method)
-	return null
+	return Sigils.worn()
 
 
 static func _cell(v) -> Vector2i:
