@@ -158,7 +158,7 @@ func _physics_process(dt: float) -> void:
 			Scenes.goto("title")
 	shake_t = maxf(0.0, shake_t - dt)
 	var k := shake_t / shake_len if shake_len > 0.0 else 0.0
-	cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_px * k
+	cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_px * k * Juice.shake_scale()
 	dark_rect.visible = fight.dark
 	Audio.intensity = 1.0 if fight.dark else (0.6 if fight.phase == 3 and not fight.won else 0.0)
 	_king_anim(fight)
@@ -176,6 +176,22 @@ const SFX_LIKE := {"boss_glow": "king", "boss_slash": "swing", "boss_fire": "das
 	"boss_phase": "king", "crown_hit": "hit", "sunfang": "stone", "clang": "land", "cut": "swing",
 	"pogo": "jump", "forge": "stone"}
 const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss"}
+
+
+## Sparks and motes for the fight's big moments (overworld/juice.gd).
+func _fx(name: String) -> void:
+	var f := fight
+	match name:
+		"clang":                                 # blade on shadow armour: white-hot sparks where they met
+			var at := f.hero.blade().intersection(f.body())
+			Juice.burst(self, at.get_center() if at.has_area() else f.king, LIGHT, 10, 160.0, 0.25, 2.0, 300.0)
+		"boss_hit":                              # a real cut: gold light bleeds out of him
+			Juice.burst(self, f.king, GOLD, 12, 110.0, 0.5)
+			Juice.burst(self, f.king, SHADOW2, 8, 70.0, 0.6)
+		"crown_hit":
+			Juice.burst(self, f.crown_rect().get_center(), EMBER2, 18, 140.0, 0.6, 3.0, 120.0)
+		"boss_land":                             # stone dust from the floor either side of him
+			Juice.burst(self, Vector2(f.king.x, ThroneFight.FLOOR_Y), STONE_HI, 14, 120.0, 0.5, 3.0, 200.0)
 
 
 func _sfx(name: String) -> void:
@@ -272,6 +288,7 @@ func _event(e: Dictionary) -> void:
 				shake_len = e["time"]
 		"sfx":
 			_sfx(e["name"])
+			_fx(e["name"])
 		"music":
 			_music(e["name"])
 		"say":
@@ -294,6 +311,8 @@ func _event(e: Dictionary) -> void:
 			_say("The dark takes you... The lantern by the door flickers back to life.")
 		"won":
 			end_t = 0.0
+			Juice.burst(self, fight.king, GOLD, 40, 160.0, 1.6, 3.0, -30.0)
+			Juice.burst(self, fight.king, LIGHT, 24, 90.0, 2.0, 2.0, -50.0)
 
 
 func _retry() -> void:
