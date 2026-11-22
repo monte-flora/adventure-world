@@ -1,0 +1,247 @@
+class_name WorldMap
+## The realm as one grid of letters, stitched from the land files in levels/world/ (levels/README.md,
+## "The Phase 2 world map"): each file's `at: row col` puts its drawing on the big map, `.` is "not
+## this land", squares no land draws are open water. B1 owns this file.
+## The realm is a grid of screens, 6 × 5 screens of 30 × 17 squares (docs/teen/levels R10); Nightfall
+## (the Umbral Reach) is the 3 × 3 screens in the middle, the same footprint with dark terrain (R15).
+
+const SCREEN := Vector2i(30, 17)        # squares per screen (960 × 540 at 32 px)
+const GRID := Vector2i(6, 5)            # screens across, down
+const MIRROR_FROM := Vector2i(2, 1)     # Nightfall mirrors screens C2..E4 (0-based column 2, row 1)
+const MIRROR_SIZE := Vector2i(3, 3)
+
+## Letters you can never walk on; water needs Tidebinder (swim). `.` is open water.
+const SOLID := "X#"
+const WATER := "W~O.="                  # O on today's maps is bubbles in the water; = a broken bridge
+## Ability gates (docs/teen/levels §5): shut until the hero has the ability.
+const GATE_LETTERS := {"Y": "climb", "K": "flare", "O": "pound"}
+## Which land a world file is, by its number (levels/world/01 ... 08; the files keep their numbers).
+## Display names come from rules/names.gd (Names.LAND), falling back to the file's `name:` line.
+const LAND_OF_NUMBER := {"01": "home", "02": "woods", "03": "lake", "04": "portal", "05": "ruins",
+	"06": "frost", "07": "desert", "08": "swamp", "09": "nightfall"}
+
+var cells := {}                         # Vector2i(col, row) -> letter
+var land_of := {}                       # Vector2i -> land id
+var lands := {}                         # land id -> {"name", "file", "rect": Rect2i, "says"}
+var size := Vector2i.ZERO               # columns, rows
+var home := Vector2i(-1, -1)
+var mines: Array[Vector2i] = []         # nearest home first
+var cave_of := {}                       # Mine cell -> cave file inside levels/ ("caves/01_....txt")
+var waystones := {}                     # cell -> land id (each land's L)
+var gates := {}                         # cell -> {"name", "needs"}: an ability id or a number of stones
+var nightfall := false
+var errors: PackedStringArray = []
+
+
+## The light realm from every file in levels/world/.
+static func load_realm() -> WorldMap:
+	var texts := {}
+	for f in Paths.level_files("world"):
+		texts[f] = FileAccess.get_file_as_string(Paths.level(f))
+	var wm := WorldMap.new()
+	wm.stitch(texts)
+	wm.plan_caves(Paths.level_files("caves"), Paths.level_files("secret"))
+	return wm
+
+
+## Nightfall: the centre 3 × 3 screens of the light realm, in the dark.
+static func load_nightfall() -> WorldMap:
+	var light := load_realm()
+	var wm := light.mirror()
+	wm.plan_caves(Paths.level_files("shadow"), PackedStringArray())
+	return wm
+
+
+## texts: file path ("world/01_home_meadow.txt") -> its text.
+func stitch(texts: Dictionary) -> void:
+	var names: Dictionary = _names("LAND")
+	var keys := texts.keys()
+	keys.sort()
+	for f in keys:
+		var lf := LevelFile.from_text(texts[f])
+		var stem: String = f.get_file().get_basename()
+		var id: String = lf.setting("land", LAND_OF_NUMBER.get(stem.left(2), stem))
+		if lf.error != "":
+			errors.append("%s: %s" % [f, lf.error])
+		var at := lf.setting("at", "0 0").split(" ", false)
+		if at.size() != 2:
+			errors.append("%s: `at:` needs a row and a column" % f)
+			continue
+		var origin := Vector2i(int(at[1]), int(at[0]))
+		var display: String = names.get(id, lf.setting("name", id))
+		if id == "home" and _names("HOME") != "":
+			display = _names("HOME")
+		lands[id] = {"name": display, "file": f, "rect": Rect2i(origin, Vector2i(lf.width, lf.height)),
+			"says": lf.setting("says")}
+		for r in lf.height:
+			for c in lf.width:
+				var ch := lf.at(c, r)
+				if ch == ".":
+					continue
+				var p := origin + Vector2i(c, r)
+				if cells.has(p):
+					errors.append("%s and %s both draw square %d %d" % [lands[land_of[p]].file, f, p.y, p.x])
+				cells[p] = ch
+				land_of[p] = id
+				size = Vector2i(maxi(size.x, p.x + 1), maxi(size.y, p.y + 1))
+				if ch == "L":
+					waystones[p] = id
+		var h := lf.setting("home").split(" ", false)
+		if h.size() == 2:
+			home = origin + Vector2i(int(h[1]), int(h[0]))
+		for line in _all(texts[f], "gate"):
+			# "Desert Gate 7 0 3" or "Ivy Cliff 3 4 climb": name, row, col, then a level/stone count or an ability
+			var parts := line.split(" ", false)
+			if parts.size() >= 4:
+				var cell := origin + Vector2i(int(parts[-2]), int(parts[-3]))
+				gates[cell] = {"name": " ".join(parts.slice(0, parts.size() - 3)), "needs": parts[-1]}
+	if home.x < 0:
+		home = _first("H")
+	for p in cells:
+		if cells[p] == "M" or cells[p] == "S":
+			mines.append(p)
+	_sort_by_home(mines)
+
+
+## Every Mine plays a cave file, nearest home first; the files go round again when there are more
+## Mines than files (caves.py plan_cave_files). An S (the Secret Mine) plays the secret files.
+func plan_caves(files: PackedStringArray, secret: PackedStringArray) -> void:
+	var i := 0
+	var s := 0
+	for m in mines:
+		if cells[m] == "S" and secret.size() > 0:
+			cave_of[m] = secret[s % secret.size()]
+			s += 1
+		elif files.size() > 0:
+			cave_of[m] = files[i % files.size()]
+			i += 1
+
+
+## The Umbral Reach: the centre screens, same footprint, dark terrain. Its home is the Portal.
+func mirror() -> WorldMap:
+	var wm := WorldMap.new()
+	wm.nightfall = true
+	var from := MIRROR_FROM * SCREEN
+	var span := MIRROR_SIZE * SCREEN
+	var reach: String = _names("LAND").get("nightfall", "the Umbral Reach")
+	wm.lands["nightfall"] = {"name": reach, "file": "", "rect": Rect2i(Vector2i.ZERO, span), "says": ""}
+	for r in span.y:
+		for c in span.x:
+			var p := Vector2i(c, r)
+			var ch: String = cells.get(from + p, "W")
+			if ch == "M" and wm.mines.size() >= 3:
+				ch = "G"                            # Nightfall has 3 shadow caves
+			wm.cells[p] = ch
+			wm.land_of[p] = "nightfall"
+			if ch == "M":
+				wm.mines.append(p)
+			elif ch == "L":
+				wm.waystones[p] = "nightfall"
+	wm.size = span
+	wm.home = wm._first("P")
+	if wm.home.x < 0:
+		wm.home = wm._first_walkable()
+	wm._sort_by_home(wm.mines)
+	return wm
+
+
+func at(p: Vector2i) -> String:
+	return cells.get(p, ".")
+
+
+func land(p: Vector2i) -> String:
+	return land_of.get(p, "")
+
+
+func land_name(id: String) -> String:
+	return lands[id].name if lands.has(id) else ""
+
+
+## Can the hero stand on this square now? Gates read Game.has_ability() every time.
+func walkable(p: Vector2i) -> bool:
+	if p.x < 0 or p.y < 0 or p.x >= size.x or p.y >= size.y:
+		return false
+	if gates.has(p):
+		return gate_open(p)
+	var ch := at(p)
+	if ch in SOLID:
+		return false
+	if GATE_LETTERS.has(ch):
+		return Game.has_ability(GATE_LETTERS[ch])
+	if ch in WATER:
+		return Game.has_ability("swim")
+	return true
+
+
+func gate_open(p: Vector2i) -> bool:
+	var needs: String = gates[p].needs
+	if needs.is_valid_int():
+		return Game.stones.size() >= int(needs)
+	return Game.has_ability(needs)
+
+
+## Which screen (column, row) a square is on.
+static func screen_of(p: Vector2i) -> Vector2i:
+	return Vector2i(p.x / SCREEN.x, p.y / SCREEN.y)
+
+
+## The shortest walk (4-way) between two squares as it is now; empty if there is none.
+func path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var came := {from: from}
+	var queue: Array[Vector2i] = [from]
+	var head := 0
+	while head < queue.size():
+		var p := queue[head]
+		head += 1
+		if p == to:
+			var out: Array[Vector2i] = []
+			while p != from:
+				out.push_front(p)
+				p = came[p]
+			return out
+		for d in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+			var q: Vector2i = p + d
+			if not came.has(q) and (walkable(q) or q == to):
+				came[q] = p
+				queue.append(q)
+	return []
+
+
+func _sort_by_home(list: Array[Vector2i]) -> void:
+	var h := home
+	list.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		var da := (a - h).length_squared()
+		var db := (b - h).length_squared()
+		return da < db or (da == db and (a.y < b.y or (a.y == b.y and a.x < b.x))))
+
+
+func _first(letter: String) -> Vector2i:
+	var best := Vector2i(-1, -1)
+	for p in cells:
+		if cells[p] == letter and (best.x < 0 or p.y < best.y or (p.y == best.y and p.x < best.x)):
+			best = p
+	return best
+
+
+func _first_walkable() -> Vector2i:
+	for r in size.y:
+		for c in size.x:
+			if walkable(Vector2i(c, r)):
+				return Vector2i(c, r)
+	return Vector2i.ZERO
+
+
+## Every value of a repeated setting line ("gate: ..."), which LevelFile keeps only the last of.
+static func _all(text: String, key: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for raw in text.split("\n"):
+		var kv := raw.strip_edges().split(":", true, 1)
+		if kv.size() == 2 and kv[0].strip_edges() == key:
+			out.append(kv[1].strip_edges())
+	return out
+
+
+## A display-name table from rules/names.gd (B4's), or {} / "" while it doesn't have one yet.
+static func _names(key: String):
+	var consts: Dictionary = load("res://rules/names.gd").get_script_constant_map()
+	return consts.get(key, {} if key != "HOME" else "")
