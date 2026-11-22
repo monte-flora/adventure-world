@@ -41,6 +41,7 @@ var stage: Node2D                       # the hall (or the void): darkens with t
 var light: GloomLight
 var castle_tex: Texture2D               # tiles_castle, loaded before any draw (loading inside a draw call shows nothing)
 var hud: Control
+var king_portrait: Texture2D            # art/ui/shadow_king_portrait.png, the intro card (art/src/make_king.py)
 
 ## Which monster sheet each lieutenant's echo borrows (tinted in its colour).
 const ECHO_SHEET := {
@@ -102,6 +103,7 @@ func _start_throne() -> void:
 	dark_rect.visible = false
 	add_child(dark_rect)
 	castle_tex = ArtSheet.texture("tiles_castle")
+	king_portrait = load("res://art/ui/shadow_king_portrait.png")
 	stage = Node2D.new()
 	stage.z_index = -1
 	stage.draw.connect(_draw_stage)
@@ -560,6 +562,11 @@ func _draw_hud() -> void:
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, LIGHT)
 		var phase_name: String = ["", "I - BLADE", "II - ECLIPSE", "III - FALL"][fight.phase]
 		hud.draw_string(font, Vector2(bar.position.x, bar.position.y - 8), phase_name, HORIZONTAL_ALIGNMENT_RIGHT, bar.size.x, 14, SHADOW2)
+		if fight.phase == 1 and fight.state == "intro" and king_portrait:   # his card: fades in, holds, fades
+			var ca := clampf(minf(fight.t / 0.6, (4.0 - fight.t) / 0.6), 0.0, 1.0)
+			var at := Vector2((ThroneFight.W - 160) / 2.0, 60)
+			hud.draw_texture(king_portrait, at, Color(1, 1, 1, ca))
+			hud.draw_string(font, at + Vector2(0, 224), Names.BOSS.to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 160, 16, Color(SHADOW2, ca))
 		if fight.state == "finale" and fight.t < 2.2:
 			var word := Names.SUNFANG.to_upper()
 			hud.draw_string(font, Vector2(0, 250), word, HORIZONTAL_ALIGNMENT_CENTER, ThroneFight.W, 64, Color(GOLD, minf(1.0, fight.t * 2.0)))
