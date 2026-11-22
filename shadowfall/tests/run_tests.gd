@@ -38,6 +38,7 @@ func _ready() -> void:
 
 func _run() -> void:
 	OS.add_logger(_errors)
+	Game.save_path = Game.TEST_SAVE_PATH          # tests never touch the player's save
 	var want := Engine.get_version_info()
 	var pinned := FileAccess.get_file_as_string("res://GODOT_VERSION").strip_edges()
 	print("Godot %s (pinned %s)" % [want.string, pinned])
@@ -75,6 +76,7 @@ func _run_file(path: String) -> void:
 		if not name.begins_with("test_"):
 			continue
 		Game.reset()
+		DirAccess.remove_absolute(Game.TEST_SAVE_PATH)
 		Scenes.resume()
 		var t: TestCase = script.new()
 		add_child(t)

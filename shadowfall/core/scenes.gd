@@ -67,7 +67,10 @@ func resume() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause"):
+	if event.is_action_pressed("mute"):            # M: sound off / on, anywhere
+		Audio.toggle_mute()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("pause"):
 		if _pause:
 			resume()
 		else:
