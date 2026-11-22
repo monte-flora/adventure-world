@@ -13,6 +13,8 @@ class Platform extends AnimatableBody2D:
 	var t := 0.0
 	var dir := 1.0
 	var color := Color("a8703f")
+	var tex: Texture2D = null                     # the theme's platform tile (CaveArt), else a plain bar
+	var region := Rect2()
 
 	func setup(from: Vector2, to: Vector2, sz: Vector2, col: Color) -> void:
 		a = from
@@ -40,6 +42,10 @@ class Platform extends AnimatableBody2D:
 		position = a.lerp(b, t)
 
 	func _draw() -> void:
+		if tex:
+			for x in int(ceilf(size.x / CaveProps.T)):
+				draw_texture_rect_region(tex, Rect2(x * CaveProps.T, 0, CaveProps.T, CaveProps.T), region)
+			return
 		draw_rect(Rect2(Vector2.ZERO, size), color)
 		draw_rect(Rect2(Vector2.ZERO, Vector2(size.x, 3)), color.lightened(0.3))
 

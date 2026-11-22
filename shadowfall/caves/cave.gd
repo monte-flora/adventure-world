@@ -52,6 +52,9 @@ var springs := {}                                # Vector2i -> frames until a us
 var leaving := false
 var heal := LumenHeal.new()                      # Q, standing still: a Lumen charge becomes a heart
 var _solid_index := {}
+var art_sheet := "tiles_stone"                   # the theme's tile sheet (CaveArt)
+var art_tex: Texture2D
+var parallax: Array[Parallax2D] = []             # far, back, mid, front
 
 
 func _ready() -> void:
@@ -72,12 +75,14 @@ func build(lf: LevelFile, from_file := "") -> void:
 	grid = lf.rows.duplicate()
 	lava_rises = lf.setting("lava rises") == "yes"
 	var pal := CaveTiles.palette(lf.theme())
-	var bg := ColorRect.new()
-	bg.color = Color(pal[3])
-	bg.size = Vector2(lf.width, lf.height) * TILE
-	add_child(bg)
+	art_sheet = CaveArt.sheet(lf.theme())
+	art_tex = ArtSheet.texture(art_sheet)
+	for l in CaveArt.LAYERS:
+		parallax.append(CaveArt.layer(lf.theme(), l[0], l[1]))
+	for i in 3:
+		add_child(parallax[i])
 	map = TileMapLayer.new()
-	map.tile_set = _tileset(pal)
+	map.tile_set = _tileset()
 	add_child(map)
 	for r in lf.height:
 		for c in lf.width:
@@ -102,6 +107,7 @@ func build(lf: LevelFile, from_file := "") -> void:
 	hero.position = checkpoint
 	add_child(hero)
 	_spawn_monsters()
+	add_child(parallax[3])                         # the front layer passes in front of the Hero
 	var cam := Camera2D.new()
 	cam.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	cam.position_smoothing_enabled = true
@@ -115,6 +121,8 @@ func build(lf: LevelFile, from_file := "") -> void:
 	light.dark = lf.setting("dark") == "yes"
 	add_child(light)
 	map.material = light.world_material
+	for p in parallax:
+		p.get_child(0).material = light.world_material
 	light.follow(hero)
 	add_child(preload("res://ui/hud.tscn").instantiate())
 
@@ -143,10 +151,26 @@ func set_letter(cell: Vector2i, ch: String) -> void:
 	var row := grid[cell.y]
 	grid[cell.y] = row.substr(0, cell.x) + ch + row.substr(cell.x + 1)
 	_set_tile(cell, ch)
+	for d in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+		if letter(cell + d) in "#F":                # rock edges follow what is next to them
+			_set_tile(cell + d, letter(cell + d))
+
+
+## Which sides of a cell are rock (N1 E2 S4 W8), for the solid_<bits> tile.
+func _rock_bits(cell: Vector2i) -> int:
+	var bits := 0
+	for i in 4:
+		if letter(cell + [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT][i]) in CaveTiles.SOLID:
+			bits |= 1 << i
+	return bits
 
 
 func _set_tile(cell: Vector2i, ch: String) -> void:
-	if _solid_index.has(ch):
+	if cell.y < 0 or cell.y >= grid.size() or cell.x < 0 or cell.x >= grid[cell.y].length():
+		return
+	if ch == "#" or ch == "F":
+		map.set_cell(cell, 0, Vector2i(_rock_bits(cell), 1 if ch == "#" else 2))
+	elif _solid_index.has(ch):
 		map.set_cell(cell, 0, Vector2i(_solid_index[ch], 0))
 	elif ch in CaveTiles.CLIMB and letter(cell + Vector2i.UP) not in CaveTiles.CLIMB:
 		map.set_cell(cell, 0, Vector2i(_solid_index[LADDER_TOP], 0))   # stand on a ladder's top
@@ -632,6 +656,8 @@ func _add_platforms(col: Color) -> void:
 func _platform(a: Vector2, b: Vector2, size: Vector2, col: Color) -> void:
 	var p := CaveProps.Platform.new()
 	p.setup(a, b, size, col)
+	p.tex = art_tex
+	p.region = Rect2(ArtSheet.region(art_sheet, "platform"))
 	props.add_child(p)
 
 
@@ -650,33 +676,26 @@ func _add_ropes() -> void:
 			props.add_child(rope)
 
 
-func _tileset(pal: Array) -> TileSet:
+func _tileset() -> TileSet:
 	var letters := CaveTiles.SOLID + CaveTiles.LEDGE + LADDER_TOP
-	var rock := Color(pal[0])
-	var colors := {"#": rock, "B": Color(pal[1]), "M": rock.lightened(0.15), "G": Color("6b6187"),
-		"%": Color("2f6142"), "I": Color("8fd0e0"), "o": Color("c0506a"), "<": Color("7a5a3a"),
-		">": Color("7a5a3a"), "n": Color("3a1a4a"), "F": rock, "=": Color(pal[2]), "-": Color(pal[2]).darkened(0.3),
-		"*": rock, "s": rock, LADDER_TOP: Color(0, 0, 0, 0)}
-	var img := Image.create(TILE * letters.length(), TILE, false, Image.FORMAT_RGBA8)
-	for i in letters.length():
+	var img := Image.create(TILE * maxi(letters.length(), 16), TILE * 3, false, Image.FORMAT_RGBA8)
+	for i in letters.length():                      # row 0: one tile per letter
 		var ch := letters[i]
-		var x := i * TILE
-		if ch in CaveTiles.LEDGE or ch == LADDER_TOP:
-			img.fill_rect(Rect2i(x, 0, TILE, 8), colors[ch])
+		var at := Vector2i(i * TILE, 0)
+		if ch == LADDER_TOP:
+			continue                                  # invisible: the ladder is drawn over it
+		if ch == "n":                                 # shadow thorns: no tile in the sheet yet
+			img.fill_rect(Rect2i(at, Vector2i(TILE, TILE)), Color("3a1a4a"))
+			for k in 4:
+				img.fill_rect(Rect2i(at + Vector2i(3 + k * 8, 4 + (k % 2) * 10), Vector2i(3, 14)), Color("9a7ad0"))
 			continue
-		img.fill_rect(Rect2i(x, 0, TILE, TILE), colors[ch])
-		img.fill_rect(Rect2i(x, 0, TILE, 2), Color(colors[ch]).lightened(0.12))
-		match ch:
-			"B":
-				for k in 6:
-					img.fill_rect(Rect2i(x + 6 + k * 3, 8 + (k % 2) * 6 + k * 2, 3, 3), rock.darkened(0.4))
-			"G":
-				for k in 4:
-					img.fill_rect(Rect2i(x + 3 + k * 8, 0, 3, TILE), Color("3a3446"))
-			"<", ">":
-				img.fill_rect(Rect2i(x + (6 if ch == "<" else 18), 12, 8, 8), Color("f7c64a"))
-			"M":
-				img.fill_rect(Rect2i(x + 12, 0, 8, 6), Color("17141d"))
+		img.blit_rect(CaveArt.tile_image(art_sheet, CaveArt.MAP_TILE.get(ch, "solid_15")), Rect2i(0, 0, TILE, TILE), at)
+		if ch in "<>":                                # a one-way wall: the marker shows the side it opens from
+			img.fill_rect(Rect2i(at + Vector2i(6 if ch == "<" else 18, 12), Vector2i(8, 8)), Color("f7c64a"))
+	for bits in 16:                                 # rows 1 and 2: rock (#) and secret wall (F) edges
+		var rock := CaveArt.tile_image(art_sheet, "solid_%d" % bits)
+		img.blit_rect(rock, Rect2i(0, 0, TILE, TILE), Vector2i(bits * TILE, TILE))
+		img.blit_rect(rock, Rect2i(0, 0, TILE, TILE), Vector2i(bits * TILE, 2 * TILE))
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(TILE, TILE)
 	ts.add_physics_layer()
@@ -705,6 +724,12 @@ func _tileset(pal: Array) -> TileSet:
 			td.set_collision_polygon_one_way(0, 0, true)
 		else:
 			td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-h, -h), Vector2(h, -h), Vector2(h, h), Vector2(-h, h)]))
+	for bits in 16:
+		src.create_tile(Vector2i(bits, 1))
+		src.create_tile(Vector2i(bits, 2))              # F: looks like rock, no collision
+		var td := src.get_tile_data(Vector2i(bits, 1), 0)
+		td.add_collision_polygon(0)
+		td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-h, -h), Vector2(h, -h), Vector2(h, h), Vector2(-h, h)]))
 	return ts
 
 
@@ -719,24 +744,15 @@ func _draw_overlay() -> void:
 		var p := Vector2(cell) * TILE
 		var mid := p + Vector2(TILE, TILE) / 2.0
 		match ch:
-			"^":
-				for k in 3:
-					overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(k * 10 + 1, TILE), p + Vector2(k * 10 + 6, TILE * 0.5), p + Vector2(k * 10 + 11, TILE)]), Color("c8c8d8"))
 			"A":
-				var up := trap_up()
-				for k in 3:
-					overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(k * 10 + 1, TILE), p + Vector2(k * 10 + 6, TILE * (0.4 if up else 0.85)), p + Vector2(k * 10 + 11, TILE)]), Color("c8c8d8") if up else Color("6a6a7a"))
-			"!":
-				overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(6, TILE), mid + Vector2(0, -12 - (clock / 6) % 3 * 2), p + Vector2(TILE - 6, TILE)]), Color("ff8a2a"))
-			"~":
-				overlay.draw_rect(Rect2(p + Vector2(0, 6), Vector2(TILE, TILE - 6)), Color("e0453a"))
-				overlay.draw_rect(Rect2(p + Vector2(0, 6), Vector2(TILE, 4)), Color("ffb040"))
+				_spr("spike_trap", p, 3 if trap_up() else 0)
 			"J":
-				overlay.draw_rect(Rect2(p + Vector2(8, TILE - 10), Vector2(TILE - 16, 10)), Color("6a6a7a"))
+				_spr("flame_jet", p, 0)
 				if jet_on():
-					overlay.draw_rect(jet_fire(cell), Color(1, 0.55, 0.15, 0.85))
+					for k in range(1, JET_HEIGHT):
+						_spr("flame", p - Vector2(0, k * TILE))
 				elif about_to_go_off():
-					overlay.draw_circle(p + Vector2(16 + randf_range(-3, 3), TILE - 14), 3.0, Color("ffb040"))
+					overlay.draw_circle(p + Vector2(16 + randf_range(-3, 3), -4), 3.0, Color("ffb040"))
 			"M":                                       # the vent's steam: a column while it puffs
 				if geyser_puffing():
 					for k in 6:
@@ -744,32 +760,20 @@ func _draw_overlay() -> void:
 						overlay.draw_circle(p + Vector2(16 + sin((clock + k * 20) * 0.2) * 5, y), 7.0 + k % 3 * 2, Color(0.9, 0.95, 1.0, 0.55))
 				elif about_to_go_off():
 					overlay.draw_circle(p + Vector2(16 + randf_range(-3, 3), -4), 4.0, Color(0.9, 0.95, 1.0, 0.5))
-			"$":
-				overlay.draw_colored_polygon(PackedVector2Array([mid + Vector2(0, -7), mid + Vector2(6, 0), mid + Vector2(0, 7), mid + Vector2(-6, 0)]), Color("5ae0c0"))
-			"*":
-				overlay.draw_colored_polygon(PackedVector2Array([mid + Vector2(0, -12), mid + Vector2(10, 0), mid + Vector2(0, 12), mid + Vector2(-10, 0)]), Color("f7f0a0") if stone_id() != "" else Color("a0e8ff"))
-			"s":
-				overlay.draw_circle(mid, 8.0, Color("ffb030"))
 			"T":
-				overlay.draw_rect(Rect2(p + Vector2(4, 12), Vector2(TILE - 8, TILE - 12)), Color("8a5a2a"))
-				overlay.draw_rect(Rect2(p + Vector2(4, 16), Vector2(TILE - 8, 3)), Color("f7c64a"))
-			"u":
-				overlay.draw_rect(Rect2(p + Vector2(4, TILE - 10), Vector2(TILE - 8, 10)), Color("4aa0e0") if not springs.has(cell) else Color("3a4a5a"))
-			"E":
-				overlay.draw_rect(Rect2(p + Vector2(4, 0), Vector2(TILE - 8, TILE)), Color("1a1020"))
-				overlay.draw_rect(Rect2(p + Vector2(4, 0), Vector2(TILE - 8, TILE)), Color("c9a66b"), false, 2.0)
-			"C":
-				overlay.draw_rect(Rect2(p + Vector2(13, 8), Vector2(6, TILE - 8)), Color("6a5a4a"))
-				overlay.draw_circle(p + Vector2(16, 8), 6.0, Color("f7c64a") if checkpoint == _cell_spot(cell) else Color("8a7a5a"))
+				_spr("chest", p, 0)
 			"L":
-				overlay.draw_line(mid + Vector2(0, 12), mid + Vector2(8, -8), Color("c9a66b"), 3.0)
-			"H":
-				overlay.draw_line(p + Vector2(6, 0), p + Vector2(6, TILE), Color("8a5a2a"), 3.0)
-				overlay.draw_line(p + Vector2(TILE - 6, 0), p + Vector2(TILE - 6, TILE), Color("8a5a2a"), 3.0)
-				for k in 3:
-					overlay.draw_line(p + Vector2(6, 5 + k * 11), p + Vector2(TILE - 6, 5 + k * 11), Color("8a5a2a"), 2.0)
-			"V":
-				overlay.draw_line(mid + Vector2(-3, -16), mid + Vector2(3, 16), Color("5d7a3a"), 3.0)
+				_spr("lever", p, 0)
+			"u":                                       # a used spring stands empty until it fills up
+				if springs.has(cell):
+					_spr("spring", p, 0, Color(0.5, 0.5, 0.6))
+				else:
+					_spr("spring", p)
+			"C":
+				if checkpoint == _cell_spot(cell):
+					_spr("checkpoint_lit", p)
+				else:
+					_spr("checkpoint", p, 0)
 			"F":
 				if Game.has_ability("truesight"):
 					overlay.draw_rect(Rect2(p, Vector2(TILE, TILE)), Color(0.6, 0.5, 1.0, 0.35))
@@ -782,9 +786,12 @@ func _draw_overlay() -> void:
 			"-":
 				if crumbling.has(cell):
 					overlay.draw_rect(Rect2(p + Vector2(randf_range(-1, 1), 0), Vector2(TILE, 8)), Color(1, 1, 1, 0.25))
-			"P", "U", "R", "S", "z", "k", "c", "x", "=", "B", "G", "%", "I", "o", "<", ">", "n":
+			"P", "U", "R", "S", "z", "k", "c", "x", "=", "B", "G", "%", "I", "o", "<", ">", "n", "*", "s":
 				pass
 			_:
+				if CaveArt.SPRITE.has(ch):
+					_spr(CaveArt.SPRITE[ch], p)
+					continue
 				overlay.draw_rect(Rect2(p + Vector2(4, 4), Vector2(24, 24)), Color.MAGENTA)  # an unknown letter
 	var ll := lost_light_spot()
 	if ll.x < INF:                                   # your Lost Light: the gold you dropped
@@ -792,3 +799,10 @@ func _draw_overlay() -> void:
 		overlay.draw_circle(ll, 5.0, Color("ffe08a"))
 	if lava_top < INF:
 		overlay.draw_rect(Rect2(Vector2(0, lava_top), Vector2(level.width * TILE, level.height * TILE - lava_top + 64)), Color(0.88, 0.27, 0.2, 0.9))
+
+
+## One tile of the theme's sheet at p (frame -1: play it at the sheet's fps).
+func _spr(anim: String, p: Vector2, frame := -1, tint := Color.WHITE) -> void:
+	if frame < 0:
+		frame = CaveArt.frame_at(art_sheet, anim, clock)
+	overlay.draw_texture_rect_region(art_tex, Rect2(p, Vector2(TILE, TILE)), Rect2(ArtSheet.region(art_sheet, anim, frame)), tint)
