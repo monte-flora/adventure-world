@@ -367,6 +367,5 @@ func hurt(from: Vector2, amount := 1) -> bool:
 	state = NORMAL
 	var away := 1.0 if position.x >= from.x else -1.0
 	velocity = Vector2(away * HURT_KNOCK_X, -HURT_KNOCK_Y)
-	Game.hearts = maxi(0, Game.hearts - amount)
-	Game.changed.emit()
+	Vitals.hurt(amount >= Vitals.BOSS_HIT)
 	return true
