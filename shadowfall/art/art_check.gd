@@ -24,13 +24,11 @@ static func pngs(dir := ROOT, out := PackedStringArray()) -> PackedStringArray:
 	return out
 
 
+## The source PNG's own pixels (not the import, so font pages and alpha borders are checked as drawn).
 static func image(path: String) -> Image:
-	var tex: Texture2D = load(path)
-	if tex == null:
+	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
+	if img == null or img.is_empty():
 		return null
-	var img := tex.get_image()
-	if img.is_compressed():
-		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
 	return img
 
