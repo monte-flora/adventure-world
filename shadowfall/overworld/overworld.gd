@@ -17,6 +17,8 @@ var map: TileMapLayer                         # the ground: grass, path, water
 var objects: TileMapLayer                     # trees, rocks, houses, Mines, waystones, gates
 var tiles: RealmTiles
 var canopy: TileMapLayer                      # tree crowns, drawn over the hero
+var ground: RealmGround                       # painted ground over the tiles (lands with `ground: painted`)
+var prop_sprites: Array[Sprite2D] = []        # realm/props/ art from `prop:` lines (RealmProps)
 var entities: Node2D                          # y-sorted: objects, hero, people, monsters
 var dusk: RealmLight                          # CanvasModulate tint + warm PointLight2Ds
 var gates_layer: Node2D
@@ -46,6 +48,22 @@ var hurt_edge: TextureRect                    # red at the screen's edges when y
 func _ready() -> void:
 	realm = Scenes.args.get("realm", "light")
 	build(WorldMap.load_nightfall() if realm == "nightfall" else WorldMap.load_realm())
+	var opts := Paths.cmdline()
+	if opts.has("shot"):                      # -- --scene=overworld --shot=out.png [--cell=col,row]
+		_shot(opts["shot"], opts.get("cell", ""))
+
+
+## Saves a screenshot (a silent window, not headless) and quits: for checking the art.
+func _shot(path: String, cell: String) -> void:
+	var c := cell.split(",")
+	if c.size() == 2:
+		hero.place(Vector2i(int(c[0]), int(c[1])))
+		cam.position = hero.position
+		cam.reset_smoothing()
+	for i in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path)
+	get_tree().quit()
 
 
 func build(w: WorldMap) -> void:
@@ -58,6 +76,12 @@ func build(w: WorldMap) -> void:
 	tiles = RealmTiles.new(w)
 	tiles.paint(map, objects, canopy)
 	add_child(map)
+	if realm == "light":
+		ground = RealmGround.new(w)
+		if ground.build():
+			add_child(ground)
+		else:
+			ground = null
 	gates_layer = Node2D.new()
 	gates_layer.draw.connect(_draw_marks)
 	add_child(gates_layer)
@@ -67,6 +91,7 @@ func build(w: WorldMap) -> void:
 	objects.y_sort_enabled = true
 	entities.add_child(objects)
 	add_child(entities)
+	prop_sprites = RealmProps.build(w, entities, canopy)
 	Game.changed.connect(_on_game_changed)
 	tiles.refresh(objects, waystone_lit)
 	hero = HeroTop.new()
@@ -441,7 +466,7 @@ func _add_glows() -> void:
 		if not RealmLight.has_light(p):
 			RealmLight.glow(p, Vector2(0, 2), RealmLight.PERSON, 0.8)
 	for c in world.cells:
-		if world.cells[c] == "H":
+		if world.cells[c] == "H" and not world.prop_cover.has(c):
 			RealmLight.glow(objects, objects.map_to_local(c), RealmLight.WINDOW, 0.7)
 	_waystone_glows()
 
