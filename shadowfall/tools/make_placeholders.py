@@ -151,7 +151,7 @@ def main():
     a = json.load(open(os.path.join(GEMINI, "assets.json")))
     os.makedirs(OUT, exist_ok=True)
     for n in a["ground"]:
-        pygame.image.save(ground(n), os.path.join(OUT, "ground_" + n + ".png"))
+        pygame.image.save(ground(n), os.path.join(OUT, (n if "_ground_" in n else "ground_" + n) + ".png"))
     for n, d in a["props"].items():
         w, h = d["size"]
         pygame.image.save(prop(n, w * 4, h * 4), os.path.join(OUT, n + ".png"))
