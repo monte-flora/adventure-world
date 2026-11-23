@@ -49,8 +49,8 @@ SCENE = {
     "moss": "a drowned, moss-choked cavern of roots, dripping stone and broken carvings",
     "crystal": "a frozen cavern of pale blue ice crystals, frost and cold mist",
     "lava": "a volcanic forge-cavern of black basalt, glowing magma seams and ember haze",
-    "shadow": "a lightless hollow of black stone veined with faint violet, where something old sleeps",
-    "castle": "the vaults of a fallen fortress: worn flagstones, iron gates and torn banners",
+    "shadow": "a lightless hollow swallowed by Nightfall: black stone veined with faint violet, where something old sleeps",
+    "castle": "the Shadow King's black castle: cold flagstone halls, iron gates, tall moonlit windows and torn banners",
 }
 
 

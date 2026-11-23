@@ -157,3 +157,25 @@ func test_a_painting_follows_the_gloom_and_the_dark() -> void:
 	check(light.overlay.visible and light.layer > 0, "the dark draws over the painting")
 	CaveArt.polish_root = ""
 	Game.gloom = 0.0
+
+
+## pixi run gemini-caves paints every folder: the stone, secret, shadow and castle caves find theirs too
+## (by the file's name), and a castle level shows it inside the boss scene.
+func test_every_cave_folder_finds_its_painting() -> void:
+	var root := ProjectSettings.globalize_path("user://polish_folders")
+	var img := Image.create(64, 36, false, Image.FORMAT_RGB8)
+	img.fill(Color("3a2a50"))
+	for f in ["stone/1_the_crumbling_vigil.txt", "secret/1_the_secret_mine.txt", "shadow/1_the_whisper_hollow.txt",
+			Castle.file(1)]:
+		DirAccess.make_dir_recursive_absolute(root.path_join(f.get_file().get_basename()))
+		img.save_png(root.path_join(f.get_file().get_basename()).path_join("painted.png"))
+	CaveArt.polish_root = root
+	for f in ["stone/1_the_crumbling_vigil.txt", "secret/1_the_secret_mine.txt", "shadow/1_the_whisper_hollow.txt"]:
+		Scenes.goto("cave", {"file": f})
+		await physics_frames(2)
+		check(Scenes.screen.painting != null, f + " is painted")
+	Scenes.goto("boss", {"castle": 1})
+	await physics_frames(2)
+	var cave = Scenes.screen.cave
+	check(cave != null and cave.painting != null, "castle level 1 is painted in the boss scene")
+	CaveArt.polish_root = ""
