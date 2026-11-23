@@ -46,6 +46,10 @@ var glow: Node2D
 var king_spr: AnimatedSprite2D
 var hero_spr: AnimatedSprite2D
 var stage: Node2D                       # the hall (or the void): darkens with the gloom stage
+## The hall painted by Gemini (levels/polish/throne_room/painted.*, pixi run gemini-caves): drawn behind
+## the fight in place of the drawn hall, until the floor breaks into the void.
+const THRONE_ROOM := "throne_room"
+var painting: Sprite2D
 var light: GloomLight
 var castle_tex: Texture2D               # tiles_castle, loaded before any draw (loading inside a draw call shows nothing)
 var hud: Control
@@ -197,6 +201,15 @@ func _start_throne() -> void:
 	add_child(dark_rect)
 	castle_tex = ArtSheet.texture("tiles_castle")
 	king_portrait = load("res://art/ui/shadow_king_portrait.png")
+	var paint := CaveArt.painting(THRONE_ROOM)
+	if paint:
+		painting = Sprite2D.new()
+		painting.name = "painting"
+		painting.texture = paint
+		painting.centered = false
+		painting.scale = Vector2(ThroneFight.W, ThroneFight.H) / paint.get_size()
+		painting.z_index = -2
+		add_child(painting)
 	stage = Node2D.new()
 	stage.z_index = -1
 	stage.draw.connect(_draw_stage)
@@ -215,6 +228,8 @@ func _start_throne() -> void:
 	light = GloomLight.new()
 	add_child(light)
 	stage.material = light.world_material
+	if painting:
+		painting.material = light.painted_material     # the smooth gloom grade, as in a painted cave
 	light.follow(hero_spr)
 	add_child(preload("res://ui/hud.tscn").instantiate())
 	glow = Node2D.new()                          # what shows through the dark: eyes, telegraphs
@@ -458,8 +473,11 @@ func _draw() -> void:
 func _draw_stage() -> void:
 	if fight == null:
 		return
+	if painting:
+		painting.visible = fight.phase < 3
 	if fight.phase < 3:
-		_draw_hall(fight)
+		if not painting:                         # the painting shows the hall, its walls and floor
+			_draw_hall(fight)
 	else:
 		_draw_void(fight)
 

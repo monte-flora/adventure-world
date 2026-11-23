@@ -2,7 +2,8 @@ Paint the caves with Gemini: pixi run gemini-caves
 
 Every cave can have a painting behind its blocks (levels/polish/<cave>/painted.webp).
 gemini-caves goes through the caves that don't have one yet, one at a time:
-the Mines' caves, the stone caves, the Secret Mine, the Nightfall caves, then the castle.
+the Mines' caves, the stone caves, the Secret Mine, the Nightfall caves, the castle,
+and last the Shadow King's throne hall (throne_room/: its map is throne_room.txt).
 
 For each cave:
 1. It copies the cave's map (layout.png) and opens Gemini in your browser (only the first time).

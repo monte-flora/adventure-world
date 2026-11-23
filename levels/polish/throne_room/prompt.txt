@@ -1,0 +1,12 @@
+Repaint this map as a painted pixel-art backdrop for a 2D side-view fantasy boss fight.
+
+Place: the throne hall of the Shadow King, at the top of his black castle in the Umbral Reach. A vast, cold hall of black stone built for a tyrant.
+In the hall: six tall arched windows along the back wall with a cold pale moon and storm clouds behind them, four great stone pillars each holding an iron brazier of dim ember fire, torn black-and-violet banners, and on the right, against the wall, a towering jagged black throne on a low stone dais.
+Mood: grim, epic and ancient, like the last stand at the end of a long war. Original art, teen-safe, no gore.
+Moody light: ember glow from the braziers and cold moonlight from the windows, deep shadows in the corners.
+
+Keep the layout exactly: dark = solid stone (the floor, the two side walls and the ceiling), light = the open hall. The floor is flat and level all the way across; do not add steps, holes, ledges or anything that sticks out into the hall.
+
+No characters, creatures, people, text, letters, numbers, UI or grid lines (remove the grid).
+Same size and shape as the map: 2752x1536, 16:9, the whole frame filled edge to edge.
+Crisp pixel art, chunky pixels, limited dark palette, strong silhouettes.
