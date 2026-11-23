@@ -1,43 +1,45 @@
-# Handoff (2026-11-21, 6:11 pm ET; 23:11 UTC)
+# Handoff (2026-11-23, 3:55 pm ET; 20:55 UTC)
 
 ## 8. Session state (read first)
-- **Orca Run: `run_859805712553`.** Repo: public `monte-flora/adventure-world`. The old private repo is **archived** (2026-11-21, user's call): no commits or pushes; local `old` remotes have push disabled.
-- **Repo-local git identity = the user's GitHub noreply address** (set in the main checkout's .git/config, so all worktrees share it). Every worker checks `git log --format=%ae` before pushing; the T4 leak was fixed by deleting a branch.
-- **Teen T1-T5 all merged into phase-2** (T4 smooth movement PR #2, T2 darkening PR #3).
-- **Teen refactor (user, 2026-11-21):** "completely refactor the game towards a teenage audience including the art style, gameplay mechanics, and music ... explore if another engine would be better for smoother 2D gameplay. I still want a top-down overworld with a side scrolling platformer with caves ... search for images of ... Shovel Knight, A Link to the Past, Hollow Knight. Keep everything at Opus 5.5 medium and leverage cheaper models where possible. Keep the current title of Shadowfall and the general theme of the Shadow King."
-  - **Wave A done.** Reports in `docs/teen/<area>/README.md` on phase-2: audio #6, gameplay #7, art #8, levels #10, engine #11. If 8, 10 or 11 is still open, rerun its pull_request Tests run (the race).
-  - **User decisions:**
-    - engine **Godot 4.7**
-    - **32-px art**
-    - hero = **hooded wanderer with a lantern**
-    - darkening stages as drawn
-    - **our own pixel font**
-    - cut XP, lives, food and sword wear
-    - Nightfall = a 3x3 mirror of the map's centre
-    - itch.io runs both builds for a while
-  - **Main's defaults (user didn't object):** retune caves for the new jump; home = Hearthvale; one merged list of 7 abilities; checkpoints don't break for gems; dropped gold on Standard, off in Assist; smooth camera; fix the game.py vsync hitch. All are in TODO.md via PR #12.
-  - Summary page shown to the user: chat-scratch `shadowfall-wave-a-3f9b.html`.
-- **Standing direction (user, 2026-11-21):** "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones." Main applies it to every gameplay/naming call: epic, grim high-fantasy tone, but original names (no copied names, places or characters) and teen-safe (no gore or sexual content). Defaults made before this (e.g. "Hearthvale", the 7 ability names) are open to epic renames in Wave B.
-- **Workers running** (all Opus 5.5 medium; start workers with `coord-whoami start [--usage-override "<user words>"] -- <worker-start args> --model claude-opus-5-5 --effort medium`):
-  - `ctx_7c8b883462ac` pixel font → `assets/fonts/`, PR into phase-2
-  - `ctx_64edfa9c0d1e` **B0** Godot scaffold + CI in `shadowfall/`, PR into phase-2; it writes `shadowfall/WAVE_B.md` (the parallel task list)
-  - `ctx_e9f0e97cae5a` game.py 59 fps vsync fix, PR into **main**
-- Open TODO PR #12 (decisions).
+- **Restart:** a fresh chat in `~/noah-adventure` reads this file, `AGENTS.md` and `TODO.md`. No `/coord-main`, no grafite-coord kit (user, 2026-11-22: "For this particular projects, let separate ourselves from grafite-coord"). Hooks are off via `.claude/settings.json` (committed) and `~/noah-adventure/.claude/settings.local.json` (local).
+- **Orca Run:** `run_859805712553` (bind: `orca orchestration run-use --id run_859805712553`). **No workers running.** Paused by the user ("Pause on this work", 2026-11-23 ~00:01 UTC): G2 and H1, both with merged part-a PRs and `.handoff/` notes in their worktrees.
+- **All PRs merged** (latest #68). `phase-2` has the Godot game (Shadowfall) in `shadowfall/` and the pygame Phase 2.
+- **Main checkout** `~/noah-adventure` on `main`: the user's dirty `levels/caves/01_the_easy_moss_cave.txt` and a conflicted `levels/caves/05_green_lvl_1.txt` (stash-pop residue). The user's files: don't touch.
+- **Play copy** `~/try-shadowfall` = detached `origin/phase-2` at #66 (update: `git fetch && git checkout --detach origin/phase-2 && godot --headless --path shadowfall --import`). It holds the user's untracked `levels/polish/17_the_fire_mountain/` (map + prompt, no painting yet); backup of polish folders in `~/polish-backup-1755`. Python for it: `/Users/montgomeryflora/noah-adventure/.pixi/envs/default/bin/python`.
+- **Concept/target images** (the user's) in `~/orca/workspaces/noah-adventure/refs/` and committed in `docs/teen/art/ref/`.
 
-## Next
-1. Wait for mail. When B0 reports: read `shadowfall/WAVE_B.md`, then launch the 6-8 Wave B workers in parallel (one folder each; Opus 5.5 medium; tell them to use haiku/sonnet subagents). The game.py/caves.py hot-file rule doesn't apply inside `shadowfall/`; folder ownership does.
-2. Reference games are for study only: no screenshots or assets in the public repo; everything original.
+## The user's words (verbatim, UTC)
+- 2026-11-21: "For any answers about gameplay or naming, we want whatever is most bad ass, epic, and engaging. Heavily take inspiration from Lord of the Rings and Game of Thrones."
+- 2026-11-21: "this is an incredibly low priority project, so once we get to 50%, pause this project until the 5-hr window resests" (they override it at times: "Start it now, don't wait for the reset").
+- 2026-11-22: "Have the agent turn off the music while its developing the game so I can listen to my own music"
+- 2026-11-22: "We want a character as close to this as we can get" (Lanternbearer, Shadow King concepts).
+- 2026-11-22: "What if we re-design the game such the background is a static element, so it can have a polish, handraw, mixed pixel size look and that characters move around on it?"
+- 2026-11-22: "It'd be cool to still have some kind of cave level editor ... once we save it, we ask the AI to polish it" then "Go with option 1" (hand-off to the Gemini web UI; no API, no keys, never automate the site).
+- 2026-11-22: "Would it be better to just describe the base layer and provide a PNG with the rough location of where the road is and then we could have it create repeatable textures like trees, houses, lampposts that you place?" then "Go ahead, start it now".
+- 2026-11-22 (E2 only): "Just for the redesign, use Fable 5.2 with medium effort".
 
-## Still waiting on the user
-- The main checkout `levels/caves/05_green_lvl_1.txt` has merge-conflict markers (a stash-pop residue); the user's file, not touched.
-- itch.io: secret `BUTLER_API_KEY` + variable `ITCH_GAME` on adventure-world, on a page whose address has no kid's name.
-- Next pygame items after the refactor: Stage 4 balance, a robot that plays the main quest.
+## Waiting on the user
+- **Gemini images:** realm textures + props (prompts in `~/try-shadowfall/shadowfall/realm/gemini/prompts/`, style line in `STYLE.txt`, save to `gemini/in/<name>.png`, then `PATH=<main>/.pixi/envs/default/bin:$PATH sh shadowfall/tools/import_art.sh`), and the Fire Mountain cave painting (`polish.py import levels/caves/17_the_fire_mountain.txt`). When happy, PR their images into `phase-2`.
+- Realm direction: painted (recommended; G1 textures + props path is built) vs tiles (E1 shadows/cliffs/props paused) vs mix. Not decided.
+- Godot itch.io page (secrets are the user's).
+
+## Next (when the user says go)
+1. Resume **G2** in `~/orca/workspaces/noah-adventure/wave-g2-darkening-painted` (read its `.handoff/monte-flora-wave-g2-darkening-painted.md`): gloom screenshots, docs, full test run.
+2. Resume **H1** in `.../wave-h1-castle-boss-audio` (`.handoff/monte-flora-wave-h1-castle-boss-audio.md`): boss SFX, 3-phase boss tunes, victory sting.
+3. After the user's Gemini images: import, screenshot Emberhold, tune house lights, PR the images.
+4. Later list in `TODO.md`.
+
+## How main runs workers (plain Orca)
+- Start: `orca orchestration worker-start --spec-file <spec> --task-title "<t>" --agent claude --worktree new-top-level --name <n> --base-branch origin/phase-2 --repo path:/Users/montgomeryflora/noah-adventure --run run_859805712553 --model claude-opus-5-5 --effort medium --json`. Restart in place: `--worktree path:<worktree>` (no `--repo`). Model: Opus 5.5 medium unless the user says otherwise.
+- Every brief carries: own folders only; names from `rules/names.gd`; the tone quote; **silent runs** (Godot `--audio-driver Dummy`/`--headless`, pygame `SDL_AUDIODRIVER=dummy`); haiku/sonnet subagents; never end a turn while waiting on CI (`gh pr checks N --watch`); noreply git identity, no force-push, no TODO/HANDOFF edits; small non-draft PRs into `phase-2`; `.handoff/<branch>.md` + ask for restart at ~120K (workers hit it fast: restart them in the same worktree).
+- Mail: `orca orchestration check --run run_859805712553 --wait --types worker_done,question,escalation --timeout-ms 7000000 --format | grep -v _keepalive` in the background (2-h tool cap: re-arm).
+- Usage: `orca account list --json` -> `result.rateLimits.claude.session.usedPercent` (`resetsAt` ms). At 50 %: tell workers to push WIP + `.handoff/` and stop, or for a short gap a blocking `until [ $(date +%H%M) -ge HHMM ]; do sleep 60; done`.
+- Done worker: `orca orchestration worker-release --dispatch <id>`; remove a clean merged worktree with `git worktree remove --force`.
 
 ## Gotchas
-- Workers hit the ~120K context hook: restart them in the same worktree pointing at their .handoff/ notes. Tell them to use subagents and push WIP early.
-- Stuck auto-merge (green PR not merging: two `tests` runs race): `gh run rerun <PR's pull_request Tests run id>`.
-- Repo guard blocks force-push: merge origin/<base> instead of rebase.
-- zsh: `$b:g...` modifiers bite in `origin/$b:file`; write `${b}`.
-- Tests hard-code Icy Steps = 5, Lava Escape = 10; don't renumber caves.
-- pixi in worktrees: `<main checkout>/.pixi/envs/default/bin/python -m pytest -q -n auto tests`.
-- Branches: `main` Classic (merges publish to itch.io); `phase-2` bigger game (PRs go here); `phase-3` Godot prototype.
+- Stuck auto-merge (green PR not merging, the two `tests` runs race): `gh run rerun <the PR's pull_request Tests run id>`.
+- A fresh Godot checkout needs `godot --headless --path shadowfall --import` once (else "Paths not declared").
+- The scratchpad under /private/tmp is wiped between days: keep specs in files you can rebuild.
+- Repo guard blocks force-push: merge, don't rebase. Tests hard-code Icy Steps = 5, Lava Escape = 10: don't renumber caves.
+- Merges into `main` publish the Classic game to itch.io; PRs into `main` need the user's OK.
+- Branches: `main` Classic; `phase-2` the bigger game + Shadowfall (Godot); `phase-3` the old Godot prototype.
