@@ -1,7 +1,8 @@
 """pixi run gemini-caves [name] [--list] [--redo NAME "what to fix"] [--downloads DIR]: paint the caves
 with Gemini, one at a time.
 
-Walks every cave with no levels/polish/<cave>/painted.* yet (caves, stone, secret, shadow, castle), the
+Walks every cave with no levels/polish/<cave>/painted.* yet (caves, stone, secret, shadow, castle, then
+the throne room: levels/polish/throne_room/throne_room.txt is its map, prompt.txt its words), the
 redo list (levels/polish/redo.txt, "name: what to fix") first. For each: makes the map and words
 (polish.py export; a prompt.txt you edited is kept), puts the map on the clipboard as a picture, opens
 Gemini (once), then on Enter puts the words on the clipboard, waits for the painting to land in
@@ -23,6 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 LEVELS = os.path.join(ROOT, "levels")
 POLISH = os.path.join(HERE, "polish.py")
 FOLDERS = ("caves", "stone", "secret", "shadow", "castle")     # this order
+THRONE = "throne_room"                                          # boss/boss.gd THRONE_ROOM, last
 PAINTED = ("painted.webp", "painted.png", "painted.jpg", "painted.jpeg")   # caves/cave_art.gd PAINTED
 
 
@@ -33,7 +35,8 @@ def caves(levels=LEVELS):
         d = os.path.join(levels, sub)
         if os.path.isdir(d):
             out += [(f[:-4], os.path.join(d, f)) for f in sorted(os.listdir(d)) if f.endswith(".txt")]
-    return out
+    throne = os.path.join(levels, "polish", THRONE, THRONE + ".txt")
+    return out + [(THRONE, throne)] if os.path.exists(throne) else out
 
 
 def polish_dir(name, levels=LEVELS):
@@ -60,9 +63,9 @@ def find(name, levels=LEVELS):
     return hits[0] if len(hits) == 1 else None
 
 
-def export(path, run_cmd=subprocess.run):
+def export(name, path, levels=LEVELS, run_cmd=subprocess.run):
     """polish.py export when the map or the words are missing. A prompt.txt that is there stays as it is."""
-    out = polish_dir(os.path.basename(path)[:-4], os.path.dirname(os.path.dirname(path)))
+    out = polish_dir(name, levels)
     keep = os.path.join(out, "prompt.txt")
     if os.path.exists(os.path.join(out, "layout.png")) and os.path.exists(keep):
         return
@@ -116,7 +119,7 @@ def run(name=None, downloads=None, levels=LEVELS, run_cmd=subprocess.run, wait=g
         cur = queue[0]
         note = gn.redo_notes(redo_dir).get(cur)
         print("\n== %s%s  (%d left)" % (cur, "  (redo: %s)" % note if note else "", len(todo(levels))))
-        export(path[cur], run_cmd)
+        export(cur, path[cur], levels, run_cmd)
         since = time.time()
         before = gn.images_in(downloads)
         copy_picture(os.path.join(polish_dir(cur, levels), "layout.png"), run_cmd)

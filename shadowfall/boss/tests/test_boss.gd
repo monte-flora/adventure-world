@@ -214,3 +214,48 @@ func test_throne_art_in_place() -> void:
 	check(screen.get_child_count() == before + 1, "a lieutenant's echo shows its ghost")
 	for id in ThroneFight.LIEUTENANTS:
 		check(FileAccess.file_exists(ArtSheet.DIR + screen.ECHO_SHEET[id] + ".json"), id + " has a ghost sheet")
+
+
+## The throne hall painted by Gemini (levels/polish/throne_room/painted.*, pixi run gemini-caves).
+func test_a_painted_throne_hall() -> void:
+	var root := ProjectSettings.globalize_path("user://polish_throne")
+	DirAccess.make_dir_recursive_absolute(root.path_join("throne_room"))
+	var img := Image.create(96, 54, false, Image.FORMAT_RGB8)
+	img.fill(Color("3a2a50"))
+	img.save_png(root.path_join("throne_room/painted.png"))
+	CaveArt.polish_root = ProjectSettings.globalize_path("user://polish_none")
+	Scenes.goto("boss")
+	await physics_frames(2)
+	check(Scenes.screen.painting == null, "no painting: the drawn hall")
+	CaveArt.polish_root = root
+	Scenes.goto("boss")
+	await physics_frames(2)
+	var screen = Scenes.screen
+	screen.set_meta("test", true)
+	var p: Sprite2D = screen.painting
+	check(p != null, "the painting is used")
+	if p:
+		var size: Vector2 = p.texture.get_size() * p.scale
+		check(size.is_equal_approx(Vector2(ThroneFight.W, ThroneFight.H)), "fills the hall: %s" % size)
+		check(p.z_index < screen.stage.z_index, "behind the stage")
+		check(p.material == screen.light.painted_material, "the gloom grade reaches it")
+		check(p.visible, "shows in the Blade phase")
+		screen.fight._phase(3)
+		await physics_frames(2)
+		check(not p.visible, "the void replaces it once the floor breaks")
+	CaveArt.polish_root = ""
+
+
+## levels/polish/throne_room/throne_room.txt (the map Gemini paints over) is the hall's real shape.
+func test_the_throne_room_map_matches_the_hall() -> void:
+	var lf := LevelFile.load_file(Paths.level("polish/throne_room/throne_room.txt"))
+	var f := ThroneFight.new(1)
+	var bad := 0
+	for r in lf.height:
+		for c in lf.width:
+			var mid := (Vector2(c, r) + Vector2(0.5, 0.5)) * LevelFile.TILE
+			var solid := mid.y >= ThroneFight.H or f.solids.any(func(s): return s.has_point(mid))
+			if solid != (lf.at(c, r) == "#"):
+				bad += 1
+	check(lf.width == 30 and lf.height == 17, "30 x 17 blocks")
+	check_eq(bad, 0, "every block matches the hall's walls, floor and ceiling")
