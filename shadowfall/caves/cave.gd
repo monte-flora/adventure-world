@@ -67,6 +67,19 @@ func _ready() -> void:
 	else:
 		file = Scenes.args.get("file", DEFAULT_FILE)
 		build(LevelFile.load_file(Paths.level(file)), file)
+	if Scenes.args.has("shot"):                     # -- --scene=cave --file=caves/x.txt --shot=out.png [--gloom=0..3]
+		if Scenes.args.has("gloom"):
+			Game.gloom = float(Scenes.args["gloom"]) / 3.0
+		_shot(str(Scenes.args["shot"]))
+
+
+## Saves a screenshot (a silent window, not headless) and quits: for checking the art.
+func _shot(path: String) -> void:
+	for i in 40:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(path)
+	get_tree().quit()
 
 
 func build(lf: LevelFile, from_file := "") -> void:
