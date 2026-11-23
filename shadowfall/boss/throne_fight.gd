@@ -429,7 +429,7 @@ func _fall_phase(dt: float) -> void:
 		"shatter":
 			king = king.lerp(Vector2(W / 2.0, 104), minf(1.0, dt * 2.5))
 			if t >= 2.0:
-				_ev("music", {"name": "boss_b"})
+				_ev("music", {"name": "boss_c"})
 				_go("hover")
 		"hover":
 			king = king.lerp(Vector2(W / 2.0 + sin(time * 0.7) * 60.0, 104), minf(1.0, dt * 3.0))

@@ -103,6 +103,41 @@ ORCHESTRA = {
             ("dark_beat", "kit:war", 0, 110, 0.0, 70),
         ],
     },
+    "boss_eclipse": {  # phase 2, the Eclipse: low brass on his motif in the dark, trembling strings, half-time taiko
+        "base": [
+            ("lead", TROMBONE, 0, 104, 0.2, 80),
+            ("lead", HORNS, 0, 86, -0.3, 80),
+            ("lead", TUBA, -12, 72, 0.1, 70),
+            ("bass", TREMOLO, 12, 80, -0.4, 70),
+            ("bass", BASSES, 0, 92, 0.2, 60),
+            ("pad", CHOIR, 0, 70, 0.0, 100),
+            ("pad", OOHS, 6, 46, 0.3, 110),
+            ("beat", "kit:taiko", 0, 110, 0.0, 70),
+        ],
+        "dark": [  # deeper night: violins shriek the tritone, a choir high above, crashes
+            ("dark_lead", VIOLIN, 0, 84, -0.4, 90),
+            ("dark_lead", CHOIR, -12, 70, 0.3, 100),
+            ("dark_beat", "kit:war", 0, 105, 0.0, 70),
+        ],
+    },
+    "boss_fall": {  # phase 3, the Fall: brass on the Shadowfall motif over driving 16th basses, full war drums
+        "base": [
+            ("lead", BRASS, 0, 108, 0.2, 60),
+            ("lead", HORNS, -12, 90, 0.4, 60),
+            ("lead", STRINGS, 0, 84, -0.3, 60),
+            ("harmony", CHOIR, 0, 76, 0.0, 90),
+            ("harmony", SLOW_STRINGS, -12, 64, -0.4, 80),
+            ("bass", CELLO, 12, 92, -0.2, 50),
+            ("bass", BASSES, 0, 96, 0.1, 50),
+            ("beat", "kit:war", 0, 112, 0.0, 50),
+        ],
+        "dark": [  # the King answers: violins and strings on his tritone, a choir, crashes and taiko fills
+            ("dark_lead", VIOLIN, 0, 88, -0.4, 70),
+            ("dark_lead", STRINGS, -12, 72, 0.4, 70),
+            ("dark_lead", CHOIR, -12, 66, 0.0, 90),
+            ("dark_beat", "kit:war", 0, 110, 0.0, 70),
+        ],
+    },
 }
 
 # Drum letters (k thud, s snare, h hat, c crash/wind) -> hits: (preset, MIDI note, velocity, seconds).

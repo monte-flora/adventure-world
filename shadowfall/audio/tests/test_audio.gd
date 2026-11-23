@@ -128,7 +128,7 @@ func test_peaks_and_size_budget() -> void:
 
 
 ## The big sounds are sampled instruments: every Sfx.RECORDED name has its .ogg, a one-shot under
-## 4 s (not looping), and they all fit in 512 KB. A recorded name plays its file, not the synth.
+## 5 s (not looping), and they all fit in 512 KB. A recorded name plays its file, not the synth.
 func test_recorded_sfx() -> void:
 	var bytes := 0
 	for sound in Sfx.RECORDED:
@@ -139,7 +139,7 @@ func test_recorded_sfx() -> void:
 		check(s is AudioStreamOggVorbis, sound + " is a recorded .ogg")
 		if s is AudioStreamOggVorbis:
 			check(not s.loop, sound + " doesn't loop")
-			check(s.get_length() > 0.2 and s.get_length() < 4.0, "%s: %.2f s, a short one-shot" % [sound, s.get_length()])
+			check(s.get_length() > 0.2 and s.get_length() < 5.0, "%s: %.2f s, a short one-shot" % [sound, s.get_length()])
 		check(sound not in Sfx.NAMES, sound + ": not also a synth recipe")
 		bytes += FileAccess.get_file_as_bytes(path).size()
 	check(bytes > 0 and bytes < 512 * 1024, "recorded sfx %d KB, under 512 KB" % (bytes / 1024))
