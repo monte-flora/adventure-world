@@ -77,6 +77,7 @@ User: refactor fully for teens (art, gameplay, music); stay on pygame unless ano
 - [x] 2026-11-22 **Polish caves with Gemini, by hand** (user: "Go with option 1"): editor Polish button, layout map + prompt, import (#62); painted caves hide rock tiles, F3 shows collision, Vine Garden painting ships (#63).
 - [x] 2026-11-22 **Realm from Gemini textures + props** (user: "Go ahead, start it now"): prompt pack `shadowfall/realm/gemini/` + `import_art.sh` (#64), painted ground blend + props in level files, Emberhold first pass with placeholders (#65), prop editor (#66). Darkening reaches painted art (#68, part a).
 - [x] 2026-11-22 Castle doors locked until key/lever (#67, H1 part a).
+- [~] **Gemini helper, 2 clicks per image** (user: "Build option 1", 2026-11-23): `pixi run gemini-next` copies STYLE + the next missing prompt to the clipboard, opens Gemini, waits for the download in ~/Downloads, files it as `in/<name>.png` and runs the import. No API, no keys, no site automation.
 - [ ] **User:** make the Gemini images (realm textures and props; Fire Mountain cave) in `~/try-shadowfall`, then ask main to PR them.
 - [ ] G2 rest (paused): gloom 0/3 screenshots, prop-line docs into `levels/README.md`, full test run.
 - [ ] H1 rest (paused): boss SFX, 3-phase boss tunes, victory sting.
