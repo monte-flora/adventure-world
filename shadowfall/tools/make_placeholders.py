@@ -21,7 +21,8 @@ OUT = os.path.join(GEMINI, "placeholder")
 MAGENTA = (255, 0, 255)
 INK = (24, 20, 28)
 GROUND = {"grass": (52, 74, 48), "dirt_road": (112, 74, 52), "cobblestone": (96, 92, 88),
-          "mud": (62, 48, 38), "shallow_water": (54, 86, 92), "rocky_ground": (78, 76, 96)}
+          "mud": (62, 48, 38), "shallow_water": (54, 86, 92), "rocky_ground": (78, 76, 96),
+          "cliff": (60, 58, 70), "deep_water": (34, 58, 76), "forest_floor": (40, 54, 38)}
 GREEN, DARK, BARK, ROOF, WALL, STONE, IRON, FIRE = ((50, 92, 52), (34, 64, 52), (92, 62, 40), (60, 70, 120),
                                                     (200, 190, 160), (120, 118, 128), (40, 40, 48), (240, 150, 40))
 
@@ -109,6 +110,20 @@ def prop(name, w, h):
     elif name == "mine_mouth":
         blob(s, STONE, (X, Y, W, H * 1.3))
         pygame.draw.ellipse(s, INK, (X + W * 0.3, Y + H * 0.4, W * 0.4, H * 0.9))
+    elif name in ("crag", "riven_boulder"):
+        tri(s, STONE, [(X, Y + H), (X + W * 0.25, Y + H * 0.1), (X + W * 0.6, Y), (X + W, Y + H * 0.3), (X + W, Y + H)])
+        if name == "riven_boulder":
+            pygame.draw.line(s, INK, (X + W * 0.5, Y + H * 0.1), (X + W * 0.45, Y + H), 10)
+    elif name == "ivy_cliff":
+        box(s, STONE, (X, Y, W, H))
+        for fx in (0.15, 0.45, 0.75):
+            box(s, GREEN, (X + W * fx, Y, W * 0.15, H * 0.8), 3)
+    elif name == "rubble_heap":
+        for r in ((0, 0.45, 0.5, 0.55), (0.45, 0.4, 0.55, 0.6), (0.2, 0, 0.55, 0.6)):
+            box(s, STONE, (X + W * r[0], Y + H * r[1], W * r[2], H * r[3]))
+    elif name == "shadow_thorns":
+        for dx in (-0.4, -0.15, 0.15, 0.4):
+            pygame.draw.line(s, (60, 30, 80), (X + W * 0.5, Y + H), (X + W * (0.5 + dx), Y), 16)
     elif name == "campfire":
         blob(s, STONE, (X, Y + H * 0.5, W, H * 0.5))
         tri(s, FIRE, [(X + W * 0.3, Y + H * 0.75), (X + W / 2, Y), (X + W * 0.7, Y + H * 0.75)])

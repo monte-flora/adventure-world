@@ -49,6 +49,65 @@ static func build(world: WorldMap, sorted: Node2D, over: Node2D = null) -> Array
 	return out
 
 
+## Painted lands draw their letters with props too (drawing only: the letters keep the collision):
+## every gate square gets its gate prop (shown while shut), and F and X squares a tree or a crag
+## every other square (a checkerboard, nudged a little), from the land's `forest:` / `crags:` lists.
+const GATE_PROPS := {"Y": "ivy_cliff", "O": "rubble_heap", "K": "shadow_thorns"}
+const GATE_ROCK := "riven_boulder"            # a `gate:` rock (the Riven Gap)
+const FOREST := ["oak", "pine", "dead_tree"]
+const CRAGS := ["crag"]
+
+
+## Adds the decor sprites for every painted square to `sorted`. Returns {"sprites": [...], "gates":
+## {square: sprite}} (refresh_gates shows a gate's sprite only while it is shut).
+static func scatter(world: WorldMap, sorted: Node2D) -> Dictionary:
+	var out: Array[Sprite2D] = []
+	var gates := {}
+	var t := float(LevelFile.TILE)
+	for p: Vector2i in world.cells:
+		var land: Dictionary = world.lands.get(world.land(p), {})
+		if land.get("ground", "") != "painted" or world.nightfall:
+			continue
+		var ch: String = world.cells[p]
+		var name := ""
+		var nudge := Vector2.ZERO
+		if world.gates.has(p):
+			name = GATE_ROCK
+		elif GATE_PROPS.has(ch):
+			name = GATE_PROPS[ch]
+		elif ch in "FX" and (p.x + p.y) % 2 == 0 and not world.prop_cover.has(p):
+			var kinds: Array = land.get("forest" if ch == "F" else "crags", [])
+			if kinds.is_empty():
+				kinds = FOREST if ch == "F" else CRAGS
+			name = kinds[RealmTiles.variant(p, kinds.size())]
+			nudge = Vector2(RealmTiles.variant(p + Vector2i(7, 3), 13) - 6, RealmTiles.variant(p + Vector2i(2, 9), 9) - 4)
+		if name == "":
+			continue
+		var tex := texture(name)
+		var m := WorldMap.prop_meta(name)
+		if tex == null or m.is_empty():
+			continue
+		var s := Sprite2D.new()
+		s.name = "decor_" + name
+		s.texture = tex
+		s.centered = false
+		s.offset = -Vector2(m.anchor[0], m.anchor[1])
+		s.position = (Vector2(p) + Vector2(0.5, 0.9)) * t + nudge    # stands near the square's bottom
+		s.set_meta("prop", name)
+		sorted.add_child(s)
+		out.append(s)
+		if name == GATE_ROCK or GATE_PROPS.has(ch):
+			gates[p] = s
+	refresh_gates(world, gates)
+	return {"sprites": out, "gates": gates}
+
+
+## Shows each gate's sprite only while the gate is shut.
+static func refresh_gates(world: WorldMap, gates: Dictionary) -> void:
+	for p in gates:
+		(gates[p] as Sprite2D).visible = not (world.gate_open(p) if world.gates.has(p) else world.walkable(p))
+
+
 ## A prop's light of its kind: a LanternLight on `parent` at `pos`, `radius` px.
 static func light(parent: Node, prop: String, pos: Vector2, radius: float) -> LanternLight:
 	var k: Dictionary = LIGHTS.get(prop, WINDOW)

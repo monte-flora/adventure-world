@@ -91,7 +91,8 @@ func stitch(texts: Dictionary) -> void:
 		if names_id(id) == "home" and _names("HOME") != "":
 			display = _names("HOME")
 		lands[id] = {"name": display, "file": f, "rect": Rect2i(origin, Vector2i(lf.width, lf.height)),
-			"says": lf.setting("says"), "ground": lf.setting("ground")}
+			"says": lf.setting("says"), "ground": lf.setting("ground"), "paint": lf.all("paint"),
+			"forest": lf.setting("forest").split(" ", false), "crags": lf.setting("crags").split(" ", false)}
 		for r in lf.height:
 			for c in lf.width:
 				var ch := lf.at(c, r)
