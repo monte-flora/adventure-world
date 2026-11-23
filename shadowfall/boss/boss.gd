@@ -269,7 +269,7 @@ func _physics_process(dt: float) -> void:
 const SFX_LIKE := {"boss_glow": "king", "boss_slash": "swing", "boss_fire": "dash", "boss_aim": "king",
 	"boss_leap": "jump", "boss_land": "pound", "boss_shimmer": "king", "boss_beam": "die", "boss_hit": "hit",
 	"boss_phase": "king", "crown_hit": "hit", "sunfang": "stone", "clang": "land", "cut": "swing",
-	"pogo": "jump", "forge": "stone", "door_open": "pound", "door_locked": "land"}
+	"pogo": "jump", "forge": "stone", "door_open": "pound", "door_locked": "land", "boss_defeat": "die"}
 const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss"}
 
 
@@ -290,7 +290,7 @@ func _fx(name: String) -> void:
 
 
 func _sfx(name: String) -> void:
-	Audio.play_sfx(name if name in Audio.Sfx.NAMES else SFX_LIKE.get(name, "hit"))
+	Audio.play_sfx(name if Audio.has_sfx(name) else SFX_LIKE.get(name, "hit"))
 
 
 func _music(name: String) -> void:
@@ -406,6 +406,7 @@ func _event(e: Dictionary) -> void:
 			_say("The dark takes you... The lantern by the door flickers back to life.")
 		"won":
 			end_t = 0.0
+			_sfx("boss_defeat")
 			Juice.burst(self, fight.king, GOLD, 40, 160.0, 1.6, 3.0, -30.0)
 			Juice.burst(self, fight.king, LIGHT, 24, 90.0, 2.0, 2.0, -50.0)
 

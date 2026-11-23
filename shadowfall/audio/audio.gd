@@ -11,7 +11,8 @@ extends Node
 ## stem drops to 75% and the Music bus low-pass closes from 8 kHz to 1.8 kHz. The gains change at
 ## most 10 times a second, ramped (a full swing takes 2 s). The stems are real sampled instruments,
 ## audio/music/<tune>_<stem>.ogg (made by audio/render/render_music.py, see CREDITS-audio.md); a tune
-## with a stem file missing falls back to the code synth. The SFX are made in code at first use.
+## with a stem file missing falls back to the code synth. The SFX are made in code at first use,
+## except the big ones (Sfx.RECORDED): sampled instruments in audio/sfx/<name>.ogg (render_sfx.py).
 
 const Synth := preload("res://audio/synth.gd")
 const Tunes := preload("res://audio/tunes.gd")
@@ -31,6 +32,7 @@ const DUCK := 0.3
 const SFX_VOICES := 8
 const SILENT_DB := -80.0
 const MUSIC_DIR := "res://audio/music/"
+const SFX_DIR := "res://audio/sfx/"
 
 var track := ""                  # the tune playing now ("" = none)
 var intensity := 0.0             # extra darkness from the game, 0..1 (the dark stem follows the larger)
@@ -145,13 +147,26 @@ func play_sfx(sound: String, pitch := 1.0) -> void:
 	p.play()
 
 
-func sfx_stream(sound: String) -> AudioStreamWAV:
-	if sound not in Sfx.NAMES:
-		push_warning("Audio: no sound called " + sound)
-		return null
+## A sound: the recorded .ogg (Sfx.RECORDED, audio/sfx/) or the code synth (Sfx.NAMES); null if neither.
+func sfx_stream(sound: String) -> AudioStream:
 	if not _sounds.has(sound):
-		_sounds[sound] = Synth.to_stream(Sfx.make(sound))
+		if has_recorded_sfx(sound):
+			_sounds[sound] = load(SFX_DIR + sound + ".ogg")
+		elif sound in Sfx.NAMES:
+			_sounds[sound] = Synth.to_stream(Sfx.make(sound))
+		else:
+			push_warning("Audio: no sound called " + sound)
+			return null
 	return _sounds[sound]
+
+
+## True if `sound` can play: a code-synth sound or a recorded one whose file is there.
+static func has_sfx(sound: String) -> bool:
+	return sound in Sfx.NAMES or has_recorded_sfx(sound)
+
+
+static func has_recorded_sfx(sound: String) -> bool:
+	return sound in Sfx.RECORDED and ResourceLoader.exists(SFX_DIR + sound + ".ogg")
 
 
 func duck(on: bool) -> void:
