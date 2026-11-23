@@ -49,7 +49,9 @@ func _ready() -> void:
 	realm = Scenes.args.get("realm", "light")
 	build(WorldMap.load_nightfall() if realm == "nightfall" else WorldMap.load_realm())
 	var opts := Paths.cmdline()
-	if opts.has("shot"):                      # -- --scene=overworld --shot=out.png [--cell=col,row]
+	if opts.has("shot"):                      # -- --scene=overworld --shot=out.png [--cell=col,row] [--gloom=0..3]
+		if opts.has("gloom"):
+			Game.gloom = float(opts["gloom"]) / 3.0
 		_shot(opts["shot"], opts.get("cell", ""))
 
 

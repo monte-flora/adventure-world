@@ -147,6 +147,25 @@ door back to the level before.
 - A swinging vine's bottom should be at most 3 blocks above the floor you jump from, and 2 or 3 blocks
   out from the edge, so you can jump into it. A vine 6 to 8 blocks long swings you across about 10 blocks.
 
+## Props on the realm
+
+The realm files (`realm/`, the Godot game) can stand painted pictures on the land: trees, cottages,
+lampposts, a campfire. Each one is a `prop:` line in the land's file:
+
+    prop: oak 12 30                  an oak with its foot on row 12, column 30
+    prop: cottage_a 24.5 48          a half square up (decimals move it part of a square)
+
+- The name is a picture in `shadowfall/realm/props/` (the full list: `shadowfall/realm/gemini/assets.json`).
+- Its foot (the bottom middle of the part you bump into) stands on the middle of the square.
+- Write one line for each prop. Rows and columns are the land's own, like `mine:` and `gate:`.
+- A prop never covers a Mine, waystone, house, chest, sign or Portal (`M S L H T + P`).
+- It replaces the tree, house or Mine tile under it.
+- In a `ground: painted` land the trees come only from props (an `F` still tells monsters where the forest is).
+- Windows, lampposts, the smithy's forge and campfires glow, and glow brighter as the Shadow King's dark
+  falls on the realm. Everything else fades to grey and violet with the gloom.
+- Easiest: place them with the prop editor, `pixi run realm-editor`. Pick a prop on the right, click the map to
+  put it there, drag it to move it, right-click to delete it, and press S to save.
+
 ## The Phase 2 world map
 
 Phase 2 (`pixi run game2`, or pick it on the title screen) plays on a big map made of the files in

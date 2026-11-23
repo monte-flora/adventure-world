@@ -55,12 +55,5 @@ plus the ability gates: `Y` ivy cliff (climb), `O` rubble (pound), `K` shadow th
 
 ## Props and the painted ground
 
-`prop: <name> <row> <column>` puts a picture from `shadowfall/realm/props/` on the land (the list of names
-is `shadowfall/realm/gemini/assets.json`). Its foot (the bottom middle of the part you bump into) sits on the
-middle of that square; decimals move it part of a square (`prop: cottage_a 24.5 48` is half a square up).
-Repeat the line for each one. The prop's `.json` says what you bump into and where its lights are.
-
-- A prop never blocks a Mine, waystone, house, chest, sign or Portal square (`M S L H T + P`).
-- Its picture replaces the tree, house or Mine tile it stands on or covers.
-- `ground: painted` lands get their trees only from props (an `F` still marks the forest for the monsters).
-- Place them with the prop editor: `pixi run realm-editor` (or by hand). Make the art: `shadowfall/realm/gemini/README.txt`.
+How to put trees, houses and lampposts on a land: "Props on the realm" in `../README.md`.
+How the art is made: `shadowfall/realm/README.md`.
