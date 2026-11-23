@@ -93,7 +93,7 @@ def test_run_loop_and_name_pick(tmp_path, capsys):
 
     ok(gn.run(downloads=str(d), gemini=g, run_cmd=fake_run(calls), wait=wait) == 0, "runs")
     ok(sorted(os.listdir(os.path.join(g, "in"))) == ["ground_grass.png", "oak.png"], "bush skipped")
-    ok([c[-1] for c in calls if c[0] == "sh"] == ["ground_grass", "oak"], "each one imported")
+    ok([c[-1] for c in calls if c[0] == "sh"] == ["grass", "oak"], "each one imported (ground by its import name)")
     ok(sum(c[0] == "open" for c in calls) == 1, "Gemini opened once")
     ok(calls[1] == ["open", gn.GEMINI_URL], "only the Gemini page")
     ok("1 still to make" in capsys.readouterr().out, "says what is left")

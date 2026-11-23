@@ -162,7 +162,8 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
             continue
         dst = move_in(got, cur, gemini)
         print("Got it: in/%s" % os.path.basename(dst))
-        r = run_cmd(["sh", IMPORT_ART, cur], check=False)
+        # import-art knows ground textures without the prefix: ground_grass -> grass
+        r = run_cmd(["sh", IMPORT_ART, cur.removeprefix("ground_")], check=False)
         if r.returncode != 0:
             print("import-art had a problem with %s (see above)." % cur)
         else:
