@@ -29,7 +29,8 @@ def fake_run(calls):
     """Records every command; a fake polish export makes the map and words, a fake import the painting."""
     def run_cmd(cmd, **kw):
         calls.append(cmd)
-        out = gc.polish_dir(os.path.basename(cmd[-1])[:-4], os.path.dirname(os.path.dirname(cmd[-1])))
+        out = os.path.dirname(cmd[-1]) if gc.THRONE in cmd[-1] else \
+            gc.polish_dir(os.path.basename(cmd[-1])[:-4], os.path.dirname(os.path.dirname(cmd[-1])))
         if cmd[1:3] == [gc.POLISH, "import"]:
             open(os.path.join(out, "painted.webp"), "wb").write(b"webp")
         if cmd[1:3] == [gc.POLISH, "export"]:
@@ -57,10 +58,10 @@ def test_export_keeps_your_prompt(tmp_path):
     os.makedirs(out)
     open(os.path.join(out, "prompt.txt"), "w").write("my own words\n")
     calls = []
-    gc.export(path, fake_run(calls))
+    gc.export("01_a", path, lv, fake_run(calls))
     ok(len(calls) == 1 and os.path.exists(os.path.join(out, "layout.png")), "no map yet: exported")
     ok(open(os.path.join(out, "prompt.txt")).read() == "my own words\n", "your prompt.txt stays")
-    gc.export(path, fake_run(calls))
+    gc.export("01_a", path, lv, fake_run(calls))
     ok(len(calls) == 1, "map and words there: no export")
 
 
@@ -124,3 +125,26 @@ def test_every_real_cave_gets_a_fitting_prompt():
         ok("Nightfall" in text if "/shadow/" in path else True, name + ": Nightfall mood")
         ok("Shadow King's black castle" in text if "/castle/" in path else True, name + ": the Shadow King's castle")
     ok(len(gc.caves()) >= 33, "every cave folder walked (%d)" % len(gc.caves()))
+
+
+def test_the_throne_room_comes_last_and_keeps_its_words(tmp_path):
+    lv = make_levels(tmp_path)
+    t = tmp_path / "levels" / "polish" / gc.THRONE
+    t.mkdir()
+    (t / (gc.THRONE + ".txt")).write_text("theme: castle\n#..#\n")
+    (t / "prompt.txt").write_text("the throne hall\n")
+    ok(gc.names(lv)[-1] == gc.THRONE, "after the castle")
+    calls = []
+    gc.export(gc.THRONE, str(t / (gc.THRONE + ".txt")), lv, fake_run(calls))
+    ok(len(calls) == 1 and (t / "layout.png").exists(), "its map is made in its own folder")
+    ok((t / "prompt.txt").read_text() == "the throne hall\n", "its own words stay")
+
+
+def test_the_real_throne_room_map():
+    sys.path.insert(0, str(GAME_FOLDER))
+    import cave_files
+    path = dict(gc.caves())[gc.THRONE]
+    theme, rows, _ = cave_files.load_cave(path)
+    ok(theme == "castle" and len(rows) == 17 and all(len(r) == 30 for r in rows), "30 x 17 blocks: the 960x540 hall")
+    words = open(os.path.join(os.path.dirname(path), "prompt.txt")).read()
+    ok("Shadow King" in words and "throne" in words and "2752x1536" in words, "the throne hall's own words")
