@@ -10,7 +10,9 @@ The music is our own tunes played by sampled orchestra instruments; the sound ef
 | `render/render_music.py` | Renders the stems: tunes → MIDI → FluidSynth + a free MIT SoundFont → fold the reverb tail into the loop → master → .ogg. The instruments for each part are in `ORCHESTRA` and `KITS` there |
 | `render/dump_parts.gd` | Godot hands the tune text to the render script as JSON |
 | `synth.gd` | The code synth: pulse/triangle/sine/noise voices, echo, low-pass. Makes the SFX, the King sting and the music fallback when a stem file is missing |
-| `sfx.gd` | The sound effects, one recipe each (`Audio.play_sfx("jump")`) |
+| `sfx.gd` | The sound effects, one recipe each (`Audio.play_sfx("jump")`); `RECORDED` lists the ones in `sfx/` |
+| `sfx/<name>.ogg` | The big one-shots on real instruments (mono): the Shadow King's fight (`boss_slash`, `boss_beam`, `boss_phase`, `boss_hit`, `boss_defeat`), `sunfang`, the castle doors (`door_open`, `door_locked`) |
+| `render/render_sfx.py` | Renders `sfx/`: orchestra hit, taiko, timpani, choir, brass, reverse cymbal on the same SoundFont, plus numpy whooshes and rumbles. `pixi run -e music render-sfx` |
 | `CREDITS-audio.md` | The SoundFont's source, licence and URL |
 
 **Changed a tune or an instrument?** `pixi run -e music render-music` (macOS/Linux; it downloads the 40 MB

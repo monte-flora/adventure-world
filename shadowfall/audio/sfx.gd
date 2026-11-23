@@ -7,6 +7,11 @@ const Synth := preload("res://audio/synth.gd")
 const NAMES := ["swing", "hit", "hurt", "jump", "land", "dash", "pound", "stone", "coin",
 	"checkpoint", "die", "menu", "select", "king"]
 
+## The big sounds on sampled orchestra instruments, audio/sfx/<name>.ogg, made by
+## audio/render/render_sfx.py (pixi run -e music render-sfx). Not made in code.
+const RECORDED := ["boss_slash", "boss_beam", "boss_phase", "boss_hit", "boss_defeat", "sunfang",
+	"door_open", "door_locked"]
+
 
 ## A sound's samples, never louder than 0.9.
 static func make(sound: String) -> PackedFloat32Array:
