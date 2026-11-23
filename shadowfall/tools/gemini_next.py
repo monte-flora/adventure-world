@@ -1,6 +1,9 @@
-"""pixi run gemini-next [name] [--list] [--downloads DIR]: make the realm's Gemini art one picture at a time.
+"""pixi run gemini-next [name] [--list] [--redo NAME "what to fix"] [--downloads DIR]: make the realm's
+Gemini art one picture at a time.
 
-For each prompt with no picture in realm/gemini/in/ yet: put STYLE.txt + the prompt on the clipboard,
+First the pictures on the redo list (realm/gemini/redo.txt, one "name: what to fix" per line; the fix is
+added to the prompt and the line is crossed off once the new picture is imported), then each prompt with
+no picture in realm/gemini/in/ yet: put STYLE.txt + the prompt on the clipboard,
 open Gemini in the browser (once), wait for the picture to land in ~/Downloads, move it to
 in/<name>.<ext> and run import_art.sh on it. macOS (pbcopy, open). It never touches the website
 beyond opening it: no clicking, no scraping, no API, no keys.
@@ -39,10 +42,40 @@ def missing(gemini=GEMINI):
     return [n for n in prompt_names(gemini) if not done_file(n, gemini)]
 
 
-def clip_text(name, gemini=GEMINI):
+def redo_notes(gemini=GEMINI):
+    """{name: what to fix} from redo.txt, in file order."""
+    p = os.path.join(gemini, "redo.txt")
+    notes = {}
+    if os.path.exists(p):
+        for line in open(p):
+            if ":" in line and not line.lstrip().startswith("#"):
+                n, note = line.split(":", 1)
+                notes[n.strip()] = note.strip()
+    return notes
+
+
+def save_redo(notes, gemini=GEMINI):
+    with open(os.path.join(gemini, "redo.txt"), "w") as f:
+        f.writelines("%s: %s\n" % kv for kv in notes.items())
+
+
+def todo(gemini=GEMINI):
+    """Redos first, then the missing ones."""
+    redo = [n for n in redo_notes(gemini) if n in prompt_names(gemini)]
+    return redo + [n for n in missing(gemini) if n not in redo]
+
+
+def full_name(name, gemini=GEMINI):
+    """dirt_road -> ground_dirt_road (the name import-art uses also works)."""
+    names = prompt_names(gemini)
+    return name if name in names or "ground_" + name not in names else "ground_" + name
+
+
+def clip_text(name, gemini=GEMINI, note=None):
     style = open(os.path.join(gemini, "STYLE.txt")).read().strip()
     prompt = open(os.path.join(gemini, "prompts", name + ".txt")).read().strip()
-    return style + "\n\n" + prompt + "\n"
+    fix = "\n\nFix from last time: " + note if note else ""
+    return style + "\n\n" + prompt + fix + "\n"
 
 
 def images_in(folder):
@@ -130,20 +163,21 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
     made = 0
     while True:
         if name:
-            todo = [name]
+            queue = [name]
         else:
-            todo = [n for n in missing(gemini) if n not in skipped]
-        if not todo:
-            left = len(missing(gemini))
+            queue = [n for n in todo(gemini) if n not in skipped]
+        if not queue:
+            left = len(todo(gemini))
             if left:
                 print("Done for now. %d still to make (pixi run gemini-next --list)." % left)
             else:
                 print("All %d done." % len(prompt_names(gemini)))
             return 0
-        cur = todo[0]
-        left = len(missing(gemini))
-        print("\n== %s  (%d left)" % (cur, left))
-        run_cmd(["pbcopy"], input=clip_text(cur, gemini).encode(), check=True)
+        cur = queue[0]
+        note = redo_notes(gemini).get(cur)
+        left = len(todo(gemini))
+        print("\n== %s%s  (%d left)" % (cur, "  (redo: %s)" % note if note else "", left))
+        run_cmd(["pbcopy"], input=clip_text(cur, gemini, note).encode(), check=True)
         since = time.time()
         before = images_in(downloads)
         print("Copied. Paste into Gemini, send, then download the picture you like. (n = skip, q = quit)")
@@ -168,29 +202,50 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
             print("import-art had a problem with %s (see above)." % cur)
         else:
             print("Made %s" % os.path.relpath(out_path(cur), os.path.dirname(SHADOWFALL)))
+            notes = redo_notes(gemini)
+            if notes.pop(cur, None) is not None:
+                save_redo(notes, gemini)
         made += 1
         if name:
             return 0
 
 
-def main(argv):
+def main(argv, gemini=GEMINI):
     downloads = None
     if "--downloads" in argv:
         i = argv.index("--downloads")
         downloads = argv[i + 1]
         argv = argv[:i] + argv[i + 2:]
-    if "--list" in argv:
-        for n in prompt_names():
-            print(("done     " if done_file(n) else "missing  ") + n)
-        print("%d of %d done." % (len(prompt_names()) - len(missing()), len(prompt_names())))
+    if "--redo" in argv:
+        i = argv.index("--redo")
+        if len(argv) < i + 3:
+            print('Say what to fix: pixi run gemini-next --redo dirt_road "no stripes, even all over"')
+            return 1
+        name = full_name(argv[i + 1], gemini)
+        if name not in prompt_names(gemini):
+            print("No prompt called %s. Try: pixi run gemini-next --list" % name)
+            return 1
+        notes = redo_notes(gemini)
+        notes[name] = argv[i + 2]
+        save_redo(notes, gemini)
+        print("On the redo list: %s (%s). Run pixi run gemini-next to make it." % (name, argv[i + 2]))
         return 0
-    name = argv[0] if argv else None
-    if name and name not in prompt_names():
+    if "--list" in argv:
+        notes = redo_notes(gemini)
+        for n in prompt_names(gemini):
+            if n in notes:
+                print("redo     %s  (%s)" % (n, notes[n]))
+            else:
+                print(("done     " if done_file(n, gemini) else "missing  ") + n)
+        print("%d of %d done." % (len(prompt_names(gemini)) - len(missing(gemini)), len(prompt_names(gemini))))
+        return 0
+    name = full_name(argv[0], gemini) if argv else None
+    if name and name not in prompt_names(gemini):
         print("No prompt called %s. Try: pixi run gemini-next --list" % name)
         return 1
     undo = cbreak()
     try:
-        return run(name, downloads)
+        return run(name, downloads, gemini)
     except KeyboardInterrupt:
         print("\nBye.")
         return 0

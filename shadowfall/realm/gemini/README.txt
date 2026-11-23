@@ -12,9 +12,14 @@ THE EASY WAY (Mac): pixi run gemini-next
 2. In Gemini: paste (Cmd+V) and send.
 3. Like the picture? Download it. That's it: the helper grabs it from Downloads, puts it in in/,
    turns it into game art, and copies the next one. Not great? Ask Gemini for another one first.
-   Press n to skip a picture, q to stop.
+   Press n to skip a picture, q to stop. Start a new Gemini chat for each picture.
    - pixi run gemini-next --list   shows which pictures are done and which are missing
    - pixi run gemini-next oak      makes (or redoes) just the oak
+   - pixi run gemini-next --redo dirt_road "no stripes, even all over"
+                                   puts a picture on the redo list with what to fix. The next
+                                   pixi run gemini-next does the redos first (the fix goes into the
+                                   words it copies), then the missing ones. Done redos drop off the
+                                   list (it lives in redo.txt; you can edit it by hand).
    - --downloads DIR               if your browser saves somewhere other than ~/Downloads
    It only opens the Gemini page. It never clicks, reads or logs in to anything.
 
