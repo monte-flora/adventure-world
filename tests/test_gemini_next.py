@@ -110,3 +110,32 @@ def test_run_loop_and_name_pick(tmp_path, capsys):
     gn.run("bush", downloads=str(d), gemini=g, run_cmd=fake_run([]), wait=lambda *a: str(p))
     gn.run(downloads=str(d), gemini=g, run_cmd=fake_run([]), wait=lambda *a: "q")
     ok("All 3 done." in capsys.readouterr().out, "All N done line")
+
+
+def test_redo_list(tmp_path, capsys):
+    g = make_gemini(tmp_path, ["oak", "ground_dirt_road", "bush"])
+    for n in ("oak", "ground_dirt_road"):
+        open(os.path.join(g, "in", n + ".png"), "wb").write(b"old")
+    ok(gn.main(["--redo", "dirt_road", "no stripes"], gemini=g) == 0, "short name works")
+    ok(gn.redo_notes(g) == {"ground_dirt_road": "no stripes"}, "saved in redo.txt")
+    ok(gn.clip_text("ground_dirt_road", g, "no stripes").endswith("Fix from last time: no stripes\n"), "fix added")
+    ok(gn.todo(g) == ["ground_dirt_road", "bush"], "redos first, then missing")
+    gn.main(["--list"], gemini=g)
+    ok("redo     ground_dirt_road  (no stripes)" in capsys.readouterr().out, "--list shows redos")
+
+    d = tmp_path / "dl"
+    d.mkdir()
+    calls = []
+    n = iter(range(9))
+
+    def wait(folder, before, since):
+        p = d / ("p%d.png" % next(n))
+        p.write_bytes(b"new")
+        return str(p)
+
+    gn.run(downloads=str(d), gemini=g, run_cmd=fake_run(calls), wait=wait)
+    clips = [kw for kw in calls if kw[0] == "pbcopy"]
+    ok(len(clips) == 2, "redo + missing done in one run")
+    ok(open(os.path.join(g, "in", "ground_dirt_road.png"), "rb").read() == b"new", "redo replaced")
+    ok(gn.redo_notes(g) == {}, "crossed off after import")
+    ok([c[-1] for c in calls if c[0] == "sh"] == ["dirt_road", "bush"], "both imported")

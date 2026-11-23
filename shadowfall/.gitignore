@@ -2,3 +2,5 @@
 build/
 # a copy of ../levels made only while exporting (tools/export_web.sh); the real files live in ../levels
 levels/
+# your own redo list for pixi run gemini-next
+realm/gemini/redo.txt
