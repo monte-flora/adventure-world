@@ -5,6 +5,7 @@ extends CanvasLayer
 ##   light.dark = level.setting("dark") == "yes"     # a dark cave: only light pools show the way
 ##   add_child(light)
 ##   map.material = light.world_material             # world tiles darken with the gloom stage
+##   painting.material = light.painted_material      # painted (Gemini) art: a smooth grade, no banding
 ##   light.follow(hero)                              # the hero's lantern, 130 px
 ##   light.add_crystal(parent, pos)                  # a crystal's small pool
 ## What it does:
@@ -33,6 +34,8 @@ var dark := false                    # a `dark: yes` cave (or any pitch-dark pla
 var stage := 0                       # the gloom stage now showing
 var tinted := false                  # a RealmLight tints this screen: no stage-3 overlay
 var world_material := ShaderMaterial.new()
+var painted_material := ShaderMaterial.new()   # painted art (realm props, cave paintings): a smooth grade
+var _tracked: Array[ShaderMaterial] = []      # other shaders with a `stage` uniform (track())
 var overlay := ColorRect.new()
 var flash := ColorRect.new()
 var lantern: LightPool
@@ -45,6 +48,7 @@ func _init() -> void:
 	name = "GloomLight"
 	world_material.shader = preload("res://light/palette_swap.gdshader")
 	world_material.set_shader_parameter("lut", GloomLut.texture())
+	painted_material.shader = preload("res://light/painted_gloom.gdshader")
 	_dark_material.shader = preload("res://light/darkness.gdshader")
 	_dark_material.set_shader_parameter("ink", INK)
 	for r: ColorRect in [overlay, flash]:
@@ -85,6 +89,14 @@ func add_crystal(parent: Node, pos: Vector2, radius := LightPool.CRYSTAL) -> Lig
 	p.position = pos
 	parent.add_child(p)
 	return p
+
+
+## Keeps a material's `stage` uniform on the gloom stage (a shader that grades itself, like the
+## painted ground's: it #includes light/painted_gloom.gdshaderinc).
+func track(mat: ShaderMaterial) -> void:
+	if mat and not mat in _tracked:
+		_tracked.append(mat)
+		mat.set_shader_parameter("stage", stage)
 
 
 ## A level file's `dark: yes` header (docs/teen/levels/README.md).
@@ -137,6 +149,9 @@ func screen_pools() -> Array:
 func refresh() -> void:
 	stage = Game.gloom_stage()
 	world_material.set_shader_parameter("stage", stage)
+	painted_material.set_shader_parameter("stage", stage)
+	for m in _tracked:
+		m.set_shader_parameter("stage", stage)
 	var base := darkness()
 	overlay.visible = base > 0.0
 	if overlay.visible:

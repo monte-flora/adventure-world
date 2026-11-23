@@ -4,6 +4,9 @@ shader_type canvas_item;
 // Each pixel blends the 4 nearest squares' textures, with the square edges pushed about by value
 // noise so a road's edge wobbles like trodden earth. One quad covers the whole realm: no screen seams.
 
+#include "res://light/painted_gloom.gdshaderinc"
+
+uniform int stage = 0;           // the gloom stage (GloomLight.track keeps it up to date)
 uniform sampler2D atlas : filter_nearest, repeat_disable;
 uniform int count = 1;            // textures in the atlas
 uniform float tex_size = 256.0;
@@ -41,5 +44,6 @@ void fragment() {
 			col += tex_at(m, px) * w;
 		}
 	}
+	col.rgb = gloom_grade(col.rgb, stage);
 	COLOR = col;
 }

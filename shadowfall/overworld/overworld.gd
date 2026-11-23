@@ -124,6 +124,9 @@ func build(w: WorldMap) -> void:
 	map.material = light.world_material
 	objects.material = light.world_material
 	canopy.material = light.world_material
+	RealmProps.shade(prop_sprites, light.painted_material)
+	if ground:
+		light.track(ground.material)
 	light.follow(hero)
 	light.tinted = true
 	dusk = RealmLight.new()

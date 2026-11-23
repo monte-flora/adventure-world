@@ -34,7 +34,9 @@ func test_a_painting_fills_the_cave_behind_the_blocks() -> void:
 		var size: Vector2 = cave.painting.texture.get_size() * cave.painting.scale
 		check(size.is_equal_approx(Vector2(cave.level.width, cave.level.height) * LevelFile.TILE), "fits the cave: %s" % size)
 		check(cave.painting.get_index() < cave.map.get_index(), "drawn behind the blocks")
-		check(cave.painting.material == cave.map.material, "the gloom light applies to it")
+		var mat: ShaderMaterial = cave.painting.material
+		check(mat != null and mat.shader.resource_path == "res://light/painted_gloom.gdshader",
+			"the painted gloom grade applies to it (not the banding palette swap)")
 	check(not cave.parallax[0].visible, "the parallax behind it is hidden")
 	check(cave.map.get_used_cells().size() > 50, "the blocks are all there")
 	CaveArt.polish_root = ""
@@ -135,3 +137,23 @@ func test_the_painted_vine_garden_keeps_every_block() -> void:
 	check(Scenes.screen.painting != null, "the Vine Garden has its painting")
 	check(_collision(Scenes.screen) == plain, "same blocks, same collision as unpainted")
 	check(plain.size() > 300, "a full cave: %d blocks" % plain.size())
+
+
+func test_a_painting_follows_the_gloom_and_the_dark() -> void:
+	CaveArt.polish_root = _fake_painting()
+	Game.gloom = 1.0
+	Scenes.goto("cave", {"file": FILE})
+	await physics_frames(3)
+	var cave = Scenes.screen
+	if cave.painting:
+		var mat: ShaderMaterial = cave.painting.material
+		check_eq(mat.get_shader_parameter("stage"), 3, "gloom 3 reaches the painting")
+		var c := Color("3a2a50")
+		var dark := PaintedGloom.grade(c, 3)
+		check(dark.v < c.v * 0.7 and dark.s < c.s, "stage 3 is darker and greyer: %s -> %s" % [c, dark])
+	var light: GloomLight = cave.find_children("*", "GloomLight", true, false)[0]
+	light.dark = true                          # `dark: yes`: the ink overlay on layer 50 covers the painting too
+	light.refresh()
+	check(light.overlay.visible and light.layer > 0, "the dark draws over the painting")
+	CaveArt.polish_root = ""
+	Game.gloom = 0.0
