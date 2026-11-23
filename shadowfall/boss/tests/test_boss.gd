@@ -46,9 +46,34 @@ func test_castle_door_leads_on() -> void:
 	await physics_frames(2)
 	var screen = Scenes.screen
 	var door: Vector2i = screen.cave.level.find("D")[0]
+	var key: Vector2i = screen.cave.level.find("K")[0]
 	screen.cave.hero.position = (Vector2(door) + Vector2(0.5, 0.5)) * LevelFile.TILE
 	await physics_frames(3)
+	check(Scenes.screen == screen and screen.door_open_t < 0.0, "without the key the great door holds")
+	check_eq(screen.caption, screen.locked_line(), "and says why, grimly")
+	screen.cave.hero.position = (Vector2(key) + Vector2(0.5, 0.5)) * LevelFile.TILE
+	await physics_frames(2)
+	check(screen.has_key, "the key is taken")
+	screen.cave.hero.position = (Vector2(door) + Vector2(0.5, 0.5)) * LevelFile.TILE
+	await physics_frames(3)
+	check(screen.door_open_t >= 0.0, "with the key the door opens")
+	await physics_frames(int(screen.DOOR_OPEN_TIME * 60) + 6)
 	check(Scenes.screen != screen and Scenes.screen.fight != null, "the last door opens the throne room")
+
+
+## Every castle door is shut until you find its key (K) or pull its lever (L).
+func test_every_castle_door_is_locked() -> void:
+	for i in range(1, Castle.LEVELS + 1):
+		var lf := LevelFile.load_file(Paths.level(Castle.file(i)))
+		check(lf.find("K").size() + lf.find("L").size() > 0, "castle %d has a key or a lever" % i)
+	Scenes.goto("boss", {"castle": 2})
+	await physics_frames(2)
+	var screen = Scenes.screen
+	check(not screen.has_key, "level 2's door starts shut")
+	var lever: Vector2i = screen.cave.level.find("L")[0]
+	screen.cave.hero.attack_hits.append(lever)   # as if the sword struck it
+	await physics_frames(2)
+	check(screen.has_key, "the lever unbars the door")
 
 
 func test_blade_phase() -> void:
