@@ -5,7 +5,7 @@ instruments and saves them as audio/sfx/<name>.ogg (mono, one shot, faded end).
 
 Each sound is a few orchestra layers (orchestra hit, taiko, timpani, choir, brass, reverse cymbal...)
 played by FluidSynth on the same SoundFont as the music (render_music.py), plus numpy noise for
-whooshes and rumbles. The list of names is SOUNDS below; the game plays them through
+whooshes and rumbles, and the victory sting. The list of names is sounds() below; the game plays them through
 Audio.play_sfx(name) (Sfx.RECORDED). Change a recipe, run it again and commit the .ogg files.
 """
 import struct
@@ -135,6 +135,21 @@ def sounds() -> dict:
                       [(TIMPANI, 33, 110, 0.0, 0.8), (CONCERT_BASS_DRUM, 36, 105, 0.0, 0.8)]
                       + chord(BASSES, "A1", 100, 0.05, 1.1) + chord(CELLO, "E2 A2", 85, 0.1, 1.0),
                       [(0.0, noise_sweep(1.1, 700, 150, 0.5, 0.15)), (0.0, rumble(0.9, 50, 0.5))]),
+        # victory: the Shadowfall motif (A C E D) rises again, and this time it resolves, to A major,
+        # on brass, strings and choir, timpani rolling in, bells over it all
+        "victory": (4.4, 0.9,
+                    [(p, n, 112, st, d) for p in (BRASS, STRINGS)
+                     for n, st, d in [("A4", 0.0, 0.3), ("C5", 0.3, 0.3), ("E5", 0.6, 0.3), ("D5", 0.9, 0.6),
+                                      ("C#5", 1.5, 2.6)]]
+                    + chord(HORNS, "A3 C4 E4", 92, 0.0, 0.9) + chord(HORNS, "A3 D4 F4", 96, 0.9, 0.6)
+                    + chord(CELLO, "A2", 96, 0.0, 0.9) + chord(CELLO, "D2", 100, 0.9, 0.6)
+                    + [(TIMPANI, 33, 60 + i * 6, 0.9 + i * 0.075, 0.08) for i in range(8)]
+                    + chord(ORCH_HIT, "A3 C#4 E4", 118, 1.5, 0.4) + chord(BRASS, "A2 E3 A3 C#4 E4", 115, 1.5, 2.6)
+                    + chord(HORNS, "E4 A4", 100, 1.5, 2.6) + chord(CHOIR, "A3 C#4 E4 A4", 100, 1.5, 2.6)
+                    + chord(BASSES, "A1", 110, 1.5, 2.6) + chord(TUBA, "A1", 100, 1.5, 2.6)
+                    + chord(BELLS, "A5 C#6 E6", 92, 1.55, 2.4)
+                    + [(TIMPANI, 33, 127, 1.5, 1.2), (KIT, 49, 112, 1.5, 2.5), (TAIKO, 33, 120, 1.5, 1.0)],
+                    []),
         # shut fast: an iron clank and a dull thud
         "door_locked": (0.45, 0.75,
                         [(TAIKO, 45, 100, 0.0, 0.25), (KIT, 56, 90, 0.0, 0.2), (KIT, 39, 70, 0.0, 0.2)],

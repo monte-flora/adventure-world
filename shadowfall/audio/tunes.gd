@@ -12,7 +12,8 @@ const Synth := preload("res://audio/synth.gd")
 const STEPS_PER_BAR := 16
 
 ## tune id -> beats per minute. Every tune here has base + dark.
-const TUNES := {"overworld": 96, "cave": 70, "boss": 140}
+## The Shadow King's fight has a tune per phase: "boss" (the Blade), "boss_eclipse", "boss_fall".
+const TUNES := {"overworld": 96, "cave": 70, "boss": 140, "boss_eclipse": 140, "boss_fall": 140}
 
 
 static func step_of(tune: String) -> float:
@@ -28,6 +29,8 @@ static func make(tune: String) -> Dictionary:
 			return _cave()
 		"boss":
 			return _boss()
+		"boss_eclipse", "boss_fall":
+			return _battle(tune)
 	push_error("no such tune: " + tune)
 	return {}
 
@@ -122,6 +125,51 @@ static func parts(tune: String) -> Dictionary:
 				"dark_beat": ("c . . . . . . . . . . . . . . . | . . . . . . . . . . . . k . k . |".repeat(3)
 					+ "c . . . . . . . . . . . . . . . | . . . . . . . . k . k . k k k k |"),
 			}
+		"boss_eclipse":  # phase 2: he drowns the hall in night and hunts you through it
+			return {
+				"lead": ("A3 - - - - - - - G#3 - - - F3 - - - | D#3 - - - - - - - - - - - . . E3 - |"
+					+ "A3 - - - C4 - - - B3 - - - A3 - G#3 - | F3 - - - - - - - E3 - - - - - . . |"
+					+ "A3 - . A3 C4 - . C4 D#4 - - - - - - - | E4 - - - D4 - - - C4 - - - B3 - - - |"
+					+ "C4 - B3 - A3 - G#3 - F3 - - - D#3 - - - | E3 - - - - - - - - - - - . . . . |"),
+				"bass": ("A1 - A2 - A1 - A2 - A#1 - A#2 - A1 - A2 - |".repeat(2)
+					+ "F1 - F2 - F1 - F2 - E1 - E2 - E1 - E2 - | D1 - D2 - D1 - D2 - E1 - E2 - E1 - E2 - |"
+					+ "A1 - A2 - A1 - A2 - A#1 - A#2 - A1 - A2 - |".repeat(2)
+					+ "F1 - F2 - F1 - F2 - D#1 - D#2 - D#1 - D#2 - | E1 - E2 - E1 - E2 - E1 - E2 - E1 E1 E1 E1 |"),
+				"pad": x2("A3 - - - - - - - | A3 - - - - - - - | F3 - - - - - - - | E3 - - - - - - - |".repeat(2)),
+				"beat": ("k . . . . . . . s . . . . . . . | k . . . . . k . s . . . . . h h |"
+					+ "k . . . . . . . s . . . . . . . | k . . . . . k . s . . k s . s s |"
+					+ "k . . k . . . . s . . . . . . . | k . . k . . k . s . . . k . . . |"
+					+ "k . . k . . . . s . . . . . . . | k . k . k . k . s s s s s s c . |"),
+				"dark_lead": (". . . . . . . . . . . . . . . . | A5 - - - - - - - D#6 - - - - - - - |"
+					+ ". . . . . . . . . . . . . . . . | F5 - - - E5 - - - - - - - . . . . |"
+					+ "A5 - D#6 - A6 - - - - - - - . . . . | G#6 - - - F6 - - - D#6 - - - - - - - |"
+					+ "E6 - - - - - - - - - - - . . D#6 E6 | A5 - - - - - - - - - - - - - . . |"),
+				"dark_beat": ("c . . . . . . . . . . . . . . . | . . . . . . . . . . . . k . k . |".repeat(3)
+					+ "c . . . . . . . . . . . . . . . | . . . . . . . . k . k . k k k k |"),
+			}
+		"boss_fall":  # phase 3: the floor is gone, the crown is cracked; the land's motif fights back
+			return {
+				"lead": ("A4 - - - C5 - - - E5 - - - D5 - - - | B4 - - - - - - - - - . . A4 B4 C5 D5 |"
+					+ "E5 - - - - - D5 - C5 - - - B4 - A4 - | G#4 - - - - - - - E4 - - - - - - - |"
+					+ "A4 - C5 - E5 - A5 - - - G#5 - F5 - - - | D#5 - - - - - - - E5 - - - - - . . |"
+					+ "C5 - D5 - E5 - - - D5 - C5 - B4 - G#4 - | A4 - - - - - - - - - - - . . . . |"),
+				"bass": ("A1 A1 A2 A1 A1 A1 A2 A1 F1 F1 F2 F1 G1 G1 G2 G1 | E1 E1 E2 E1 E1 E1 E2 E1 E1 E1 E2 E1 G#1 G#1 G#2 G#1 |"
+					+ "A1 A1 A2 A1 A1 A1 A2 A1 F1 F1 F2 F1 G1 G1 G2 G1 | E1 E1 E2 E1 E1 E1 E2 E1 D#1 D#1 D#2 D#1 E1 E1 E2 E1 |"
+					+ "A1 A1 A2 A1 C2 C2 C3 C2 F1 F1 F2 F1 D#1 D#1 D#2 D#1 | E1 E1 E2 E1 E1 E1 E2 E1 E1 - - - E2 - - - |"
+					+ "F1 F1 F2 F1 G1 G1 G2 G1 E1 E1 E2 E1 E1 E1 E2 E1 | A1 A1 A2 A1 A1 A1 A2 A1 E1 - - - E1 E1 E1 E1 |"),
+				"harmony": x2("A3 - - - F3 - G3 - | E3 - - - - - - - | A3 - - - F3 - G3 - | E3 - - - D#3 - E3 - |"
+					+ "A3 - C4 - F3 - D#3 - | E3 - - - - - - - | F3 - G3 - E3 - - - | A3 - - - - - - - |"),
+				"beat": ("k . h k s . h . k . k . s . h h | k . h k s . h . k k . k s . s s |"
+					+ "k . h k s . h . k . k . s . h h | k . h k s . h . k . k . s s s s |"
+					+ "k k s . k k s . k k s . k k s . | k . s s k . s s k . s s s s s s |"
+					+ "k . h k s . h . k . k . s . h h | k . s s s s s s k . s s c . . . |"),
+				"dark_lead": (". . . . . . . . E6 - - - D#6 - E6 - | F6 - - - - - - - E6 - - - - - - - |"
+					+ ". . . . . . . . E6 - - - D#6 - E6 - | B5 - - - - - - - - - - - . . . . |"
+					+ "A6 - G#6 - F6 - D#6 - E6 - - - - - - - | A5 - D#6 A6 - D#6 A6 - . . . . . . . . |"
+					+ "C6 - - - B5 - - - A5 - - - G#5 - - - | A5 - - - - - - - - - - - . . . . |"),
+				"dark_beat": ("c . . . . . . . . . . . . . . . | . . . . . . . . k . k . k . k . |".repeat(3)
+					+ "c . . . . . . . k . . . c . . . | k k k k k k k k c . . . . . . . |"),
+			}
 	return {}
 
 
@@ -182,6 +230,28 @@ static func _boss() -> Dictionary:
 		Synth.voice(p.lead, step, "pulse", 0.22, n, 0.25, [0.005, 0.1, 0.75, 0.04], 0.008),
 		Synth.voice(p.bass, step, "pulse", 0.14, n, 0.5, [0.002, 0.05, 0.6, 0.02]),
 		Synth.voice(p.low, step, "triangle", 0.45, n, 0.5, [0.01, 0.2, 0.8, 0.1]),
+		Synth.drums(p.beat, step, 0.32, n, 3),
+	])
+	base = Synth.echo(base, step * 6, 0.2, 0.2)
+	var dark := Synth.mix([
+		Synth.voice(p.dark_lead, step, "pulse", 0.14, n, 0.125, [0.002, 0.04, 0.5, 0.02]),
+		Synth.drums(p.dark_beat, step, 0.35, n, 5),
+	])
+	dark = Synth.echo(Synth.lowpass(dark, 3000.0), step * 6, 0.4, 0.4)
+	return {"base": Synth.normalise(base), "dark": Synth.normalise(dark, 0.6), "bars": 8}
+
+
+## The fight's later phases on the code synth (only when a stem file is missing): the lead,
+## the bass, the pad or harmony and the drums; the dark stem is the high line and the crashes.
+static func _battle(tune: String) -> Dictionary:
+	var step := step_of(tune)
+	var p := parts(tune)
+	var n := Synth.length_of(p.lead, step)
+	var chords: String = p.get("pad", p.get("harmony", ""))
+	var base := Synth.mix([
+		Synth.voice(p.lead, step, "pulse", 0.22, n, 0.25, [0.005, 0.1, 0.75, 0.04], 0.008),
+		Synth.voice(p.bass, step, "triangle", 0.40, n, 0.5, [0.002, 0.05, 0.7, 0.02]),
+		Synth.voice(chords, step, "pulse", 0.10, n, 0.125, [0.05, 0.2, 0.6, 0.1]),
 		Synth.drums(p.beat, step, 0.32, n, 3),
 	])
 	base = Synth.echo(base, step * 6, 0.2, 0.2)

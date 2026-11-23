@@ -151,6 +151,41 @@ func test_bot_beats_the_shadow_king() -> void:
 		check_eq(f.phases_seen, [1, 2, 3], "seed %d: through all 3 phases" % seed_value)
 
 
+## Each phase has its own tune (Blade, Eclipse, Fall), each a recorded tune, and the dark stem
+## pushes in harder as the fight goes on; once he falls the victory sting is a recorded sound.
+func test_music_follows_the_phases() -> void:
+	const Boss := preload("res://boss/boss.gd")
+	Game.reset()
+	var f := ThroneFight.new(1)
+	var bot := ThroneBot.new()
+	var tunes: Array[String] = []
+	for i in 240 * 60:
+		bot.drive(f)
+		f.tick(DT)
+		for e in f.events:
+			var tune: String = Boss.MUSIC_LIKE.get(e.get("name", ""), "") if e["kind"] == "music" else ""
+			if tune != "" and (tunes.is_empty() or tunes[-1] != tune):
+				tunes.append(tune)
+		f.events.clear()
+		if f.won or f.lost:
+			break
+	check(f.won, "the bot wins")
+	check_eq(tunes, ["boss", "boss_eclipse", "boss_fall"], "a tune per phase")
+	for tune in tunes:
+		check(Audio.Tunes.TUNES.has(tune) and not Audio.recorded_stems(tune).is_empty(), tune + " is recorded")
+	var g := ThroneFight.new(1)
+	var want := {1: 0.0, 2: 0.5, 3: 0.8}
+	for phase in want:
+		g.phase = phase
+		check_eq(Boss.intensity_of(g), want[phase], "phase %d intensity" % phase)
+	g.phase = 2
+	g.dark = true
+	check_eq(Boss.intensity_of(g), 1.0, "the dark hall: full dark stem")
+	g.won = true
+	check_eq(Boss.intensity_of(g), 0.0, "he falls: no dark stem")
+	check(Audio.has_recorded_sfx("victory") and Audio.has_recorded_sfx("boss_defeat"), "victory and defeat are recorded")
+
+
 func test_throne_screen_runs() -> void:
 	Scenes.goto("boss")
 	await physics_frames(2)

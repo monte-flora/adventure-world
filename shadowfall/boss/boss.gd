@@ -255,7 +255,7 @@ func _physics_process(dt: float) -> void:
 	var k := shake_t / shake_len if shake_len > 0.0 else 0.0
 	cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_px * k * Juice.shake_scale()
 	dark_rect.visible = fight.dark
-	Audio.intensity = 1.0 if fight.dark else (0.6 if fight.phase == 3 and not fight.won else 0.0)
+	Audio.intensity = intensity_of(fight)
 	_king_anim(fight)
 	if fight.dark:
 		dark_rect.material.set_shader_parameter("hero_px", fight.hero.pos)
@@ -265,12 +265,27 @@ func _physics_process(dt: float) -> void:
 	glow.queue_redraw()
 
 
+const VICTORY_AFTER := 2.6                 # s after he falls: the victory sting, once boss_defeat dies down
+
+
+## How far the music's dark stem is pushed in: phase 1 none, phase 2 half (all of it while the hall is
+## dark), phase 3 most; none once he falls.
+static func intensity_of(f: ThroneFight) -> float:
+	if f.won:
+		return 0.0
+	if f.dark:
+		return 1.0
+	return [0.0, 0.0, 0.5, 0.8][clampi(f.phase, 0, 3)]
+
+
 ## Boss sounds and tunes B6 hasn't made yet fall back to the nearest one it has (ask: B6).
 const SFX_LIKE := {"boss_glow": "king", "boss_slash": "swing", "boss_fire": "dash", "boss_aim": "king",
 	"boss_leap": "jump", "boss_land": "pound", "boss_shimmer": "king", "boss_beam": "die", "boss_hit": "hit",
 	"boss_phase": "king", "crown_hit": "hit", "sunfang": "stone", "clang": "land", "cut": "swing",
-	"pogo": "jump", "forge": "stone", "door_open": "pound", "door_locked": "land", "boss_defeat": "die"}
-const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss"}
+	"pogo": "jump", "forge": "stone", "door_open": "pound", "door_locked": "land", "boss_defeat": "die", "victory": "stone"}
+## The fight's tune per phase: the Blade, the Eclipse, the Fall.
+const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss_eclipse",
+	"boss_c": "boss_fall"}
 
 
 ## Sparks and motes for the fight's big moments (overworld/juice.gd).
@@ -407,6 +422,8 @@ func _event(e: Dictionary) -> void:
 		"won":
 			end_t = 0.0
 			_sfx("boss_defeat")
+			Audio.stop_music(1.5)
+			get_tree().create_timer(VICTORY_AFTER).timeout.connect(_sfx.bind("victory"))
 			Juice.burst(self, fight.king, GOLD, 40, 160.0, 1.6, 3.0, -30.0)
 			Juice.burst(self, fight.king, LIGHT, 24, 90.0, 2.0, 2.0, -50.0)
 
