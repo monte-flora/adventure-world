@@ -1,0 +1,17 @@
+{
+ "name": "shadow_thorns",
+ "size": [
+  35,
+  50
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  17,
+  50
+ ],
+ "base": 50
+}

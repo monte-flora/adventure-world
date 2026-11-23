@@ -98,6 +98,8 @@ func ground(p: Vector2i) -> String:
 ## What stands on square p now (empty = nothing).
 func object(p: Vector2i) -> String:
 	var ch := world.at(p)
+	if ch in "XYOK" and painted(p):           # painted lands: crags and gates are props (RealmProps.scatter)
+		return ""
 	if world.gates.has(p):
 		return "" if world.gate_open(p) else "rock"
 	if GATE.has(ch):

@@ -250,10 +250,14 @@ func test_gate_art_opens_with_the_ability() -> void:
 		if ow.world.cells[p] == "Y":
 			gate = p
 			break
-	check(gate.x >= 0 and ow.objects.get_cell_source_id(gate) != -1, "an ivy cliff is drawn while shut")
+	var painted: bool = ow.tiles.painted(gate)
+	var drawn := func() -> bool:
+		return ow.decor.gates[gate].visible if painted else ow.objects.get_cell_source_id(gate) != -1
+	check(gate.x >= 0 and drawn.call(), "an ivy cliff is drawn while shut")
+	check(not painted or ow.objects.get_cell_source_id(gate) == -1, "a painted land draws it as a prop, not a tile")
 	Game.take_stone("leaf")
 	Game.changed.emit()
-	check(ow.objects.get_cell_source_id(gate) == -1, "and gone once you can climb")
+	check(not drawn.call(), "and gone once you can climb")
 
 
 func test_hits_stop_shake_and_burst() -> void:

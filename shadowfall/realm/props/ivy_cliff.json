@@ -1,0 +1,17 @@
+{
+ "name": "ivy_cliff",
+ "size": [
+  34,
+  60
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  17,
+  60
+ ],
+ "base": 60
+}

@@ -1,6 +1,7 @@
 shader_type canvas_item;
 // The realm's painted ground (RealmGround): TEXTURE is the material map, one texel per square
-// (0 = none: the tiles underneath show, 1..n = a ground texture in `atlas`, 256 px each, side by side).
+// (0 = none: the tiles underneath show, 1..n = a ground texture in `atlas`, 256 px each, `cols` a row).
+// Textures from water_first on are water: they ripple (each pixel row and column sways a pixel or two).
 // Each pixel blends the 4 nearest squares' textures, with the square edges pushed about by value
 // noise so a road's edge wobbles like trodden earth. One quad covers the whole realm: no screen seams.
 
@@ -9,6 +10,9 @@ shader_type canvas_item;
 uniform int stage = 0;           // the gloom stage (GloomLight.track keeps it up to date)
 uniform sampler2D atlas : filter_nearest, repeat_disable;
 uniform int count = 1;            // textures in the atlas
+uniform int cols = 8;             // textures per atlas row
+uniform int water_first = 999;    // the first water texture
+uniform float ripple = 1.5;       // px the water sways
 uniform float tex_size = 256.0;
 uniform float tile = 32.0;
 uniform float wobble = 0.35;      // how far (in squares) the noise moves an edge
@@ -21,10 +25,13 @@ float noise(vec2 p) {
 	return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
 }
 
-vec4 tex_at(int m, vec2 px) {
+vec4 tex_at(int m, vec2 px, float time) {
 	if (m <= 0 || m > count) return vec4(0.0);
+	if (m >= water_first) {
+		px += floor(vec2(sin(time * 1.3 + px.y * 0.19), cos(time * 1.1 + px.x * 0.15)) * ripple + 0.5);
+	}
 	ivec2 t = ivec2(mod(px, tex_size));
-	return texelFetch(atlas, t + ivec2((m - 1) * int(tex_size), 0), 0);
+	return texelFetch(atlas, t + ivec2((m - 1) % cols, (m - 1) / cols) * int(tex_size), 0);
 }
 
 void fragment() {
@@ -41,7 +48,7 @@ void fragment() {
 			ivec2 c = clamp(b + ivec2(i, j), ivec2(0), cells - 1);
 			int m = int(round(texelFetch(TEXTURE, c, 0).r * 255.0));
 			float w = (i == 0 ? 1.0 - f.x : f.x) * (j == 0 ? 1.0 - f.y : f.y);
-			col += tex_at(m, px) * w;
+			col += tex_at(m, px, TIME) * w;
 		}
 	}
 	col.rgb = gloom_grade(col.rgb, stage);

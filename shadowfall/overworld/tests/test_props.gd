@@ -163,3 +163,50 @@ func test_each_lit_prop_has_its_lights_and_the_hero_stays_brightest() -> void:
 	check(fire.base_energy > window.base_energy, "and burns stronger")
 	fire.free()
 	window.free()
+
+
+func test_painted_lands_draw_crags_gates_and_water_without_changing_collision() -> void:
+	var w := WorldMap.new()
+	w.stitch({"realm/1_t.txt": "at: 0 0\nhome: 1 1\nground: painted\ncrags: rocks\ngate: Riven Gap 0 5 dash\n"
+		+ "XXXXXXXX\nXHGGGGYX\nXGFFGGOX\nXGWWWWKX\nXGWWWWWX\nXXXXXXXX"})
+	var before := {}
+	for p in w.cells:
+		before[p] = w.walkable(p)
+	var root := Node2D.new()
+	var d := RealmProps.scatter(w, root)
+	for p in w.cells:
+		check_eq(w.walkable(p), before[p], "square %s walks as its letter says" % p)
+	check(w.prop_cells.is_empty() and w.prop_solid.is_empty(), "decor adds no footprints")
+	for c in [Vector2i(6, 1), Vector2i(6, 2), Vector2i(6, 3), Vector2i(5, 0)]:
+		check(d.gates.has(c) and d.gates[c].visible, "gate %s has its prop, shown while shut" % c)
+	check_eq(d.gates[Vector2i(6, 1)].get_meta("prop"), "ivy_cliff", "Y is an ivy cliff")
+	check_eq(d.gates[Vector2i(5, 0)].get_meta("prop"), RealmProps.GATE_ROCK, "a gate: rock is a boulder")
+	var crags := 0
+	for s: Sprite2D in d.sprites:
+		if s.get_meta("prop") == "rocks":
+			crags += 1
+	check(crags >= 10, "the walls get the land's crags (%d)" % crags)
+	Game.take_stone("leaf")
+	RealmProps.refresh_gates(w, d.gates)
+	check(not d.gates[Vector2i(6, 1)].visible, "the ivy cliff goes once you can climb")
+	var g := RealmGround.new(w)
+	check_eq(g.role_at(Vector2i(3, 4)), "deep_water", "water away from the shore is deep")
+	check_eq(g.role_at(Vector2i(2, 3)), "shallow_water", "water by the land is the shore")
+	check_eq(g.role_at(Vector2i(0, 0)), "cliff", "a wall is cliff")
+	check_eq(g.role_at(Vector2i(5, 0)), "rocky_ground", "under the boulder: rocky ground")
+	check_eq(g.role_at(Vector2i(2, 2)), "forest_floor", "under the trees: forest floor")
+	check(g.build(), "builds")
+	var water_first: int = g.material.get_shader_parameter("water_first")
+	check(g.have[g.material_at(Vector2i(3, 4))] >= water_first and g.have[g.material_at(Vector2i(1, 2))] < water_first,
+		"only the water ripples")
+	g.free()
+	root.free()
+
+
+func test_a_land_paints_a_role_with_its_own_texture() -> void:
+	var w := WorldMap.new()
+	w.stitch({"realm/1_t.txt": "at: 0 0\nground: painted\npaint: grass mud\npaint: cliff no_such_texture\nXGG\nGGG"})
+	var g := RealmGround.new(w)
+	check_eq(g.material_at(Vector2i(1, 0)), "mud", "paint: grass mud")
+	check_eq(g.material_at(Vector2i(0, 0)), "cliff", "a missing texture falls back to the shared one")
+	g.free()

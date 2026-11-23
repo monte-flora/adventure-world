@@ -1,0 +1,17 @@
+{
+ "name": "rubble_heap",
+ "size": [
+  42,
+  40
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  21,
+  40
+ ],
+ "base": 40
+}
