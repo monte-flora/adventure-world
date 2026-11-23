@@ -69,10 +69,18 @@ User: refactor fully for teens (art, gameplay, music); stay on pygame unless ano
   - [x] 2026-11-22 C2 realm + boss (#38, #41, #43, #44, #46): art/tilesets/sprites in place of placeholders, weak monsters redrawn, juice.
   - [x] 2026-11-22 C3 music on real sampled instruments (user: "Does the music have to be 8-bit? Could we make it sound more authentic?"), #40, #42.
   - [x] 2026-11-22 Hero = the Lanternbearer and a new Shadow King, from the user's concept art ("as close to this as we can get"), #49, #50; hero crawls under 1-tile ceilings + thorn tile, #51. Boss/Sunfang/lieutenant names, #46.
-- [~] **Wave D: people, dialogue and the shop** (user, 2026-11-22: "Go ahead with people, dialogue and the shop next."):
+- [x] 2026-11-22 **Wave D: people, dialogue and the shop** (user, 2026-11-22: "Go ahead with people, dialogue and the shop next."):
   - [x] 2026-11-22 D1 people in the realm (#52), dialogue with choices and quests, shop + forge (#53), CI robot that shops and takes a quest (#54).
-  - [~] caves use the forged sword's damage and the Sunfang anims.
-- [ ] Later: balance; castle door/key; real boss SFX/tunes; Shadow King second pass (bigger cloak and sword) if the user wants it; Godot itch.io page (user sets secrets).
+  - [x] 2026-11-22 caves use the forged sword's damage and the Sunfang anims (#55).
+- [x] 2026-11-22 **Wave E: atmosphere + characters** (user's two target images, `docs/teen/art/ref/`): E1 dusk lighting tied to gloom, flicker, y-sort (#57; rest paused); E2 (Fable 5.2) Lanternbearer lantern + embers, 19 NPC looks + gear overlays, NPC lights (#58, #60, #61).
+- [x] 2026-11-22 **Painted look** (user: "re-design the game such the background is a static element"): P1 painted Emberhold prototype (#59, `pixi run painted`).
+- [x] 2026-11-22 **Polish caves with Gemini, by hand** (user: "Go with option 1"): editor Polish button, layout map + prompt, import (#62); painted caves hide rock tiles, F3 shows collision, Vine Garden painting ships (#63).
+- [x] 2026-11-22 **Realm from Gemini textures + props** (user: "Go ahead, start it now"): prompt pack `shadowfall/realm/gemini/` + `import_art.sh` (#64), painted ground blend + props in level files, Emberhold first pass with placeholders (#65), prop editor (#66). Darkening reaches painted art (#68, part a).
+- [x] 2026-11-22 Castle doors locked until key/lever (#67, H1 part a).
+- [ ] **User:** make the Gemini images (realm textures and props; Fire Mountain cave) in `~/try-shadowfall`, then ask main to PR them.
+- [ ] G2 rest (paused): gloom 0/3 screenshots, prop-line docs into `levels/README.md`, full test run.
+- [ ] H1 rest (paused): boss SFX, 3-phase boss tunes, victory sting.
+- [ ] Later: balance; Shadow King second pass (bigger cloak and sword) if the user wants it; leaner cave hero (`hero_side`); Godot itch.io page (user sets secrets); realm tiles path (E1 shadows/cliffs/props) only if the painted path is dropped.
 
 ## From the play-test on 2026-11-07
 
