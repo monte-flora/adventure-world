@@ -22,6 +22,14 @@ const LIGHT := Color("fff4d6")
 var level := 0                          # castle level, 0 = the throne room
 var cave: Node                          # the castle level being played
 var door := Rect2()
+var door_cell := Vector2i(-1, -1)
+var key_cells: Array[Vector2i] = []     # K: the key to this level's door (taking one is enough)
+var lever_cells: Array[Vector2i] = []   # L: levels 2 and 4 open their door with a lever instead
+var has_key := false
+var door_open_t := -1.0                 # seconds since the door opened (-1 = shut)
+var bumped := 0                         # times you've tried the shut door
+var bump_cool := 0.0
+var door_art: Node2D
 var fight: ThroneFight
 var losses := 0
 var told_clang := false
@@ -72,17 +80,102 @@ func _start_castle() -> void:
 	add_child(cave)
 	var lf: LevelFile = cave.get("level")
 	if lf and lf.find("D").size() > 0:
-		door = Rect2(Vector2(lf.find("D")[0]) * LevelFile.TILE, Vector2.ONE * LevelFile.TILE).grow(6)
+		door_cell = lf.find("D")[0]
+		door = Rect2(Vector2(door_cell) * LevelFile.TILE, Vector2.ONE * LevelFile.TILE).grow(6)
+	if lf:
+		key_cells.assign(lf.find("K"))
+		lever_cells.assign(lf.find("L"))
+	has_key = key_cells.is_empty() and lever_cells.is_empty()   # nothing to find: the door is open
+	door_art = Node2D.new()
+	door_art.z_index = 5
+	door_art.draw.connect(_draw_door_and_key)
+	cave.add_child(door_art)
 	if caption == "" and lf:
 		_say(lf.setting("name", "The Shadow Castle"))
 	_music("castle")
 
 
-func _castle_tick() -> void:
+func _castle_tick(dt: float) -> void:
 	var h = cave.get("hero")
-	if h and door.has_area() and door.has_point(h.position):
-		cave = null
-		Scenes.goto.call_deferred("boss", Castle.next(level))
+	if h == null:
+		return
+	bump_cool = maxf(0.0, bump_cool - dt)
+	door_art.queue_redraw()
+	if not has_key:
+		_look_for_key(h)
+	if door_open_t >= 0.0:
+		door_open_t += dt
+		if door_open_t >= DOOR_OPEN_TIME:
+			cave = null
+			Scenes.goto.call_deferred("boss", Castle.next(level))
+		return
+	if not (door.has_area() and door.has_point(h.position)):
+		return
+	if has_key:
+		door_open_t = 0.0
+		_say(DOOR_OPENS if level == Castle.LEVELS else "The door grinds open.")
+		_sfx("door_open")
+		cave.juice.shake.add(3, 14)
+	elif bump_cool <= 0.0:
+		bump_cool = 2.0
+		bumped += 1
+		_sfx("door_locked")
+		var hint: String = cave.level.setting("locked door says", "")
+		_say(hint if bumped % 2 == 0 and hint != "" else locked_line())
+
+
+const DOOR_OPEN_TIME := 0.8
+const DOOR_OPENS := "The great door groans open. Cold air, and the smell of old ash."
+
+
+## What the shut door says the first time you touch it: grim, short.
+func locked_line() -> String:
+	if level == Castle.LEVELS:
+		return "The great door will not yield. Its key hangs at the belt of the King's captain."
+	if not lever_cells.is_empty():
+		return "The door is barred. Somewhere in these halls, a lever holds it shut."
+	return "The door is barred with black iron. Its key lies somewhere in these halls."
+
+
+## K: walk into the key to take it. L: strike the lever (R) or pull it (interact) beside it.
+func _look_for_key(h: HeroSide) -> void:
+	var r: Rect2 = h.rect()
+	for c in key_cells:
+		if r.intersects(Rect2(Vector2(c) * LevelFile.TILE, Vector2.ONE * LevelFile.TILE)):
+			_got_key("You take the key. Iron, and cold as a grave.")
+			return
+	for c in lever_cells:
+		var near: bool = h.position.distance_to((Vector2(c) + Vector2(0.5, 0.5)) * LevelFile.TILE) < LevelFile.TILE * 1.6
+		if c in h.attack_hits or (near and h.interact_pressed):
+			_got_key("Far off, chains rattle. A bar lifts from the door.")
+			return
+
+
+func _got_key(text: String) -> void:
+	has_key = true
+	_say(text)
+	_sfx("stone")
+
+
+## The key until it's taken; the door, barred until it opens.
+func _draw_door_and_key() -> void:
+	var tile := Vector2.ONE * LevelFile.TILE
+	if not has_key:
+		for c in key_cells:
+			var bob := Vector2(0, sin(Time.get_ticks_msec() / 250.0) * 2.0)
+			door_art.draw_texture_rect(ArtSheet.tile("tiles_castle", "key"), Rect2(Vector2(c) * tile + bob, tile), false)
+	if door_cell.x < 0:
+		return
+	var p := Vector2(door_cell) * tile
+	if door_open_t >= 0.0:                       # swinging open: the dark beyond shows through
+		var k := minf(1.0, door_open_t / 0.5)
+		door_art.draw_rect(Rect2(p, tile), INK0)
+		door_art.draw_texture_rect(ArtSheet.tile("tiles_castle", "door"), Rect2(p, Vector2(tile.x * (1.0 - k), tile.y)), false)
+		return
+	door_art.draw_texture_rect(ArtSheet.tile("tiles_castle", "door"), Rect2(p, tile), false)
+	if not has_key:                              # black iron bars across it
+		for y in [8.0, 20.0]:
+			door_art.draw_rect(Rect2(p + Vector2(2, y), Vector2(tile.x - 4, 4)), INK1)
 
 
 # ---- the throne room ------------------------------------------------------------------------
@@ -141,7 +234,7 @@ func _physics_process(dt: float) -> void:
 	flash = maxf(0.0, flash - dt)
 	hud.queue_redraw()
 	if cave:
-		_castle_tick()
+		_castle_tick(dt)
 	if fight == null:
 		return
 	if not has_meta("test"):
@@ -176,7 +269,7 @@ func _physics_process(dt: float) -> void:
 const SFX_LIKE := {"boss_glow": "king", "boss_slash": "swing", "boss_fire": "dash", "boss_aim": "king",
 	"boss_leap": "jump", "boss_land": "pound", "boss_shimmer": "king", "boss_beam": "die", "boss_hit": "hit",
 	"boss_phase": "king", "crown_hit": "hit", "sunfang": "stone", "clang": "land", "cut": "swing",
-	"pogo": "jump", "forge": "stone"}
+	"pogo": "jump", "forge": "stone", "door_open": "pound", "door_locked": "land"}
 const MUSIC_LIKE := {"castle": "cave", "throne": "boss", "boss_a": "boss", "boss_b": "boss"}
 
 
