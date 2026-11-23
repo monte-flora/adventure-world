@@ -302,3 +302,20 @@ func test_dusk_lights_and_y_sort() -> void:
 	check_eq(cm, 1, "one CanvasModulate tints the realm")
 	check(RealmLight.has_light(ow.hero), "the hero carries a light")
 	check(get_tree().get_nodes_in_group(RealmLight.GROUP).size() > 1, "houses and people glow too")
+
+
+## Props must never wall off a Mine, a waystone or a gate: with every ability, all are reachable from home.
+func test_props_leave_every_mine_waystone_and_gate_reachable() -> void:
+	for st in Game.STONES:
+		Game.take_stone(st)
+	var w := WorldMap.load_realm()
+	var goals: Array[Vector2i] = []
+	goals.append_array(w.mines)
+	goals.append_array(w.waystones.keys())
+	goals.append_array(w.gates.keys())
+	for p in w.cells:
+		if WorldMap.GATE_LETTERS.has(w.cells[p]):
+			goals.append(p)
+	for g in goals:
+		check(not w.path(w.home, g).is_empty(), "%s (%s, %s) is reachable" % [g, w.at(g), w.land(g)])
+	Game.reset()

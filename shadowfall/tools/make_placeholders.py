@@ -23,6 +23,7 @@ INK = (24, 20, 28)
 GROUND = {"grass": (52, 74, 48), "dirt_road": (112, 74, 52), "cobblestone": (96, 92, 88),
           "mud": (62, 48, 38), "shallow_water": (54, 86, 92), "rocky_ground": (78, 76, 96),
           "cliff": (60, 58, 70), "deep_water": (34, 58, 76), "forest_floor": (40, 54, 38)}
+GROUND_COLORS = {}                            # a land's own ground: assets.json "ground_colors"
 GREEN, DARK, BARK, ROOF, WALL, STONE, IRON, FIRE = ((50, 92, 52), (34, 64, 52), (92, 62, 40), (60, 70, 120),
                                                     (200, 190, 160), (120, 118, 128), (40, 40, 48), (240, 150, 40))
 
@@ -133,7 +134,7 @@ def prop(name, w, h):
 
 def ground(name):
     rng = random.Random(name)
-    base = GROUND[name]
+    base = GROUND.get(name) or tuple(GROUND_COLORS[name])
     s = pygame.Surface((512, 512))
     s.fill(base)
     for _ in range(900):
@@ -149,12 +150,13 @@ def ground(name):
 def main():
     pygame.init()
     a = json.load(open(os.path.join(GEMINI, "assets.json")))
+    GROUND_COLORS.update(a.get("ground_colors", {}))
     os.makedirs(OUT, exist_ok=True)
     for n in a["ground"]:
         pygame.image.save(ground(n), os.path.join(OUT, (n if "_ground_" in n else "ground_" + n) + ".png"))
     for n, d in a["props"].items():
         w, h = d["size"]
-        pygame.image.save(prop(n, w * 4, h * 4), os.path.join(OUT, n + ".png"))
+        pygame.image.save(prop(d.get("like", n), w * 4, h * 4), os.path.join(OUT, n + ".png"))  # like: draw it as that shape
     print("placeholders:", len(a["ground"]) + len(a["props"]))
 
 
