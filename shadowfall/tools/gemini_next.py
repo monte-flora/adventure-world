@@ -25,9 +25,14 @@ IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 PARTIAL_EXTS = (".crdownload", ".part", ".download")
 
 
+def is_ground(name):
+    """ground_grass, or a land's own ground like wintermarch_ground_snow."""
+    return name.startswith("ground_") or "_ground_" in name
+
+
 def prompt_names(gemini=GEMINI):
     names = [f[:-4] for f in os.listdir(os.path.join(gemini, "prompts")) if f.endswith(".txt")]
-    return sorted(names, key=lambda n: (not n.startswith("ground_"), n))
+    return sorted(names, key=lambda n: (not is_ground(n), n))
 
 
 def done_file(name, gemini=GEMINI):
@@ -140,8 +145,8 @@ def move_in(src, name, gemini=GEMINI):
 
 
 def out_path(name):
-    sub = "ground" if name.startswith("ground_") else "props"
-    return os.path.join(SHADOWFALL, "realm", sub, name + ".png")
+    sub = "ground" if is_ground(name) else "props"
+    return os.path.join(SHADOWFALL, "realm", sub, name.removeprefix("ground_") + ".png")
 
 
 def cbreak():
