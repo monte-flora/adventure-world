@@ -136,7 +136,7 @@ func build(lf: LevelFile, from_file := "") -> void:
 	for p in parallax:
 		p.get_child(0).material = light.world_material
 	if painting:
-		painting.material = light.world_material
+		painting.material = light.painted_material     # a smooth gloom grade: the palette swap bands paintings
 	light.follow(hero)
 	add_child(preload("res://ui/hud.tscn").instantiate())
 

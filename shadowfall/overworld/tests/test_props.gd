@@ -97,3 +97,69 @@ func test_painted_ground_has_no_seam_between_screens() -> void:
 
 func _diff(a: Color, b: Color) -> float:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b)
+
+
+func test_painted_props_and_ground_follow_the_gloom() -> void:
+	Game.gloom = 0.0
+	Scenes.goto("overworld")
+	await physics_frames(2)
+	var ow = Scenes.screen
+	var lamp: Sprite2D = null
+	for s in ow.prop_sprites:
+		if s.get_meta("prop") == "lamppost":
+			lamp = s
+	check(lamp != null, "Emberhold has a lamppost")
+	if lamp == null:
+		return
+	var mat: ShaderMaterial = lamp.material
+	check(mat != null and mat.shader.resource_path == "res://light/painted_gloom.gdshader", "props get the painted grade")
+	check_eq(mat.get_shader_parameter("stage"), 0, "stage 0 to start")
+	Game.gloom = 1.0
+	await frames(2)
+	check_eq(mat.get_shader_parameter("stage"), 3, "the props' stage follows the gloom")
+	check_eq(ow.ground.material.get_shader_parameter("stage"), 3, "and the painted ground's")
+	var img := lamp.texture.get_image()
+	img.decompress()
+	var c := Color(0, 0, 0, 0)
+	for y in img.get_height():                       # the lamppost's most opaque, brightest pixel
+		for x in img.get_width():
+			var p := img.get_pixel(x, y)
+			if p.a > 0.9 and p.v > c.v:
+				c = p
+	var dark := PaintedGloom.grade(c, 3)
+	check(PaintedGloom.grade(c, 0) == c, "stage 0 leaves the art as painted")
+	check(dark.v < c.v * 0.6, "stage 3 darker (%.2f -> %.2f)" % [c.v, dark.v])
+	check(dark.s <= c.s * 0.6 + 0.01, "and greyer (%.2f -> %.2f)" % [c.s, dark.s])
+	check(dark.b >= dark.g, "and shifted toward violet: %s" % dark)
+	var px := Vector2(ow.world.lands["emberhold"].rect.position + Vector2i(10, 18)) * TILE
+	var g0: Color = ow.ground.color_at(px, 0)
+	var g3: Color = ow.ground.color_at(px, 3)
+	check(g0.a > 0.99 and g3.v < g0.v * 0.6 and g3.s < g0.s, "the ground darkens and greys too (%s -> %s)" % [g0, g3])
+	Game.gloom = 0.0
+
+
+func test_each_lit_prop_has_its_lights_and_the_hero_stays_brightest() -> void:
+	Scenes.goto("overworld")
+	await physics_frames(2)
+	var ow = Scenes.screen
+	var hero_l: LanternLight = ow.hero.light
+	var seen := {}
+	var count := {}
+	for p in ow.world.props:
+		count[p.name] = p.meta.get("lights", []).size()
+	for s in ow.prop_sprites:
+		var want: int = count[s.get_meta("prop")]
+		var lights: Array = s.get_children().filter(func(n): return n is LanternLight)
+		check_eq(lights.size(), want, "%s: one light per .json light" % s.get_meta("prop"))
+		for l: LanternLight in lights:
+			seen[s.get_meta("prop")] = true
+			check(l.base_energy < hero_l.base_energy and l.radius < hero_l.radius,
+				"%s's light (%.2f, %.0f px) is under the hero's lantern" % [s.get_meta("prop"), l.base_energy, l.radius])
+	for k in ["cottage_a", "lamppost", "campfire"]:
+		check(seen.has(k), "Emberhold's %s is lit" % k)
+	var fire := RealmProps.light(self, "campfire", Vector2.ZERO, 110.0)
+	var window := RealmProps.light(self, "cottage_a", Vector2.ZERO, 44.0)
+	check((fire.get_child(0) as Flicker).amount > (window.get_child(0) as Flicker).amount, "fire flickers more than a window")
+	check(fire.base_energy > window.base_energy, "and burns stronger")
+	fire.free()
+	window.free()

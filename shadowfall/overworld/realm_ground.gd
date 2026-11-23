@@ -96,9 +96,9 @@ func _villages() -> Array:
 	return out
 
 
-## The shader's colour at realm pixel px, worked out on the CPU (tests check seams with it). Keep in
-## step with realm_ground.gdshader.
-func color_at(px: Vector2) -> Color:
+## The shader's colour at realm pixel px at gloom `stage`, worked out on the CPU (tests check seams
+## and the gloom with it). Keep in step with realm_ground.gdshader.
+func color_at(px: Vector2, stage := 0) -> Color:
 	var atlas := atlas_image
 	var cells := map_image.get_size()
 	var n := Vector2(_noise(px / 23.0), _noise(px / 23.0 + Vector2(17.3, 17.3))) - Vector2(0.5, 0.5)
@@ -116,7 +116,7 @@ func color_at(px: Vector2) -> Color:
 			if m > 0:
 				var t := Vector2i(int(fposmod(px.x, 256.0)) + (m - 1) * 256, int(fposmod(px.y, 256.0)))
 				col += atlas.get_pixelv(t) * w
-	return col
+	return PaintedGloom.grade(col, stage)
 
 
 static func _hash(p: Vector2) -> float:
