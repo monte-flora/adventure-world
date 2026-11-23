@@ -139,3 +139,11 @@ def test_redo_list(tmp_path, capsys):
     ok(open(os.path.join(g, "in", "ground_dirt_road.png"), "rb").read() == b"new", "redo replaced")
     ok(gn.redo_notes(g) == {}, "crossed off after import")
     ok([c[-1] for c in calls if c[0] == "sh"] == ["dirt_road", "bush"], "both imported")
+
+
+def test_a_lands_own_ground_counts_as_ground(tmp_path):
+    g = make_gemini(tmp_path, ["willow", "wintermarch_ground_snow", "ground_grass"])
+    ok(gn.missing(g) == ["ground_grass", "wintermarch_ground_snow", "willow"], "land ground goes with the ground")
+    ok(gn.out_path("wintermarch_ground_snow").endswith(os.path.join("realm", "ground", "wintermarch_ground_snow.png")),
+       "into realm/ground/, its name kept")
+    ok(gn.out_path("ground_grass").endswith(os.path.join("realm", "ground", "grass.png")), "ground_grass -> grass.png")

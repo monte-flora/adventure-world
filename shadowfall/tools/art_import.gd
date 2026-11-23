@@ -151,6 +151,11 @@ static func source(folder: String, file_stem: String) -> String:
 	return ""
 
 
+## A ground texture's picture name: grass -> ground_grass; a land's own (wintermarch_ground_snow) keeps its name.
+static func ground_stem(n: String) -> String:
+	return n if "_ground_" in n else "ground_" + n
+
+
 ## Imports everything in realm/gemini/in/; with placeholders, also the placeholder of each asset that
 ## has no picture in in/ yet. Returns one line per asset done (errors start with "!").
 static func run(placeholders := false, only := PackedStringArray()) -> PackedStringArray:
@@ -159,9 +164,9 @@ static func run(placeholders := false, only := PackedStringArray()) -> PackedStr
 	for n in a["ground"]:
 		if only.size() > 0 and n not in only:
 			continue
-		var src := source("in", "ground_" + n)
+		var src := source("in", ground_stem(n))
 		if src == "" and placeholders:
-			src = source("placeholder", "ground_" + n)
+			src = source("placeholder", ground_stem(n))
 		if src != "":
 			var err := import_ground(src, n)
 			log.append(("! " + err) if err != "" else "ground %s <- %s" % [n, src.get_file()])
