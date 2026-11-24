@@ -1,0 +1,4 @@
+A dialogue portrait, 1024x1024: the head and shoulders of Corran the Ferryman, a quiet weathered old boatman with a short grey beard under a wide faded-blue brimmed hat. Wearing a faded blue tunic and sleeves, brown belt, dark trousers.
+Seen from the front, turned a little to one side, looking at the viewer, a calm face that fits them; shoulders cut off flat at the bottom edge of the picture, the head near the top.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around them: no scenery, no shadow, no gradient, no frame.
+Do not use magenta or pink anywhere on the character.

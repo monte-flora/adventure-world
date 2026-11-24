@@ -1,0 +1,4 @@
+A hero portrait, 1024x1280 (taller than wide): the Lanternbearer, a young hooded ranger: a deep night-blue hooded cloak, hood up, a lean watchful face in its shadow with pale steady eyes; a dark brown leather jerkin crossed with straps over a mail shirt, a steel pauldron on one shoulder, a dull red sash at the waist; in one hand an iron lantern held up near the chest, its small warm flame lighting the face from below.
+Half-length, from the top of the hood down to the waist, cut off flat at the bottom edge, filling the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around them: no scenery, no shadow, no gradient, no frame.
+Do not use magenta or pink anywhere on the character.

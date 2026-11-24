@@ -4,3 +4,5 @@ build/
 levels/
 # your own redo list for pixi run gemini-next
 realm/gemini/redo.txt
+# your own redo list for pixi run gemini-next --set characters
+art/gemini/redo.txt

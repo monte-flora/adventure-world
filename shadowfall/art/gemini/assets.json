@@ -1,0 +1,43 @@
+{
+ "about": "What import-characters makes from each picture (tools/char_import.gd). portraits: exact picture size per portrait. face_size: every dialogue face. people_box: the biggest a villager may be in its 32x48 cell (it keeps its shape), by look. green_key: pictures drawn on flat green instead of magenta (purple characters). hero_walk_down: a test sheet in the live hero's cell size (like) for the comparison.",
+ "portraits": {
+  "portrait_hero": [
+   128,
+   160
+  ],
+  "portrait_shadow_king": [
+   160,
+   200
+  ]
+ },
+ "face_size": [
+  64,
+  64
+ ],
+ "people_box": {
+  "default": [
+   28,
+   44
+  ],
+  "child": [
+   20,
+   30
+  ],
+  "hound": [
+   26,
+   32
+  ]
+ },
+ "green_key": [
+  "seer",
+  "portrait_shadow_king"
+ ],
+ "hero_walk_down": {
+  "like": "hero_top",
+  "frames": 4,
+  "box": [
+   40,
+   52
+  ]
+ }
+}

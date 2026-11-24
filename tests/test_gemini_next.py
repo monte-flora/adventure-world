@@ -147,3 +147,22 @@ def test_a_lands_own_ground_counts_as_ground(tmp_path):
     ok(gn.out_path("wintermarch_ground_snow").endswith(os.path.join("realm", "ground", "wintermarch_ground_snow.png")),
        "into realm/ground/, its name kept")
     ok(gn.out_path("ground_grass").endswith(os.path.join("realm", "ground", "grass.png")), "ground_grass -> grass.png")
+
+
+def test_set_characters(tmp_path, monkeypatch):
+    """--set characters uses art/gemini/ and import_characters.sh; its portraits get STYLE_portraits.txt."""
+    folder, importer = gn.SETS["characters"]
+    ok(folder.endswith(os.path.join("shadowfall", "art", "gemini")), "the characters' folder")
+    ok(importer.endswith("import_characters.sh") and os.path.exists(importer), "its import script")
+    ok("people_smith" in gn.prompt_names(folder) and "portrait_hero" in gn.prompt_names(folder), "its prompts")
+    g = make_gemini(tmp_path, ["portrait_hero", "people_smith"])
+    (tmp_path / "gemini" / "STYLE_portraits.txt").write_text("PORTRAIT\n")
+    (tmp_path / "gemini" / "STYLE_characters.txt").write_text("SPRITE\n")
+    ok(gn.clip_text("portrait_hero", g).startswith("PORTRAIT\n\n"), "portrait style")
+    ok(gn.clip_text("people_smith", g).startswith("SPRITE\n\n"), "sprite style")
+    got = {}
+    monkeypatch.setattr(gn, "run", lambda name, downloads, gemini, importer: got.update(g=gemini, i=importer) or 0)
+    monkeypatch.setattr(gn, "cbreak", lambda: (lambda: None))
+    ok(gn.main(["--set", "characters"]) == 0 and got == {"g": folder, "i": importer}, "main picks the set")
+    ok(gn.main([]) == 0 and got == {"g": gn.GEMINI, "i": gn.IMPORT_ART}, "realm stays the default")
+    ok(gn.main(["--set", "nope"]) == 1, "an unknown set is refused")

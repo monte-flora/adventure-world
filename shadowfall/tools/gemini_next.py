@@ -1,5 +1,5 @@
-"""pixi run gemini-next [name] [--list] [--redo NAME "what to fix"] [--downloads DIR]: make the realm's
-Gemini art one picture at a time.
+"""pixi run gemini-next [name] [--list] [--redo NAME "what to fix"] [--downloads DIR] [--set characters]: make
+the realm's Gemini art (or, with --set characters, the characters' in art/gemini/) one picture at a time.
 
 First the pictures on the redo list (realm/gemini/redo.txt, one "name: what to fix" per line; the fix is
 added to the prompt and the line is crossed off once the new picture is imported), then each prompt with
@@ -20,6 +20,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SHADOWFALL = os.path.dirname(HERE)
 GEMINI = os.path.join(SHADOWFALL, "realm", "gemini")
 IMPORT_ART = os.path.join(HERE, "import_art.sh")
+# --set NAME: which Gemini folder and import script (realm is the default)
+SETS = {
+    "realm": (GEMINI, IMPORT_ART),
+    "characters": (os.path.join(SHADOWFALL, "art", "gemini"), os.path.join(HERE, "import_characters.sh")),
+}
 GEMINI_URL = "https://gemini.google.com/app"
 IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 PARTIAL_EXTS = (".crdownload", ".part", ".download")
@@ -76,8 +81,15 @@ def full_name(name, gemini=GEMINI):
     return name if name in names or "ground_" + name not in names else "ground_" + name
 
 
+def style_file(name, gemini=GEMINI):
+    """STYLE.txt; the characters' folder has STYLE_portraits.txt (portrait_*, face_*) and STYLE_characters.txt."""
+    if name.startswith(("portrait_", "face_")) and os.path.exists(os.path.join(gemini, "STYLE_portraits.txt")):
+        return "STYLE_portraits.txt"
+    return "STYLE_characters.txt" if os.path.exists(os.path.join(gemini, "STYLE_characters.txt")) else "STYLE.txt"
+
+
 def clip_text(name, gemini=GEMINI, note=None):
-    style = open(os.path.join(gemini, "STYLE.txt")).read().strip()
+    style = open(os.path.join(gemini, style_file(name, gemini))).read().strip()
     prompt = open(os.path.join(gemini, "prompts", name + ".txt")).read().strip()
     fix = "\n\nFix from last time: " + note if note else ""
     return style + "\n\n" + prompt + fix + "\n"
@@ -161,7 +173,7 @@ def cbreak():
     return lambda: termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 
-def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=wait_download):
+def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=wait_download, importer=IMPORT_ART):
     downloads = downloads or os.path.expanduser("~/Downloads")
     opened = False
     skipped = set()
@@ -202,11 +214,11 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
         dst = move_in(got, cur, gemini)
         print("Got it: in/%s" % os.path.basename(dst))
         # import-art knows ground textures without the prefix: ground_grass -> grass
-        r = run_cmd(["sh", IMPORT_ART, cur.removeprefix("ground_")], check=False)
+        r = run_cmd(["sh", importer, cur.removeprefix("ground_")], check=False)
         if r.returncode != 0:
-            print("import-art had a problem with %s (see above)." % cur)
+            print("The import had a problem with %s (see above)." % cur)
         else:
-            print("Made %s" % os.path.relpath(out_path(cur), os.path.dirname(SHADOWFALL)))
+            print("Made %s" % (os.path.relpath(out_path(cur), os.path.dirname(SHADOWFALL)) if importer == IMPORT_ART else cur))
             notes = redo_notes(gemini)
             if notes.pop(cur, None) is not None:
                 save_redo(notes, gemini)
@@ -215,8 +227,18 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
             return 0
 
 
-def main(argv, gemini=GEMINI):
+def main(argv, gemini=None):
     downloads = None
+    which = "realm"
+    if "--set" in argv:
+        i = argv.index("--set")
+        which = argv[i + 1] if len(argv) > i + 1 else ""
+        argv = argv[:i] + argv[i + 2:]
+        if which not in SETS:
+            print("No set called %s. Try: --set %s" % (which, " or --set ".join(SETS)))
+            return 1
+    folder, importer = SETS[which]
+    gemini = gemini or folder
     if "--downloads" in argv:
         i = argv.index("--downloads")
         downloads = argv[i + 1]
@@ -250,7 +272,7 @@ def main(argv, gemini=GEMINI):
         return 1
     undo = cbreak()
     try:
-        return run(name, downloads, gemini)
+        return run(name, downloads, gemini, importer=importer)
     except KeyboardInterrupt:
         print("\nBye.")
         return 0
