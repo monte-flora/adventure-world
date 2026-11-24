@@ -2,6 +2,7 @@ extends Node2D
 ## The overworld (top-down). B1 owns this folder.
 ##   Scenes.goto("overworld")                              the realm, at home
 ##   Scenes.goto("overworld", {"at": Vector2i(c, r)})       back from a cave: next to that Mine
+##   godot --path shadowfall -- --scene=overworld --at=41,54   play-test: start beside that square
 ##   Scenes.goto("overworld", {"realm": "nightfall"})       the Umbral Reach (Nightfall's mirror)
 ## Walk onto a Mine to play its cave; onto a waystone (L) to light it (heal, respawn point); G on a lit
 ## waystone travels to the next lit one. Ability gates (Y ivy cliff, O rubble, K shadow thorns, water,
@@ -104,7 +105,11 @@ func build(w: WorldMap) -> void:
 	hero.swung.connect(_on_swing)
 	var start: Vector2i = w.home
 	if Scenes.args.has("at"):
-		start = _beside(Scenes.args["at"])
+		var at = Scenes.args["at"]
+		if at is String:                    # play-testing: -- --scene=overworld --at=col,row
+			var p: PackedStringArray = at.split(",")
+			at = Vector2i(int(p[0]), int(p[1]))
+		start = _beside(at)
 	hero.place(start)
 	last_cell = hero.cell()
 	respawn = w.home
