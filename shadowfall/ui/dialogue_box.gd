@@ -7,6 +7,8 @@ extends CanvasLayer
 ## the rest of a page still typing). *Word* marks the important word in light0.
 ##   await box.talk(Conversation.new("maera"))     a whole talk from rules/data/people.json: its pages,
 ##                                                 then its choices (UP/DOWN picks, JUMP/INTERACT/ATTACK takes)
+## A face (art/ui/faces/<look>.png, made with Gemini: art/gemini/README.txt) shows in a small frame left of the
+## box when the speaker has one: talk() finds it from the person's look; say(..., face) takes a texture.
 
 signal finished
 signal chosen(i: int)
@@ -15,12 +17,16 @@ const LAYER := GloomLight.HUD_LAYER + 10
 const LINES := 3
 const WIDTH := 640                     # text width (px) inside the frame
 const CHARS_PER_SECOND := 60.0
+const FACES := "res://art/ui/faces/"
+const FACE_GAP := 8                    # px between the face's frame and the box
 
 var pages: PackedStringArray = []      # each page: up to 3 lines joined by "\n", with *marks*
 var page := 0
 var speaker_label: Label
 var text: RichTextLabel
 var _panel: PanelContainer
+var face_panel: PanelContainer         # the speaker's face, left of the box (hidden when they have none)
+var face_rect: TextureRect
 var _shown_chars := 0.0
 var choices: PackedStringArray = []    # shown instead of the text while you pick one
 var cursor := 0
@@ -50,11 +56,35 @@ func _ready() -> void:
 	text.add_theme_font_size_override("normal_font_size", UiStyle.BODY)
 	text.add_theme_constant_override("line_separation", 0)
 	col.add_child(text)
+	face_panel = PanelContainer.new()
+	face_panel.add_theme_stylebox_override("panel", UiStyle.frame(12))
+	face_panel.visible = false
+	add_child(face_panel)
+	face_rect = TextureRect.new()
+	face_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	face_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	face_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	var inner := _panel.custom_minimum_size.y - 24
+	face_rect.custom_minimum_size = Vector2(inner, inner)
+	face_panel.add_child(face_rect)
 	visible = false
 
 
+## The face of someone with this look (art/ui/faces/<look>.png), or null if none has been made.
+static func face_for(look: String) -> Texture2D:
+	var p := FACES + look + ".png"
+	return load(p) if look != "" and ResourceLoader.exists(p) else null
+
+
+## Shows `face` beside the box, or hides the slot when it is null.
+func show_face(face: Texture2D) -> void:
+	face_rect.texture = face
+	face_panel.visible = face != null
+
+
 ## Shows `speaker`'s words, page by page. Emits `finished` after the last page.
-func say(speaker: String, words: String) -> void:
+func say(speaker: String, words: String, face: Texture2D = null) -> void:
+	show_face(face)
 	speaker_label.text = speaker
 	speaker_label.visible = speaker != ""
 	pages = paginate(words)
@@ -69,19 +99,21 @@ func is_open() -> bool:
 
 ## Runs a Conversation to its end. Returns what it opens after ("shop", "forge" or "").
 func talk(c) -> String:
+	var face := face_for(str(c.person.get("look", "")))
 	while not c.done:
-		say(c.name(), c.page())
+		say(c.name(), c.page(), face)
 		await finished
 		var cs: PackedStringArray = c.choice_texts()
 		if cs.is_empty():
 			c.next_page()
 		else:
-			c.choose(await ask(c.name(), cs))
+			c.choose(await ask(c.name(), cs, face))
 	return c.then
 
 
 ## Shows `options` to pick from; returns the index picked.
-func ask(speaker: String, options: PackedStringArray) -> int:
+func ask(speaker: String, options: PackedStringArray, face: Texture2D = null) -> int:
+	show_face(face)
 	speaker_label.text = speaker
 	speaker_label.visible = speaker != ""
 	choices = options
@@ -130,6 +162,7 @@ func _show_page() -> void:
 
 func _process(delta: float) -> void:
 	_panel.position.y = UiStyle.VIEW.y - 24 - _panel.size.y      # grows up when there are 4+ choices
+	face_panel.position = Vector2(_panel.position.x - FACE_GAP - face_panel.size.x, UiStyle.VIEW.y - 24 - face_panel.size.y)
 	if visible and text.visible_characters >= 0:
 		_shown_chars += delta * CHARS_PER_SECOND
 		text.visible_characters = int(_shown_chars)
