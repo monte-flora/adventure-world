@@ -73,3 +73,6 @@ func _process(dt: float) -> void:
 		dusk = found[0] if not found.is_empty() else null
 	var k := lerpf(DAY_SHARE, 1.0, darkness())
 	color = Color(base_color.r * k, base_color.g * k, base_color.b * k)
+	var h := get_node_or_null("halo") as Sprite2D      # a prop flame's own glow (RealmProps.halo)
+	if h:
+		h.modulate.a = clampf(energy / maxf(base_energy, 0.01), 0.0, 1.0) * lerpf(0.6, 1.0, darkness())
