@@ -14,6 +14,7 @@ const FORGE := {"energy": 0.9, "color": Color("f0784a"), "amount": 0.2, "speed":
 const RUNE := {"energy": 0.9, "color": Color("8fb4ff"), "amount": 0.15, "speed": 6.0}     # the Shadowgate: cold silver-blue
 const WISP := {"energy": 0.9, "color": Color("a070f0"), "amount": 0.25, "speed": 9.0}     # the Umbral Reach: cold violet
 const FIRE := {"energy": 1.0, "color": Color("f0784a"), "amount": 0.3, "speed": 10.0}
+const HALO_SHARE := 0.3                   # a halo is this share of its light's pool across
 const LIGHTS := {"cottage_a": WINDOW, "cottage_b": WINDOW, "tavern": WINDOW, "smithy": FORGE,
 	"lamppost": LAMP, "campfire": FIRE,
 	"cinder_wastes_forge_temple": FORGE, "cinder_wastes_ash_shrine": FIRE, "cinder_wastes_lava_crack": FIRE,
@@ -125,8 +126,25 @@ static func light(parent: Node, prop: String, pos: Vector2, radius: float) -> La
 	var f: Flicker = l.get_child(0)
 	f.amount = k.amount
 	f.speed = k.speed
+	if k != WINDOW:                       # a flame or lamp glows itself; a window's glass is painted lit
+		l.add_child(halo(k.color, radius * HALO_SHARE))
 	parent.add_child(l)
 	return l
+
+
+## A small glow on the flame itself (additive, unshaded), so a lamp's head reads as lit at every gloom
+## stage, not just the ground round it. LanternLight fades it with its flicker.
+static func halo(color: Color, across: float) -> Sprite2D:
+	var h := Sprite2D.new()
+	h.name = "halo"
+	h.texture = LanternLight.glow()
+	h.scale = Vector2.ONE * across / LanternLight.TEX
+	h.modulate = color
+	var m := CanvasItemMaterial.new()
+	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	m.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	h.material = m
+	return h
 
 
 ## Shades every prop sprite (and its front rows) with `mat` (GloomLight.painted_material).

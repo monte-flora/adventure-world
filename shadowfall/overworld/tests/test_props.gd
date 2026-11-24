@@ -165,6 +165,27 @@ func test_each_lit_prop_has_its_lights_and_the_hero_stays_brightest() -> void:
 	window.free()
 
 
+func test_a_lamp_or_flame_glows_itself_a_window_does_not() -> void:
+	var lamp := RealmProps.light(self, "lamppost", Vector2.ZERO, 96.0)
+	var window := RealmProps.light(self, "cottage_a", Vector2.ZERO, 44.0)
+	var halo: Sprite2D = lamp.get_node_or_null("halo")
+	check(halo != null, "a lamppost's head has a halo")
+	check(window.get_node_or_null("halo") == null, "a window has none (its glass is painted lit)")
+	if halo:
+		var m := halo.material as CanvasItemMaterial
+		check(m != null and m.blend_mode == CanvasItemMaterial.BLEND_MODE_ADD, "the halo adds light")
+		check(m != null and m.light_mode == CanvasItemMaterial.LIGHT_MODE_UNSHADED, "and isn't dimmed by other lights")
+		check(halo.texture.get_width() * halo.scale.x < 96.0, "smaller than the light's pool")
+		lamp.energy = 0.0
+		lamp._process(0.0)
+		var dim := halo.modulate.a
+		lamp.energy = lamp.base_energy
+		lamp._process(0.0)
+		check(halo.modulate.a > dim, "the halo flickers with the light")
+	lamp.free()
+	window.free()
+
+
 func test_painted_lands_draw_crags_gates_and_water_without_changing_collision() -> void:
 	var w := WorldMap.new()
 	w.stitch({"realm/1_t.txt": "at: 0 0\nhome: 1 1\nground: painted\ncrags: rocks\ngate: Riven Gap 0 5 dash\n"
