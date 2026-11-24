@@ -68,7 +68,7 @@ static func scatter(world: WorldMap, sorted: Node2D) -> Dictionary:
 	var t := float(LevelFile.TILE)
 	for p: Vector2i in world.cells:
 		var land: Dictionary = world.lands.get(world.land(p), {})
-		if land.get("ground", "") != "painted" or world.nightfall:
+		if land.get("ground", "") != "painted":
 			continue
 		var ch: String = world.cells[p]
 		var name := ""

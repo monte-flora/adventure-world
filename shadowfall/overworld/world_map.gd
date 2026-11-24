@@ -67,6 +67,10 @@ static func load_realm() -> WorldMap:
 static func load_nightfall() -> WorldMap:
 	var light := load_realm()
 	var wm := light.mirror()
+	for f in Paths.level_files(land_folder()):       # its look (ground, paint, forest, crags, props) is its file's
+		var lf := LevelFile.load_file(Paths.level(f))
+		if lf.setting("world") == "umbral_reach":
+			wm.dress(lf, f)
 	wm.plan_caves(Paths.level_files("shadow"), PackedStringArray())
 	return wm
 
@@ -144,6 +148,18 @@ func plan_caves(files: PackedStringArray, secret: PackedStringArray) -> void:
 		elif files.size() > 0:
 			cave_of[m] = files[i % files.size()]
 			i += 1
+
+
+## The Umbral Reach's painted look from its file: `ground:`, `paint:`, `forest:`, `crags:` and `prop:`
+## lines (props in the mirror's own rows and columns).
+func dress(lf: LevelFile, file := "") -> void:
+	var land: Dictionary = lands["nightfall"]
+	land["ground"] = lf.setting("ground")
+	land["paint"] = lf.all("paint")
+	land["forest"] = lf.setting("forest").split(" ", false)
+	land["crags"] = lf.setting("crags").split(" ", false)
+	for line in lf.all("prop"):
+		add_prop(line, Vector2i.ZERO, file)
 
 
 ## The Umbral Reach: the centre screens, same footprint, dark terrain. Its home is the Portal.
