@@ -113,3 +113,98 @@ func test_hero_compare_picture() -> void:
 	check(not today.is_invisible(), "today's hero is in it")
 	var cmp: Image = hc.compare(today, today)
 	check(cmp.get_width() >= today.get_width() * 4 and cmp.get_height() > today.get_height() * 8, "1x and 4x rows: %s" % cmp.get_size())
+
+
+## A made-up Gemini "animate" GIF: a tall figure on green whose head slides 1 px a frame and back.
+func _moving_gif(n := 6) -> String:
+	var dir := OS.get_user_data_dir() + "/zz_gif/"
+	DirAccess.make_dir_recursive_absolute(dir)
+	for i in n:
+		var img := Image.create(160, 120, false, Image.FORMAT_RGBA8)
+		img.fill(Color(0, 1, 0))
+		img.fill_rect(Rect2i(60, 50, 40, 70), Color(0.4, 0.2, 0.5))             # body to the bottom edge
+		img.fill_rect(Rect2i(68 + mini(i, n - i), 20, 24, 30), SKIN)             # head
+		img.save_png(dir + "f%d.png" % i)
+	var gif := dir + "face_zz_test.gif"
+	OS.execute(CharImport.ffmpeg(), ["-v", "error", "-y", "-framerate", "5", "-i", dir + "f%d.png", gif])
+	return gif
+
+
+func _rm_gif_dir() -> void:
+	var dir := OS.get_user_data_dir() + "/zz_gif/"
+	for f in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir + f)
+	DirAccess.remove_absolute(dir)
+
+
+func test_moving_face_frames() -> void:
+	if CharImport.ffmpeg() == "":
+		print("  (skipped: no ffmpeg)")
+		return
+	var got := CharImport.face_frames(_moving_gif(), Vector2i(64, 64))
+	_rm_gif_dir()
+	check(not got.has("error"), "read the GIF: %s" % got.get("error", ""))
+	var fr: Array = got["frames"]
+	check_eq(fr.size(), 6, "6 frames (the ends nearly match, so no ping-pong)")
+	check(is_equal_approx(float(got["fps"]), 5.0), "keeps its fps: %s" % got["fps"])
+	for f in fr:
+		check_eq((f as Image).get_size(), Vector2i(64, 64), "64x64 frames")
+	var f0: Image = fr[0]
+	check(f0.get_pixel(0, 0).a == 0.0, "green keyed out")
+	var skin := 0
+	for y in 64:
+		for x in 64:
+			skin += 1 if f0.get_pixel(x, y).a > 0.5 and f0.get_pixel(x, y).r > 0.6 else 0
+	check(skin > 64 * 64 / 10, "cut round the head, not the whole figure: %d skin pixels" % skin)
+	check(CharImport.difference(fr[1], fr[0]) > 0.0, "it moves")
+
+
+func test_corner_key_and_loop() -> void:
+	var g := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	g.fill(Color(0, 1, 0))
+	var m := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	m.fill(Color(1, 0, 1))
+	check(CharImport.corner_key(g) == "green" and CharImport.corner_key(m) == "magenta", "key from the corners")
+	var near: Array[Image] = []
+	var far: Array[Image] = []
+	for i in 8:
+		var a := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+		a.fill(Color(0.5, 0.5, 0.5 + i * 0.002))
+		near.append(a)
+		var b := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+		b.fill(Color(i / 8.0, 0, 0))
+		far.append(b)
+	var n := CharImport.seamless(near)
+	check(n.size() == 8 and n[7].get_pixel(0, 0).b < near[7].get_pixel(0, 0).b, "close ends: the last frames fade into the first")
+	var f := CharImport.seamless(far)
+	check(f.size() == 14 and f[13].get_pixel(0, 0).is_equal_approx(far[1].get_pixel(0, 0)), "far ends: ping-pong (8 + 6)")
+	var many: Array[Image] = []
+	for i in 50:
+		many.append(g)
+	check_eq(CharImport.cap(many).size(), CharImport.MAX_FRAMES, "capped")
+
+
+func test_import_moving_face_writes_strip_json_and_still() -> void:
+	if CharImport.ffmpeg() == "":
+		print("  (skipped: no ffmpeg)")
+		return
+	var keep := FileAccess.get_file_as_string(CharImport.PAINTED) if FileAccess.file_exists(CharImport.PAINTED) else ""
+	var r := CharImport.import_one(_moving_gif(), "face_zz_test", CharImport.assets())
+	_rm_gif_dir()
+	check_eq(r, "res://art/ui/faces/zz_test_anim.png", "the strip")
+	var strip := Image.load_from_file(ProjectSettings.globalize_path(r))
+	var meta = JSON.parse_string(FileAccess.get_file_as_string("res://art/ui/faces/zz_test_anim.json"))
+	check(meta is Dictionary and int(meta["frames"]) == 6 and is_equal_approx(float(meta["fps"]), 5.0), "json: %s" % meta)
+	check(meta is Dictionary and meta["size"] == [64.0, 64.0], "json size 64x64")
+	check(strip != null and strip.get_size() == Vector2i(64 * 6, 64), "a strip of 6 frames side by side")
+	var still := Image.load_from_file(ProjectSettings.globalize_path("res://art/ui/faces/zz_test.png"))
+	check(still != null and still.get_data() == strip.get_region(Rect2i(0, 0, 64, 64)).get_data(), "the still is frame 0")
+	check(r in CharImport.painted(), "listed in painted.json")
+	for p in ["zz_test_anim.png", "zz_test_anim.json", "zz_test.png"]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path("res://art/ui/faces/" + p))
+	if keep == "":
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(CharImport.PAINTED))
+	else:
+		var f := FileAccess.open(CharImport.PAINTED, FileAccess.WRITE)
+		f.store_string(keep)
+		f.close()

@@ -113,6 +113,37 @@ func test_dialogue_face_beside_the_box() -> void:
 	box.queue_free()
 
 
+func test_dialogue_moving_face_plays_while_typing() -> void:
+	var box = load("res://ui/dialogue_box.tscn").instantiate()
+	add_child(box)
+	await frames(1)
+	check(box.face_anim_for("no_such_look").is_empty() and box.face_anim_for("").is_empty(), "no moving face: none")
+	var img := Image.create(64 * 3, 64, false, Image.FORMAT_RGBA8)
+	for i in 3:
+		img.fill_rect(Rect2i(i * 64, 0, 64, 64), Color(i / 3.0, 0.2, 0.3))
+	var anim: Dictionary = box.face_anim(ImageTexture.create_from_image(img), {"fps": 30, "frames": 3, "size": [64, 64]})
+	check_eq(anim["frames"].size(), 3, "3 frames from the strip")
+	check_eq(anim["frames"][2].region, Rect2(128, 0, 64, 64), "frame 3's place in the strip")
+	box.say("Seer", "The stars are quiet tonight, little one. Listen to them while the lantern burns low and long.", null, anim)
+	check(box.face_panel.visible and box.face_rect.texture == anim["frames"][0], "starts on frame 0")
+	var seen := {}
+	for i in 20:
+		await frames(1)
+		seen[box.face_rect.texture] = true
+	check(seen.size() >= 2, "plays while the words type: %d frames seen" % seen.size())
+	box.advance()                                          # the rest of the page shows at once
+	await frames(2)
+	check(box.face_rect.texture == anim["frames"][0], "rests on frame 0 once typed")
+	box.ask("Seer", PackedStringArray(["Yes", "No"]), null, anim)
+	await frames(3)
+	check(box.face_rect.texture == anim["frames"][0], "still while picking")
+	box._pick(0)
+	box.say("Warden Maera", "Keep your lantern lit.")
+	await frames(2)
+	check(not box.face_panel.visible and box.anim_frames.is_empty(), "the next speaker without a face: no slot, no animation")
+	box.queue_free()
+
+
 func test_pause_opens_every_tab() -> void:
 	_before()
 	Quests.start_main()

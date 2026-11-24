@@ -50,6 +50,23 @@ def test_download_detection(tmp_path):
     ok(gn.check_download(str(d), before, since, sizes) == str(d / "pic.png"), "settled file picked")
 
 
+def test_a_face_may_move(tmp_path):
+    """A face_* download may be Gemini's animate GIF or video; other pictures stay still images."""
+    d = tmp_path / "dl"
+    d.mkdir()
+    before = gn.images_in(str(d), gn.exts_for("face_seer"))
+    (d / "seer.gif").write_bytes(b"GIF89a")
+    (d / "seer.mp4.crdownload").write_bytes(b"half")
+    ok(gn.check_download(str(d), before, 0, {}, gn.exts_for("people_seer")) is None, "a GIF is not a villager picture")
+    sizes = {}
+    gn.check_download(str(d), before, 0, sizes, gn.exts_for("face_seer"))
+    ok(gn.check_download(str(d), before, 0, sizes, gn.exts_for("face_seer")) == str(d / "seer.gif"), "settled GIF counts for a face")
+    g = make_gemini(tmp_path, ["face_seer", "people_seer"])
+    dst = gn.move_in(str(d / "seer.gif"), "face_seer", g)
+    ok(dst.endswith(os.path.join("in", "face_seer.gif")) and gn.done_file("face_seer", g) == dst, "a face done as a GIF")
+    ok("face_seer" not in gn.missing(g) and "people_seer" in gn.missing(g), "missing list knows it")
+
+
 def test_wait_download_keys(tmp_path):
     d = tmp_path / "dl"
     d.mkdir()
@@ -83,7 +100,7 @@ def test_run_loop_and_name_pick(tmp_path, capsys):
     calls = []
     answers = iter(["pic1", "n", "pic2"])
 
-    def wait(folder, before, since):
+    def wait(folder, before, since, exts=gn.IMAGE_EXTS):
         a = next(answers)
         if a == "n":
             return a
@@ -128,7 +145,7 @@ def test_redo_list(tmp_path, capsys):
     calls = []
     n = iter(range(9))
 
-    def wait(folder, before, since):
+    def wait(folder, before, since, exts=gn.IMAGE_EXTS):
         p = d / ("p%d.png" % next(n))
         p.write_bytes(b"new")
         return str(p)
