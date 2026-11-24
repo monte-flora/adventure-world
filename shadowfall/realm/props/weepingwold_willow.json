@@ -1,0 +1,22 @@
+{
+ "name": "weepingwold_willow",
+ "size": [
+  112,
+  120
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  45,
+  106,
+  22,
+  14
+ ],
+ "anchor": [
+  56,
+  120
+ ],
+ "base": 120
+}

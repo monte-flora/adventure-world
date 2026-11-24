@@ -1,0 +1,22 @@
+{
+ "name": "weepingwold_hollow_stump",
+ "size": [
+  72,
+  60
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  7,
+  30,
+  58,
+  30
+ ],
+ "anchor": [
+  36,
+  60
+ ],
+ "base": 60
+}

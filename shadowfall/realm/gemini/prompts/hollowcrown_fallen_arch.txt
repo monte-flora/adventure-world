@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one broken stone gateway arch of an old kingdom: two thick weathered pillars joined by a cracked half-arch, the other half fallen in a heap of carved blocks at its foot, moss and heather growing in the cracks.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

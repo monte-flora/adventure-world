@@ -49,6 +49,8 @@ func build() -> bool:
 		for c in world.size.x:
 			var p := Vector2i(c, r)
 			var id := world.land(p)
+			if id == "" and RealmTiles.SEA_LAND in lands:
+				id = RealmTiles.SEA_LAND            # the open sea is the Mere's water
 			if id in lands:
 				var role := role_at(p, villages)
 				var key := id + ":" + role
@@ -130,7 +132,8 @@ func role_at(p: Vector2i, villages: Array = []) -> String:
 
 ## The texture a square is drawn with (the land's pick for its role).
 func material_at(p: Vector2i, villages: Array = []) -> String:
-	return texture_for(world.land(p), role_at(p, villages)) if world.lands.has(world.land(p)) else ""
+	var id := world.land(p) if world.land(p) != "" else RealmTiles.SEA_LAND
+	return texture_for(id, role_at(p, villages)) if world.lands.has(id) else ""
 
 
 ## The middles of every land's `village:` squares, in realm squares.

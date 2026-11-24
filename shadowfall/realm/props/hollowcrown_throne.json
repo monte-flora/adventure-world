@@ -1,0 +1,22 @@
+{
+ "name": "hollowcrown_throne",
+ "size": [
+  72,
+  61
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  7,
+  37,
+  58,
+  24
+ ],
+ "anchor": [
+  36,
+  61
+ ],
+ "base": 61
+}

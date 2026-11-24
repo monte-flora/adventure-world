@@ -1,0 +1,17 @@
+{
+ "name": "hollowcrown_banner",
+ "size": [
+  27,
+  88
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  13,
+  88
+ ],
+ "base": 88
+}

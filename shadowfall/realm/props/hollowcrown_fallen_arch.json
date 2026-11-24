@@ -1,0 +1,22 @@
+{
+ "name": "hollowcrown_fallen_arch",
+ "size": [
+  112,
+  59
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  0,
+  35,
+  112,
+  24
+ ],
+ "anchor": [
+  56,
+  59
+ ],
+ "base": 59
+}

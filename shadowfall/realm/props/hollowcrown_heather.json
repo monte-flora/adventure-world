@@ -1,0 +1,17 @@
+{
+ "name": "hollowcrown_heather",
+ "size": [
+  44,
+  17
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  22,
+  17
+ ],
+ "base": 17
+}

@@ -1,0 +1,22 @@
+{
+ "name": "weepingwold_grieving_oak",
+ "size": [
+  192,
+  192
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  73,
+  173,
+  46,
+  19
+ ],
+ "anchor": [
+  96,
+  192
+ ],
+ "base": 192
+}
