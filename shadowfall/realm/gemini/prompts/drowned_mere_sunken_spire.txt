@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one tall sunken spire of a drowned kingdom: a slender black-green stone tower with a pointed roof and arched windows, half of it broken away, crusted with barnacles and hanging weed, rising out of its own ring of dark water.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

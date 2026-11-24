@@ -9,6 +9,79 @@ mine: caves/06_the_icy_steps.txt 6 10
 mine: caves/13_the_frozen_falls.txt 25 40
 mine: caves/16_the_glacier_crossing.txt 12 20
 gate: Ashen Stair 33 45 double_jump
+ground: painted
+paint: grass wintermarch_ground_snow
+paint: ice wintermarch_ground_ice
+paint: cliff wintermarch_ground_frozen_rock
+forest: wintermarch_snow_pine wintermarch_snow_pine pine
+crags: wintermarch_ice_crag wintermarch_ice_crag crag
+prop: mine_mouth 6 10
+prop: mine_mouth 5 50
+prop: mine_mouth 25 40
+prop: mine_mouth 12 20
+prop: wintermarch_ice_fortress 25 8
+prop: wintermarch_brazier 30 5
+prop: wintermarch_brazier 30 11
+prop: wintermarch_brazier 28 2
+prop: wintermarch_brazier 23 2
+prop: wintermarch_brazier 23 14
+prop: wintermarch_rune_stone 27 16
+prop: wintermarch_rune_stone 31 3
+prop: wintermarch_rune_stone 31 14
+prop: wintermarch_rune_stone 21 5
+prop: wintermarch_rune_stone 21 12
+prop: wintermarch_longhouse 3 16
+prop: wintermarch_longhouse 3 21
+prop: wintermarch_longhouse 8 22
+prop: wintermarch_longhouse 9 10
+prop: wintermarch_longhouse 10 5
+prop: wintermarch_brazier 6 19
+prop: wintermarch_brazier 6 13
+prop: wintermarch_longhouse 3 45
+prop: wintermarch_longhouse 8 46
+prop: wintermarch_brazier 6 48
+prop: wintermarch_brazier 6 53
+prop: wintermarch_longhouse 22 36
+prop: wintermarch_longhouse 22 46
+prop: wintermarch_brazier 25 35
+prop: wintermarch_brazier 25 44
+prop: wintermarch_rune_stone 14 30
+prop: wintermarch_rune_stone 17 50
+prop: wintermarch_rune_stone 14 3
+prop: wintermarch_snow_pine 1 28
+prop: wintermarch_snow_pine 2 32
+prop: wintermarch_snow_pine 9 29
+prop: wintermarch_snow_pine 12 26
+prop: wintermarch_snow_pine 18 43
+prop: wintermarch_snow_pine 16 48
+prop: wintermarch_snow_pine 15 19
+prop: wintermarch_snow_pine 21 13
+prop: wintermarch_snow_pine 31 30
+prop: wintermarch_snow_pine 30 32
+prop: wintermarch_snow_pine 17 3
+prop: wintermarch_snow_pine 21 1
+prop: wintermarch_snow_pine 7 39
+prop: wintermarch_snow_pine 9 37
+prop: wintermarch_snow_pine 29 50
+prop: wintermarch_snow_pine 29 49
+prop: wintermarch_snow_pine 17 57
+prop: wintermarch_snow_pine 16 56
+prop: wintermarch_snow_pine 3 1
+prop: wintermarch_snow_pine 2 3
+prop: wintermarch_ice_crag 29 26
+prop: wintermarch_ice_crag 21 23
+prop: wintermarch_ice_crag 26 44
+prop: wintermarch_ice_crag 13 17
+prop: wintermarch_ice_crag 22 12
+prop: wintermarch_ice_crag 3 27
+prop: wintermarch_ice_crag 20 38
+prop: wintermarch_ice_crag 17 54
+prop: wintermarch_snow_drift 22 17
+prop: wintermarch_snow_drift 14 13
+prop: wintermarch_snow_drift 6 43
+prop: wintermarch_snow_drift 30 37
+prop: wintermarch_snow_drift 19 52
+prop: wintermarch_snow_drift 10 52
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XGGGGGGGGGGGGGGGGGGGGGGGGGIIGGGGGGGGGGGGGGGGGGGGGGGIIGGGGGGX
 XGGGGGXXGGGGGGGGGGGGGGGGGGIIGGGGGGGGGGGGGGGGGGGGGGGIIGGGGGGX

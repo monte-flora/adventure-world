@@ -1,0 +1,22 @@
+{
+ "name": "wintermarch_rune_stone",
+ "size": [
+  31,
+  96
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  5,
+  83,
+  22,
+  13
+ ],
+ "anchor": [
+  16,
+  96
+ ],
+ "base": 96
+}

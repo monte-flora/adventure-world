@@ -1,0 +1,17 @@
+{
+ "name": "drowned_mere_sunken_spire",
+ "size": [
+  41,
+  160
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  20,
+  160
+ ],
+ "base": 160
+}
