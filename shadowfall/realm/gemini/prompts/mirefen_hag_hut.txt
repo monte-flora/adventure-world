@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one crooked witch's hut on stilts over black water: a lopsided hut of grey rotten planks with a sagging thatch roof of reeds and moss, a crooked chimney, a rickety ladder, strings of bones and dried herbs and little iron charms hanging from the eaves, a single window glowing sickly amber, a cracked clay cauldron on the porch.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

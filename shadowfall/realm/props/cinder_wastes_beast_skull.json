@@ -1,0 +1,17 @@
+{
+ "name": "cinder_wastes_beast_skull",
+ "size": [
+  72,
+  51
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  36,
+  51
+ ],
+ "base": 51
+}

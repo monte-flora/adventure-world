@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one ruined forge-temple of a lost fire cult: a broad squat temple of black basalt blocks with a collapsed roof, a huge cracked anvil-shaped altar and a tall chimney still breathing a thread of smoke, bronze doors hanging off their hinges, molten orange light glowing through the cracks and the doorway, dark iron banners in rags.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

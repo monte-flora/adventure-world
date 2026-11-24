@@ -1,0 +1,38 @@
+{
+ "name": "cinder_wastes_forge_temple",
+ "size": [
+  160,
+  144
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   48,
+   101,
+   70
+  ],
+  [
+   112,
+   101,
+   70
+  ],
+  [
+   80,
+   58,
+   60
+  ]
+ ],
+ "foot": [
+  6,
+  79,
+  147,
+  65
+ ],
+ "anchor": [
+  79,
+  144
+ ],
+ "base": 144
+}

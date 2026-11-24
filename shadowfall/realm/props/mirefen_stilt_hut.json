@@ -1,0 +1,28 @@
+{
+ "name": "mirefen_stilt_hut",
+ "size": [
+  104,
+  110
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   52,
+   68,
+   44
+  ]
+ ],
+ "foot": [
+  6,
+  68,
+  92,
+  42
+ ],
+ "anchor": [
+  52,
+  110
+ ],
+ "base": 110
+}

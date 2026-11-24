@@ -1,0 +1,17 @@
+{
+ "name": "cinder_wastes_wyrm_ribs",
+ "size": [
+  224,
+  82
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  112,
+  82
+ ],
+ "base": 82
+}

@@ -236,7 +236,13 @@ func test_realm_art_per_land() -> void:
 		if w.cells[p] == "F" and w.at(p + Vector2i.DOWN) != "F" and not t.painted(p):   # painted lands: props
 			tree = p
 			break
-	check(tree.x >= 0 and ow.objects.get_cell_source_id(tree) != -1, "a forest square (outside painted lands) has a tree")
+	if tree.x >= 0:
+		check(ow.objects.get_cell_source_id(tree) != -1, "a forest square (outside painted lands) has a tree")
+	else:      # every land is painted now: its forest squares are props, not tiles
+		for p in w.cells:
+			if w.cells[p] == "F":
+				check(ow.objects.get_cell_source_id(p) == -1, "a painted forest square has no tree tile")
+				break
 	check(ow.hero.sprite.sprite_frames == ArtSheet.frames("hero_top"), "the hero uses the top-down sheet")
 	for m in ow.monsters:
 		check(MapMonster.KINDS.has(m.kind) and m.sprite.sprite_frames == ArtSheet.frames("monster_" + m.kind),

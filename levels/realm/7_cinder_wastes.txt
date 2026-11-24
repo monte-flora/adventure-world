@@ -10,6 +10,78 @@ mine: caves/08_the_lava_cave.txt 22 40
 mine: caves/11_the_lava_escape.txt 44 80
 mine: caves/17_the_fire_mountain.txt 41 10
 gate: Ashen Stair 0 75 double_jump
+ground: painted
+paint: grass cinder_wastes_ground_ash
+paint: cliff cinder_wastes_ground_basalt
+paint: rocky_ground cinder_wastes_ground_basalt
+forest: cinder_wastes_charred_tree cinder_wastes_charred_tree dead_tree
+crags: cinder_wastes_obsidian_crag cinder_wastes_obsidian_crag crag
+prop: mine_mouth 21 80
+prop: mine_mouth 22 40
+prop: mine_mouth 41 10
+prop: mine_mouth 44 40
+prop: mine_mouth 44 80
+prop: cinder_wastes_wyrm_ribs 8 75
+prop: cinder_wastes_forge_temple 13 70
+prop: cinder_wastes_forge_temple 27 50
+prop: cinder_wastes_forge_temple 42 20
+prop: cinder_wastes_forge_temple 33 70
+prop: cinder_wastes_forge_temple 44 86
+prop: cinder_wastes_forge_temple 21 36
+prop: cinder_wastes_ash_shrine 6 66
+prop: cinder_wastes_ash_shrine 24 72
+prop: cinder_wastes_ash_shrine 28 38
+prop: cinder_wastes_ash_shrine 42 60
+prop: cinder_wastes_ash_shrine 46 24
+prop: cinder_wastes_ash_shrine 34 45
+prop: cinder_wastes_ash_shrine 16 85
+prop: cinder_wastes_ash_shrine 49 75
+prop: cinder_wastes_ash_shrine 10 63
+prop: cinder_wastes_ash_shrine 38 86
+prop: cinder_wastes_ash_shrine 20 56
+prop: cinder_wastes_ash_shrine 26 34
+prop: cinder_wastes_lava_crack 33 65
+prop: cinder_wastes_lava_crack 20 85
+prop: cinder_wastes_lava_crack 37 45
+prop: cinder_wastes_lava_crack 49 81
+prop: cinder_wastes_lava_crack 8 78
+prop: cinder_wastes_lava_crack 12 71
+prop: cinder_wastes_lava_crack 44 30
+prop: cinder_wastes_lava_crack 15 79
+prop: cinder_wastes_lava_crack 36 7
+prop: cinder_wastes_lava_crack 46 53
+prop: cinder_wastes_lava_crack 43 2
+prop: cinder_wastes_lava_crack 25 62
+prop: cinder_wastes_lava_crack 7 62
+prop: cinder_wastes_lava_crack 39 37
+prop: cinder_wastes_lava_crack 38 59
+prop: cinder_wastes_lava_crack 12 61
+prop: cinder_wastes_charred_tree 27 53
+prop: cinder_wastes_charred_tree 15 65
+prop: cinder_wastes_charred_tree 45 8
+prop: cinder_wastes_charred_tree 38 85
+prop: cinder_wastes_charred_tree 10 70
+prop: cinder_wastes_charred_tree 45 68
+prop: cinder_wastes_charred_tree 26 40
+prop: cinder_wastes_charred_tree 46 29
+prop: cinder_wastes_charred_tree 26 31
+prop: cinder_wastes_charred_tree 19 71
+prop: cinder_wastes_charred_tree 31 36
+prop: cinder_wastes_charred_tree 38 63
+prop: cinder_wastes_charred_tree 20 58
+prop: cinder_wastes_charred_tree 44 52
+prop: cinder_wastes_beast_skull 18 64
+prop: cinder_wastes_beast_skull 46 2
+prop: cinder_wastes_beast_skull 32 57
+prop: cinder_wastes_beast_skull 45 45
+prop: cinder_wastes_beast_skull 23 36
+prop: cinder_wastes_beast_skull 16 88
+prop: cinder_wastes_beast_skull 36 37
+prop: cinder_wastes_obsidian_crag 16 65
+prop: cinder_wastes_obsidian_crag 44 82
+prop: cinder_wastes_obsidian_crag 10 86
+prop: cinder_wastes_obsidian_crag 45 63
+prop: cinder_wastes_obsidian_crag 10 72
 ............................................................XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ............................................................XGGGGGGGGGGGGGGGGGGGGGGGGGGGXX
 ............................................................XGGGGGGGGGGGGGGXXGGGGGGGGGGGXX

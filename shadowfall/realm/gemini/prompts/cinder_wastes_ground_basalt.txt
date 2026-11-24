@@ -1,0 +1,4 @@
+A square seamless tileable texture, 1024x1024: dark black-brown basalt rock, cracked into rough plates, glossy obsidian glints, thin dull orange glows deep in the cracks and a dusting of grey ash on the ledges.
+Seen straight from above, completely flat, evenly lit, no objects, no horizon, no perspective, no vignette.
+The left edge must match the right edge and the top edge must match the bottom edge so it tiles with no seams.
+Even detail everywhere (no one big feature), so it repeats without a pattern you can spot.

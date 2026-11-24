@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one crooked wooden pole leaning out of the mud with an old iron lantern hanging from a hook, the glass full of a cold pale green-white flame like a will-o'-wisp, a rag of cloth tied at its foot, a few reed stalks round the base.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

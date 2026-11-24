@@ -1,0 +1,23 @@
+{
+ "name": "cinder_wastes_lava_crack",
+ "size": [
+  96,
+  30
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   48,
+   15,
+   90
+  ]
+ ],
+ "foot": [],
+ "anchor": [
+  48,
+  30
+ ],
+ "base": 30
+}

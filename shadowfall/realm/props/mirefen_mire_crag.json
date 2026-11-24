@@ -1,0 +1,17 @@
+{
+ "name": "mirefen_mire_crag",
+ "size": [
+  72,
+  80
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  36,
+  80
+ ],
+ "base": 80
+}
