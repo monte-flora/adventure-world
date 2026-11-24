@@ -1,0 +1,23 @@
+{
+ "name": "umbral_reach_ruined_arch",
+ "size": [
+  128,
+  84
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   64,
+   50,
+   70
+  ]
+ ],
+ "foot": [],
+ "anchor": [
+  64,
+  84
+ ],
+ "base": 84
+}

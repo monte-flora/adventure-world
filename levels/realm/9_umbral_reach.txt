@@ -10,6 +10,81 @@ castle: castle/1_the_gate_and_the_lava_moat.txt 22 45
 mine: shadow/1_the_whisper_hollow.txt 8 10
 mine: shadow/2_the_hollow_stair.txt 8 80
 mine: shadow/3_the_shadow_throne_stairs.txt 44 12
+ground: painted
+paint: grass umbral_reach_ground_ash_grass
+paint: forest_floor umbral_reach_ground_ash_grass
+paint: ice umbral_reach_ground_shadow_rock
+paint: cliff umbral_reach_ground_shadow_rock
+paint: rocky_ground umbral_reach_ground_shadow_rock
+paint: shallow_water umbral_reach_ground_black_water
+paint: deep_water umbral_reach_ground_black_water
+forest: umbral_reach_shadow_tree umbral_reach_shadow_tree dead_tree
+crags: umbral_reach_shadow_crag umbral_reach_shadow_crag crag
+prop: mine_mouth 11 22
+prop: mine_mouth 24 77
+prop: mine_mouth 41 69
+prop: umbral_reach_weeping_throne 2.6 50
+prop: umbral_reach_ruined_arch 25.5 46
+prop: umbral_reach_wisp_fire 24 44
+prop: umbral_reach_wisp_fire 24 48
+prop: umbral_reach_wisp_fire 28 44
+prop: umbral_reach_wisp_fire 28 48
+prop: umbral_reach_king_banner 29 42
+prop: umbral_reach_king_banner 29 50
+prop: umbral_reach_king_banner 23 41
+prop: umbral_reach_king_banner 23 51
+prop: umbral_reach_king_banner 26 40
+prop: umbral_reach_king_banner 26 52
+prop: umbral_reach_ruined_shrine 44 82
+prop: umbral_reach_ruined_shrine 6 64
+prop: umbral_reach_ruined_shrine 30 5
+prop: umbral_reach_ruined_shrine 5 33
+prop: umbral_reach_ruined_shrine 3 10
+prop: umbral_reach_ruined_shrine 10 80
+prop: umbral_reach_ruined_shrine 48 68
+prop: umbral_reach_ruined_shrine 43 47
+prop: umbral_reach_wisp_fire 10 7
+prop: umbral_reach_wisp_fire 3 33
+prop: umbral_reach_wisp_fire 3 73
+prop: umbral_reach_wisp_fire 7 21
+prop: umbral_reach_wisp_fire 26 75
+prop: umbral_reach_wisp_fire 1 64
+prop: umbral_reach_wisp_fire 27 4
+prop: umbral_reach_wisp_fire 19 20
+prop: umbral_reach_wisp_fire 43 61
+prop: umbral_reach_wisp_fire 6 47
+prop: umbral_reach_king_banner 29 52
+prop: umbral_reach_king_banner 5 61
+prop: umbral_reach_king_banner 47 64
+prop: umbral_reach_king_banner 42 78
+prop: umbral_reach_shadow_tree 8 27
+prop: umbral_reach_shadow_tree 38 78
+prop: umbral_reach_shadow_tree 5 70
+prop: umbral_reach_shadow_tree 39 49
+prop: umbral_reach_shadow_tree 49 8
+prop: umbral_reach_shadow_tree 24 80
+prop: umbral_reach_shadow_tree 6 82
+prop: umbral_reach_shadow_tree 36 83
+prop: umbral_reach_shadow_tree 49 79
+prop: umbral_reach_shadow_tree 13 76
+prop: umbral_reach_shadow_tree 45 81
+prop: umbral_reach_shadow_tree 19 18
+prop: umbral_reach_shadow_tree 28 5
+prop: umbral_reach_shadow_tree 3 43
+prop: umbral_reach_shadow_tree 15 5
+prop: umbral_reach_shadow_tree 4 21
+prop: umbral_reach_shadow_tree 22 3
+prop: umbral_reach_shadow_tree 8 65
+prop: umbral_reach_shadow_tree 8 2
+prop: umbral_reach_shadow_tree 43 3
+prop: umbral_reach_shadow_crag 47 6
+prop: umbral_reach_shadow_crag 27 70
+prop: umbral_reach_shadow_crag 19 35
+prop: umbral_reach_shadow_crag 10 1
+prop: umbral_reach_shadow_crag 6 32
+prop: umbral_reach_shadow_crag 48 73
+prop: umbral_reach_shadow_crag 38 68
+prop: umbral_reach_shadow_crag 3 22
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGX
 XGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGFGGGGGGGGFGGGGGGGGGGGGFGGGGGGGGGGGX

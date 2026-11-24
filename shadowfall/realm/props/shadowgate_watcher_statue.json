@@ -1,0 +1,22 @@
+{
+ "name": "shadowgate_watcher_statue",
+ "size": [
+  36,
+  104
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  7,
+  88,
+  22,
+  16
+ ],
+ "anchor": [
+  18,
+  104
+ ],
+ "base": 104
+}

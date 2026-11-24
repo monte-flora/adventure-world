@@ -1,0 +1,33 @@
+{
+ "name": "umbral_reach_ruined_shrine",
+ "size": [
+  128,
+  126
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   38,
+   88,
+   60
+  ],
+  [
+   90,
+   88,
+   60
+  ]
+ ],
+ "foot": [
+  8,
+  76,
+  113,
+  50
+ ],
+ "anchor": [
+  64,
+  126
+ ],
+ "base": 126
+}

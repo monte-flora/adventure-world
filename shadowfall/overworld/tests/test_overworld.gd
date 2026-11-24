@@ -219,6 +219,13 @@ func test_nightfall_mirrors_the_centre() -> void:
 	check(ow.world.nightfall and ow.map.get_used_cells().size() > 0, "the Umbral Reach opens")
 
 
+func test_nightfall_is_painted() -> void:
+	check(WorldMap.load_nightfall().errors.is_empty(), "the Umbral Reach's props all load: %s" % [WorldMap.load_nightfall().errors])
+	var ow = await _open({"realm": "nightfall"})
+	check(ow.ground != null, "the Umbral Reach has the painted ground")
+	check(not ow.prop_sprites.is_empty(), "and its props")
+
+
 func test_realm_art_per_land() -> void:
 	var w := WorldMap.load_realm()
 	for id in w.lands:
@@ -231,18 +238,20 @@ func test_realm_art_per_land() -> void:
 	for id in w.lands:
 		var sheet := t.sheet_at(w.lands[id].rect.position + Vector2i(1, 1))
 		check(FileAccess.file_exists(ArtSheet.DIR + sheet + ".json"), "%s draws from %s" % [id, sheet])
-	var tree := Vector2i(-1, -1)
+	var tree := Vector2i(-1, -1)             # every land is painted: forest squares are props, not tiles
 	for p in w.cells:
-		if w.cells[p] == "F" and w.at(p + Vector2i.DOWN) != "F" and not t.painted(p):   # painted lands: props
+		if w.cells[p] == "F" and (p.x + p.y) % 2 == 0 and not w.prop_cover.has(p):
 			tree = p
 			break
+	check(tree.x >= 0 and t.painted(tree), "a painted forest square")
 	if tree.x >= 0:
-		check(ow.objects.get_cell_source_id(tree) != -1, "a forest square (outside painted lands) has a tree")
-	else:      # every land is painted now: its forest squares are props, not tiles
-		for p in w.cells:
-			if w.cells[p] == "F":
-				check(ow.objects.get_cell_source_id(p) == -1, "a painted forest square has no tree tile")
-				break
+		check(ow.objects.get_cell_source_id(tree) == -1, "a painted forest square has no tree tile")
+		var at := (Vector2(tree) + Vector2(0.5, 0.9)) * float(LevelFile.TILE)
+		var decor := false
+		for s: Sprite2D in ow.decor.sprites:
+			if s.position.distance_to(at) < 20.0:
+				decor = true
+		check(decor, "and the overworld draws a decor tree there")
 	check(ow.hero.sprite.sprite_frames == ArtSheet.frames("hero_top"), "the hero uses the top-down sheet")
 	for m in ow.monsters:
 		check(MapMonster.KINDS.has(m.kind) and m.sprite.sprite_frames == ArtSheet.frames("monster_" + m.kind),

@@ -1,0 +1,23 @@
+{
+ "name": "umbral_reach_weeping_throne",
+ "size": [
+  160,
+  133
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   80,
+   80,
+   110
+  ]
+ ],
+ "foot": [],
+ "anchor": [
+  80,
+  133
+ ],
+ "base": 133
+}
