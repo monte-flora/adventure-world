@@ -1,0 +1,22 @@
+{
+ "name": "shadowgate_broken_pillar",
+ "size": [
+  31,
+  96
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  6,
+  81,
+  19,
+  15
+ ],
+ "anchor": [
+  15,
+  96
+ ],
+ "base": 96
+}

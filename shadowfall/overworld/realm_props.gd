@@ -11,11 +11,16 @@ class_name RealmProps
 const WINDOW := {"energy": 0.55, "color": Color("f7c64a"), "amount": 0.08, "speed": 3.0}
 const LAMP := {"energy": 0.8, "color": Color("ffc56a"), "amount": 0.1, "speed": 5.0}
 const FORGE := {"energy": 0.9, "color": Color("f0784a"), "amount": 0.2, "speed": 7.0}
+const RUNE := {"energy": 0.9, "color": Color("8fb4ff"), "amount": 0.15, "speed": 6.0}     # the Shadowgate: cold silver-blue
+const WISP := {"energy": 0.9, "color": Color("a070f0"), "amount": 0.25, "speed": 9.0}     # the Umbral Reach: cold violet
 const FIRE := {"energy": 1.0, "color": Color("f0784a"), "amount": 0.3, "speed": 10.0}
 const LIGHTS := {"cottage_a": WINDOW, "cottage_b": WINDOW, "tavern": WINDOW, "smithy": FORGE,
 	"lamppost": LAMP, "campfire": FIRE,
 	"cinder_wastes_forge_temple": FORGE, "cinder_wastes_ash_shrine": FIRE, "cinder_wastes_lava_crack": FIRE,
-	"mirefen_wisp_lantern": LAMP}
+	"mirefen_wisp_lantern": LAMP,
+	"shadowgate_portal_arch": RUNE, "shadowgate_rune_brazier": RUNE,
+	"umbral_reach_ruined_shrine": WISP, "umbral_reach_wisp_fire": WISP, "umbral_reach_weeping_throne": WISP,
+	"umbral_reach_ruined_arch": WISP}
 
 
 ## Adds one Sprite2D per prop to `sorted` (a y-sorted node); front rows to `over` if given.
@@ -68,7 +73,7 @@ static func scatter(world: WorldMap, sorted: Node2D) -> Dictionary:
 	var t := float(LevelFile.TILE)
 	for p: Vector2i in world.cells:
 		var land: Dictionary = world.lands.get(world.land(p), {})
-		if land.get("ground", "") != "painted" or world.nightfall:
+		if land.get("ground", "") != "painted":
 			continue
 		var ch: String = world.cells[p]
 		var name := ""

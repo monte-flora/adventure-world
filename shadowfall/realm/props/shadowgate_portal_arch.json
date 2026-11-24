@@ -1,0 +1,23 @@
+{
+ "name": "shadowgate_portal_arch",
+ "size": [
+  224,
+  144
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   112,
+   89,
+   120
+  ]
+ ],
+ "foot": [],
+ "anchor": [
+  112,
+  144
+ ],
+ "base": 144
+}

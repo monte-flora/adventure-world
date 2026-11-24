@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: the great Portal arch, a colossal horseshoe-shaped gateway of black basalt standing tall and wide, two massive carved pillars joined by a heavy keystone lintel, silver runes running up both pillars and round the arch, cracked and ancient, the wide opening between the pillars empty and open so the ground shows through, a ring of pale blue-white rune light just glowing along the inner edge, iron-grey ivy-less moss only at the feet, a lost kingdom's last doorway.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

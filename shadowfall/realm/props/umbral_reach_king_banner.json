@@ -1,0 +1,22 @@
+{
+ "name": "umbral_reach_king_banner",
+ "size": [
+  36,
+  112
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  13,
+  101,
+  11,
+  11
+ ],
+ "anchor": [
+  18,
+  112
+ ],
+ "base": 112
+}

@@ -1,0 +1,22 @@
+{
+ "name": "umbral_reach_shadow_tree",
+ "size": [
+  57,
+  120
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  22,
+  108,
+  14,
+  12
+ ],
+ "anchor": [
+  29,
+  120
+ ],
+ "base": 120
+}

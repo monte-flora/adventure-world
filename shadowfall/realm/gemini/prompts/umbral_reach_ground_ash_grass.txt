@@ -1,0 +1,4 @@
+A square seamless tileable texture, 1024x1024: dead ashen grey grass, brittle flattened blades over grey-brown earth, a pale dusting of ash, a few dark pebbles, a very faint violet tint in the shadows.
+Seen straight from above, completely flat, evenly lit, no objects, no horizon, no perspective, no vignette.
+The left edge must match the right edge and the top edge must match the bottom edge so it tiles with no seams.
+Even detail everywhere (no one big feature), so it repeats without a pattern you can spot.

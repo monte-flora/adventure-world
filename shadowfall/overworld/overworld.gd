@@ -79,12 +79,12 @@ func build(w: WorldMap) -> void:
 	tiles = RealmTiles.new(w)
 	tiles.paint(map, objects, canopy)
 	add_child(map)
-	if realm == "light":
-		ground = RealmGround.new(w)
-		if ground.build():
-			add_child(ground)
-		else:
-			ground = null
+	ground = RealmGround.new(w)
+	if ground.build():
+		add_child(ground)
+	else:
+		ground.free()
+		ground = null
 	gates_layer = Node2D.new()
 	gates_layer.draw.connect(_draw_marks)
 	add_child(gates_layer)

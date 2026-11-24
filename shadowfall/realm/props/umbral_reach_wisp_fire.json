@@ -1,0 +1,28 @@
+{
+ "name": "umbral_reach_wisp_fire",
+ "size": [
+  24,
+  72
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   12,
+   14,
+   96
+  ]
+ ],
+ "foot": [
+  5,
+  65,
+  14,
+  7
+ ],
+ "anchor": [
+  12,
+  72
+ ],
+ "base": 72
+}

@@ -124,7 +124,7 @@ func object(p: Vector2i) -> String:
 
 ## Is square p in a land drawn with the painted ground (`ground: painted`, RealmGround)?
 func painted(p: Vector2i) -> bool:
-	return not world.nightfall and world.lands.get(world.land(p), {}).get("ground", "") == "painted"
+	return world.lands.get(world.land(p), {}).get("ground", "") == "painted"
 
 
 ## Fills the layers for the whole realm (sea included). canopy (over the hero) gets the tree crown

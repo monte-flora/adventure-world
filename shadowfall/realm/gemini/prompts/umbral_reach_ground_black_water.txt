@@ -1,0 +1,4 @@
+A square seamless tileable texture, 1024x1024: still black water seen from above, deep ink-dark with slow faint ripples, a cold violet-grey sheen on the ripple crests, a few pale flecks of drifting ash.
+Seen straight from above, completely flat, evenly lit, no objects, no horizon, no perspective, no vignette.
+The left edge must match the right edge and the top edge must match the bottom edge so it tiles with no seams.
+Even detail everywhere (no one big feature), so it repeats without a pattern you can spot.
