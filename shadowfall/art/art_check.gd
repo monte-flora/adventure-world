@@ -1,6 +1,8 @@
 class_name ArtCheck
 ## The art checker: every PNG under res://art uses only Shadowfall 32 colours (alpha 0 or 255), and
-## every sheet's image is a whole number of cells with each animation inside it.
+## every sheet's image is a whole number of cells with each animation inside it. Art made from Gemini
+## pictures (listed in art/gemini/painted.json by tools/char_import.gd) may use any colour, like the realm's
+## props; its cells are still checked. art/gemini/ (the raw pictures) and sheets/candidates/ (tests) are skipped.
 ## Run: sh shadowfall/tools/run_tests.sh --only=art
 
 const ROOT := "res://art"
@@ -16,7 +18,7 @@ static func palette() -> Dictionary:
 
 static func pngs(dir := ROOT, out := PackedStringArray()) -> PackedStringArray:
 	for d in DirAccess.get_directories_at(dir):
-		if d != "src" and d != "tests":
+		if d not in ["src", "tests", "gemini", "candidates"]:
 			pngs(dir.path_join(d), out)
 	for f in DirAccess.get_files_at(dir):
 		if f.ends_with(".png"):
@@ -89,8 +91,10 @@ static func check_all() -> PackedStringArray:
 	var pal := palette()
 	if pal.size() != 32:
 		bad.append("palette.json has %d colours, want 32" % pal.size())
+	var painted := CharImport.painted()
 	for p in pngs():
-		bad.append_array(check_png(p, pal))
+		if p not in painted:
+			bad.append_array(check_png(p, pal))
 	for n in ArtSheet.names():
 		bad.append_array(check_sheet(n))
 	return bad
