@@ -88,6 +88,31 @@ func test_dialogue_box_three_lines_and_pages() -> void:
 	box.queue_free()
 
 
+func test_dialogue_face_beside_the_box() -> void:
+	var box = load("res://ui/dialogue_box.tscn").instantiate()
+	add_child(box)
+	await frames(1)
+	check(box.face_for("no_such_look") == null and box.face_for("") == null, "no face picture: none")
+	box.say("Warden Maera", "Keep your lantern lit.")
+	await frames(1)
+	check(not box.face_panel.visible, "no face: no slot")
+	var img := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	img.fill(Color("0b0a12"))
+	var face := ImageTexture.create_from_image(img)
+	box.say("Warden Maera", "Keep your lantern lit.", face)
+	await frames(2)
+	check(box.face_panel.visible and box.face_rect.texture == face, "the face shows")
+	var f: Rect2 = box.face_panel.get_global_rect()
+	var b: Rect2 = box._panel.get_global_rect()
+	check(f.end.x <= b.position.x and is_equal_approx(f.end.y, b.end.y), "left of the box, bottoms level: %s %s" % [f, b])
+	check(is_equal_approx(f.size.y, b.size.y), "as tall as the 3-line box")
+	_fits(box, "dialogue with a face")
+	box.ask("Warden Maera", PackedStringArray(["Yes", "No"]))
+	check(not box.face_panel.visible, "ask with no face hides it")
+	box._pick(0)
+	box.queue_free()
+
+
 func test_pause_opens_every_tab() -> void:
 	_before()
 	Quests.start_main()
