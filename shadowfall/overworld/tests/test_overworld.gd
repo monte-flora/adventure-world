@@ -86,6 +86,12 @@ func test_back_from_a_cave_stands_beside_the_mine() -> void:
 	check(ow.hero.cell().distance_to(w.mines[0]) < 1.5, "next to the Mine")
 
 
+func test_play_test_start_at_a_square_from_the_command_line() -> void:
+	var w := WorldMap.load_realm()
+	var ow = await _open({"at": "%d,%d" % [w.mines[0].x, w.mines[0].y]})     # -- --at=col,row is text
+	check(ow.hero.cell().distance_to(w.mines[0]) < 1.5, "--at=col,row starts beside that square")
+
+
 func _gate_world(letter: String) -> WorldMap:
 	var w := WorldMap.new()
 	w.stitch({"world/01_test.txt": "at: 0 0\nhome: 1 1\nGGGGG\nGH%sGG\nGGGGG" % letter})
