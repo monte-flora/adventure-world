@@ -14,6 +14,9 @@ What there is (prompts/, 43 pictures):
   The Shadow King is drawn on green, not magenta, because he is purple.
 - face_<look>: a head-and-shoulders face for each villager look, shown beside the talk box
   (art/ui/faces/<look>.png). The seer is on green too.
+  For a face that moves: animate it in Gemini, download the GIF or video. pixi run gemini-next takes
+  a .gif, .mp4 or .webm for a face_*; the import (needs ffmpeg: brew install ffmpeg) makes
+  art/ui/faces/<look>_anim.png + .json, which plays beside the talk box while the words type.
 - people_<look>: each villager standing, 2 copies side by side (still + breathing in), written over
   art/sheets/people_<look>.png. Their spear, lantern or pack is still added by the game, so the
   picture has empty hands. Every direction uses this front view.
@@ -25,6 +28,6 @@ What there is (prompts/, 43 pictures):
   Gemini's picture editing in the same chat.
 
 By hand: paste STYLE_portraits.txt (portrait_*, face_*) or STYLE_characters.txt (the rest), then
-the prompt; save the picture as in/<prompt name>.png (or .jpg/.webp); run pixi run import-characters.
+the prompt; save the picture as in/<prompt name>.png (or .jpg/.webp; a face may be .gif/.mp4/.webm); run pixi run import-characters.
 Until you make a picture the game keeps today's art. To undo one, git checkout its file.
 assets.json sets the sizes. Never paste passwords or keys anywhere.

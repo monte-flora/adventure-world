@@ -27,6 +27,7 @@ SETS = {
 }
 GEMINI_URL = "https://gemini.google.com/app"
 IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+MOVING_EXTS = (".gif", ".mp4", ".webm")  # a face_* may be Gemini's "animate" GIF or video
 PARTIAL_EXTS = (".crdownload", ".part", ".download")
 
 
@@ -40,8 +41,12 @@ def prompt_names(gemini=GEMINI):
     return sorted(names, key=lambda n: (not is_ground(n), n))
 
 
+def exts_for(name):
+    return IMAGE_EXTS + MOVING_EXTS if name.startswith("face_") else IMAGE_EXTS
+
+
 def done_file(name, gemini=GEMINI):
-    for ext in IMAGE_EXTS:
+    for ext in exts_for(name):
         p = os.path.join(gemini, "in", name + ext)
         if os.path.exists(p):
             return p
@@ -95,12 +100,12 @@ def clip_text(name, gemini=GEMINI, note=None):
     return style + "\n\n" + prompt + fix + "\n"
 
 
-def images_in(folder):
+def images_in(folder, exts=IMAGE_EXTS):
     out = {}
     for f in os.listdir(folder):
         p = os.path.join(folder, f)
         low = f.lower()
-        if low.startswith(".") or low.endswith(PARTIAL_EXTS) or not low.endswith(IMAGE_EXTS):
+        if low.startswith(".") or low.endswith(PARTIAL_EXTS) or not low.endswith(exts):
             continue
         try:
             st = os.stat(p)
@@ -110,10 +115,10 @@ def images_in(folder):
     return out
 
 
-def check_download(folder, before, since, sizes):
+def check_download(folder, before, since, sizes, exts=IMAGE_EXTS):
     """One look at the folder. A new picture counts once its size is the same as last look.
     before: {path: (mtime, size)} at the start; sizes: {path: size} from the last look (updated)."""
-    for p, (mtime, size) in sorted(images_in(folder).items()):
+    for p, (mtime, size) in sorted(images_in(folder, exts).items()):
         if p in before and mtime <= since:
             continue
         if size > 0 and sizes.get(p) == size:
@@ -131,14 +136,14 @@ def read_key():
     return None
 
 
-def wait_download(folder, before, since, key=read_key, poll=0.5, sleep=time.sleep):
+def wait_download(folder, before, since, exts=IMAGE_EXTS, key=read_key, poll=0.5, sleep=time.sleep):
     """Returns the settled picture's path, or "n" / "q" if that key was pressed."""
     sizes = {}
     while True:
         k = key()
         if k:
             return k
-        p = check_download(folder, before, since, sizes)
+        p = check_download(folder, before, since, sizes, exts)
         if p:
             return p
         sleep(poll)
@@ -196,12 +201,13 @@ def run(name=None, downloads=None, gemini=GEMINI, run_cmd=subprocess.run, wait=w
         print("\n== %s%s  (%d left)" % (cur, "  (redo: %s)" % note if note else "", left))
         run_cmd(["pbcopy"], input=clip_text(cur, gemini, note).encode(), check=True)
         since = time.time()
-        before = images_in(downloads)
+        exts = exts_for(cur)
+        before = images_in(downloads, exts)
         print("Copied. Paste into Gemini, send, then download the picture you like. (n = skip, q = quit)")
         if not opened:
             run_cmd(["open", GEMINI_URL], check=False)
             opened = True
-        got = wait(downloads, before, since)
+        got = wait(downloads, before, since, exts)
         if got == "q":
             print("Bye. %d made this time." % made)
             return 0

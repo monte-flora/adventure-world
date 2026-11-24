@@ -9,6 +9,8 @@ extends CanvasLayer
 ##                                                 then its choices (UP/DOWN picks, JUMP/INTERACT/ATTACK takes)
 ## A face (art/ui/faces/<look>.png, made with Gemini: art/gemini/README.txt) shows in a small frame left of the
 ## box when the speaker has one: talk() finds it from the person's look; say(..., face) takes a texture.
+## A moving face (art/ui/faces/<look>_anim.png, a strip of 64x64 frames, + <look>_anim.json {"fps", "frames"})
+## plays while the words type, then rests on its frame 0; say(..., face, anim) takes face_anim_for(look).
 
 signal finished
 signal chosen(i: int)
@@ -27,6 +29,9 @@ var text: RichTextLabel
 var _panel: PanelContainer
 var face_panel: PanelContainer         # the speaker's face, left of the box (hidden when they have none)
 var face_rect: TextureRect
+var anim_frames: Array[Texture2D] = [] # the moving face's frames ([] for a still face)
+var anim_fps := 10.0
+var _anim_time := 0.0
 var _shown_chars := 0.0
 var choices: PackedStringArray = []    # shown instead of the text while you pick one
 var cursor := 0
@@ -76,15 +81,43 @@ static func face_for(look: String) -> Texture2D:
 	return load(p) if look != "" and ResourceLoader.exists(p) else null
 
 
-## Shows `face` beside the box, or hides the slot when it is null.
-func show_face(face: Texture2D) -> void:
-	face_rect.texture = face
-	face_panel.visible = face != null
+## The moving face of this look: {"fps": .., "frames": [AtlasTexture, ..]} from <look>_anim.png/.json,
+## or {} if none has been made.
+static func face_anim_for(look: String) -> Dictionary:
+	var p := FACES + look + "_anim"
+	if look == "" or not ResourceLoader.exists(p + ".png") or not FileAccess.file_exists(p + ".json"):
+		return {}
+	var meta = JSON.parse_string(FileAccess.get_file_as_string(p + ".json"))
+	return face_anim(load(p + ".png"), meta) if meta is Dictionary else {}
+
+
+## A strip of frames side by side + its .json ({"fps", "frames", "size"}) -> {"fps", "frames": [AtlasTexture]}.
+static func face_anim(strip: Texture2D, meta: Dictionary) -> Dictionary:
+	if strip == null:
+		return {}
+	var size := Vector2(meta.get("size", [64, 64])[0], meta.get("size", [64, 64])[1])
+	var frames: Array[Texture2D] = []
+	for i in mini(int(meta.get("frames", 0)), int(strip.get_width() / size.x)):
+		var t := AtlasTexture.new()
+		t.atlas = strip
+		t.region = Rect2(Vector2(i * size.x, 0), size)
+		frames.append(t)
+	return {"fps": float(meta.get("fps", 10)), "frames": frames} if not frames.is_empty() else {}
+
+
+## Shows `face` beside the box (or the moving face `anim`, resting on its frame 0); hides the slot when
+## there is neither.
+func show_face(face: Texture2D, anim := {}) -> void:
+	anim_frames.assign(anim.get("frames", []))
+	anim_fps = float(anim.get("fps", 10.0))
+	_anim_time = 0.0
+	face_rect.texture = anim_frames[0] if not anim_frames.is_empty() else face
+	face_panel.visible = face_rect.texture != null
 
 
 ## Shows `speaker`'s words, page by page. Emits `finished` after the last page.
-func say(speaker: String, words: String, face: Texture2D = null) -> void:
-	show_face(face)
+func say(speaker: String, words: String, face: Texture2D = null, anim := {}) -> void:
+	show_face(face, anim)
 	speaker_label.text = speaker
 	speaker_label.visible = speaker != ""
 	pages = paginate(words)
@@ -99,21 +132,23 @@ func is_open() -> bool:
 
 ## Runs a Conversation to its end. Returns what it opens after ("shop", "forge" or "").
 func talk(c) -> String:
-	var face := face_for(str(c.person.get("look", "")))
+	var look := str(c.person.get("look", ""))
+	var face := face_for(look)
+	var anim := face_anim_for(look)
 	while not c.done:
-		say(c.name(), c.page(), face)
+		say(c.name(), c.page(), face, anim)
 		await finished
 		var cs: PackedStringArray = c.choice_texts()
 		if cs.is_empty():
 			c.next_page()
 		else:
-			c.choose(await ask(c.name(), cs, face))
+			c.choose(await ask(c.name(), cs, face, anim))
 	return c.then
 
 
 ## Shows `options` to pick from; returns the index picked.
-func ask(speaker: String, options: PackedStringArray, face: Texture2D = null) -> int:
-	show_face(face)
+func ask(speaker: String, options: PackedStringArray, face: Texture2D = null, anim := {}) -> int:
+	show_face(face, anim)
 	speaker_label.text = speaker
 	speaker_label.visible = speaker != ""
 	choices = options
@@ -168,6 +203,16 @@ func _process(delta: float) -> void:
 		text.visible_characters = int(_shown_chars)
 		if text.visible_characters >= text.get_total_character_count():
 			text.visible_characters = -1
+	_animate_face(delta)
+
+
+## The moving face plays while the words type, then rests on frame 0.
+func _animate_face(delta: float) -> void:
+	if anim_frames.is_empty():
+		return
+	var typing := visible and choices.is_empty() and text.visible_characters >= 0
+	_anim_time = _anim_time + delta if typing else 0.0
+	face_rect.texture = anim_frames[int(_anim_time * anim_fps) % anim_frames.size()]
 
 
 func _unhandled_input(event: InputEvent) -> void:
