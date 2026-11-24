@@ -90,9 +90,9 @@ func test_painted_ground_has_no_seam_between_screens() -> void:
 		across += _diff(a, b)
 		inside += _diff(c, d)
 	check(across <= inside * 1.5 + 0.5, "the screen edge is no harsher than inside (%.2f vs %.2f)" % [across, inside])
-	var cinder: Rect2i = w.lands["cinder_wastes"].rect      # still unpainted (the Mere's sea is painted now)
-	var p := cinder.position + cinder.size / 2
-	check(w.land(p) == "cinder_wastes", "the middle of the Cinder Wastes is its own square")
+	var gate: Rect2i = w.lands["shadowgate"].rect      # still unpainted (the other lands are painted now)
+	var p := gate.position + gate.size / 2
+	check(w.land(p) == "shadowgate", "the middle of the Shadowgate is its own square")
 	check(g.color_at((Vector2(p) + Vector2(0.5, 0.5)) * TILE).a == 0.0, "other lands stay on today's tiles")
 	g.free()
 

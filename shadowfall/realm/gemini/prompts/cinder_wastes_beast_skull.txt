@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one huge bleached skull of an ancient horned beast half-sunk in grey ash: a long bone muzzle, a pair of great curved horns, empty eye sockets, a few ribs and vertebrae poking from the drift beside it, weathered and cracked, nothing gruesome.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

@@ -1,0 +1,28 @@
+{
+ "name": "cinder_wastes_ash_shrine",
+ "size": [
+  31,
+  88
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   16,
+   62,
+   80
+  ]
+ ],
+ "foot": [
+  5,
+  76,
+  22,
+  12
+ ],
+ "anchor": [
+  16,
+  88
+ ],
+ "base": 88
+}

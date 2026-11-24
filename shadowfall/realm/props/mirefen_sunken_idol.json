@@ -1,0 +1,17 @@
+{
+ "name": "mirefen_sunken_idol",
+ "size": [
+  36,
+  96
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  18,
+  96
+ ],
+ "base": 96
+}

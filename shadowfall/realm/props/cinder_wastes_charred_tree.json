@@ -1,0 +1,22 @@
+{
+ "name": "cinder_wastes_charred_tree",
+ "size": [
+  51,
+  108
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  18,
+  97,
+  14,
+  11
+ ],
+ "anchor": [
+  25,
+  108
+ ],
+ "base": 108
+}

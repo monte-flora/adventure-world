@@ -1,0 +1,22 @@
+{
+ "name": "mirefen_hag_tree",
+ "size": [
+  67,
+  128
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  25,
+  115,
+  16,
+  13
+ ],
+ "anchor": [
+  33,
+  128
+ ],
+ "base": 128
+}

@@ -13,7 +13,9 @@ const LAMP := {"energy": 0.8, "color": Color("ffc56a"), "amount": 0.1, "speed": 
 const FORGE := {"energy": 0.9, "color": Color("f0784a"), "amount": 0.2, "speed": 7.0}
 const FIRE := {"energy": 1.0, "color": Color("f0784a"), "amount": 0.3, "speed": 10.0}
 const LIGHTS := {"cottage_a": WINDOW, "cottage_b": WINDOW, "tavern": WINDOW, "smithy": FORGE,
-	"lamppost": LAMP, "campfire": FIRE}
+	"lamppost": LAMP, "campfire": FIRE,
+	"cinder_wastes_forge_temple": FORGE, "cinder_wastes_ash_shrine": FIRE, "cinder_wastes_lava_crack": FIRE,
+	"mirefen_wisp_lantern": LAMP}
 
 
 ## Adds one Sprite2D per prop to `sorted` (a y-sorted node); front rows to `over` if given.

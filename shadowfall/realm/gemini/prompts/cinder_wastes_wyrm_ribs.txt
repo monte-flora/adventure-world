@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one colossal ribcage of an ancient dragon lying half-buried in grey ash: huge curved bleached-ivory ribs arching up like the hull of a ruined ship, a vast spine and the great fanged skull sunk at one end, cracked and sun-polished, scorched black at the tips, a few ember glints in the sand around it.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

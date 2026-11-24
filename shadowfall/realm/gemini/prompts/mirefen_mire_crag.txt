@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one low crag of slick black bog-stone: wet dark boulders stacked together, green slime and moss dripping from the ledges, a little reed grass and tangled roots round the base.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.
