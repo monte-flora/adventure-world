@@ -1,0 +1,4 @@
+A dialogue portrait, 1024x1024: the head and shoulders of the Hollow-Eyed Deserter, a gaunt soldier who fled the Shadowgate: short brown hair and beard, haunted tired eyes. Wearing a dented steel breastplate over a black tunic, a torn mail hem, dark trousers, mud on the boots.
+Seen from the front, turned a little to one side, looking at the viewer, a calm face that fits them; shoulders cut off flat at the bottom edge of the picture, the head near the top.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around them: no scenery, no shadow, no gradient, no frame.
+Do not use magenta or pink anywhere on the character.

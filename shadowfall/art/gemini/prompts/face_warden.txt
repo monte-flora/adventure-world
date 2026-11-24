@@ -1,0 +1,4 @@
+A dialogue portrait, 1024x1024: the head and shoulders of Warden Maera, the stern grey-eyed woman who keeps Emberhold's watch-fire: long brown hair under a steel nasal helm. Wearing steel breastplate over a grey tunic, a grey wool cloak pinned with a small pale-gold clasp, a dull orange-red belt, dark trousers and boots.
+Seen from the front, turned a little to one side, looking at the viewer, a calm face that fits them; shoulders cut off flat at the bottom edge of the picture, the head near the top.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around them: no scenery, no shadow, no gradient, no frame.
+Do not use magenta or pink anywhere on the character.

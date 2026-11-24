@@ -1,0 +1,6 @@
+A game character sprite sheet, 1536x1024: Morwen of the Mirefen, a mysterious seer: her deep violet hood up, only two faint pale eyes and her chin showing. Wearing a long violet robe down to the ground with a pale-gold cord belt.
+Two copies of the same character side by side in a 2x1 grid, the same size and standing on the same ground line, both facing the camera (3/4 top-down view, looking a little down at them from the south), standing still at ease, arms relaxed at the sides with empty hands (no weapons, tools, bags or lights: the game adds those).
+Left: standing still. Right: the same pose breathing in, chest and shoulders up by a hair; nothing else changes.
+Full body from the top of the head to the soles of the feet, nothing cut off, a clear gap of background between the two figures.
+The background is one flat solid pure green colour (#00FF00) everywhere around them: no ground, no shadow, no gradient, no other objects.
+Do not use bright green anywhere on the character.
