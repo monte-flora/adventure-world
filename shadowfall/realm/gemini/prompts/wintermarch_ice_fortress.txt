@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: the great ice-wall fortress of the Wintermarch seen from the front and slightly above: a mighty curtain wall of blue-white ice blocks on black stone footings, a huge gatehouse with iron-bound doors, four tall crenellated watchtowers with pointed slate roofs, banners of dark blue cloth, lit amber windows and braziers along the wall, snow heaped on every ledge.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

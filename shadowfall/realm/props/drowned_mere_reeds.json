@@ -1,0 +1,17 @@
+{
+ "name": "drowned_mere_reeds",
+ "size": [
+  48,
+  24
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  24,
+  24
+ ],
+ "base": 24
+}

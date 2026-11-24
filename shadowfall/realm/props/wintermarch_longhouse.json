@@ -1,0 +1,33 @@
+{
+ "name": "wintermarch_longhouse",
+ "size": [
+  144,
+  111
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   43,
+   83,
+   50
+  ],
+  [
+   101,
+   83,
+   50
+  ]
+ ],
+ "foot": [
+  4,
+  64,
+  135,
+  47
+ ],
+ "anchor": [
+  71,
+  111
+ ],
+ "base": 111
+}

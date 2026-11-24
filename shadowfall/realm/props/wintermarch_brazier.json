@@ -1,0 +1,28 @@
+{
+ "name": "wintermarch_brazier",
+ "size": [
+  24,
+  56
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   12,
+   14,
+   100
+  ]
+ ],
+ "foot": [
+  5,
+  45,
+  14,
+  11
+ ],
+ "anchor": [
+  12,
+  56
+ ],
+ "base": 56
+}

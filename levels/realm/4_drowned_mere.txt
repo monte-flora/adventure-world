@@ -7,6 +7,83 @@ about: A lake round the Shadowgate. Walk the west and north shores; swim for the
 mine: stone/4_the_drowned_bell_road.txt 47 5
 mine: caves/10_green_lvl_2.txt 25 77
 mine: caves/12_the_crystal_cave.txt 41 45
+ground: painted
+paint: deep_water drowned_mere_ground_black_water
+paint: shallow_water drowned_mere_ground_shallows
+paint: grass drowned_mere_ground_marsh_grass
+forest: dead_tree dead_tree pine
+crags: drowned_mere_sea_crag drowned_mere_sea_crag crag
+prop: mine_mouth 47 5
+prop: mine_mouth 25 77
+prop: mine_mouth 41 45
+prop: drowned_mere_lighthouse 6 43
+prop: drowned_mere_stilt_house 4 34
+prop: drowned_mere_stilt_house 5 38
+prop: drowned_mere_stilt_house 6 33
+prop: drowned_mere_stilt_house 4 42
+prop: drowned_mere_dock 7.4 36
+prop: drowned_mere_dock 7.4 47
+prop: drowned_mere_dock 2.4 45
+prop: drowned_mere_drowned_statue 3 47
+prop: drowned_mere_drowned_statue 3 53
+prop: drowned_mere_reeds 1 40
+prop: drowned_mere_reeds 1 52
+prop: drowned_mere_reeds 8 45
+prop: drowned_mere_reeds 8 57
+prop: drowned_mere_reeds 6 57.5
+prop: drowned_mere_stilt_house 21 5
+prop: drowned_mere_stilt_house 25 5
+prop: drowned_mere_stilt_house 29 5
+prop: drowned_mere_stilt_house 33 5
+prop: drowned_mere_stilt_house 37 5
+prop: drowned_mere_stilt_house 41 5
+prop: drowned_mere_stilt_house 31 7
+prop: drowned_mere_dock 23 9.8
+prop: drowned_mere_dock 31 9.8
+prop: drowned_mere_dock 39 9.8
+prop: drowned_mere_dock 46 9.8
+prop: drowned_mere_reeds 19.5 22
+prop: drowned_mere_reeds 24 7
+prop: drowned_mere_reeds 36 3
+prop: drowned_mere_drowned_statue 19 16
+prop: drowned_mere_drowned_statue 19 28
+prop: drowned_mere_stilt_house 27 72
+prop: drowned_mere_dock 22.3 72
+prop: drowned_mere_dock 29.4 77
+prop: drowned_mere_reeds 23 75
+prop: drowned_mere_reeds 28 74
+prop: drowned_mere_drowned_statue 39 41
+prop: drowned_mere_drowned_statue 44 43
+prop: drowned_mere_drowned_statue 43 49
+prop: drowned_mere_reeds 38.4 44
+prop: drowned_mere_reeds 41 51
+prop: drowned_mere_sunken_spire 21 20
+prop: drowned_mere_sunken_spire 27 18
+prop: drowned_mere_sunken_spire 33 15
+prop: drowned_mere_sunken_spire 40 30
+prop: drowned_mere_sunken_spire 47 30
+prop: drowned_mere_sunken_spire 30 60
+prop: drowned_mere_sunken_spire 32 70
+prop: drowned_mere_sunken_spire 27 88
+prop: drowned_mere_sunken_spire 20 66
+prop: drowned_mere_sunken_spire 36 52
+prop: drowned_mere_sunken_spire 48 56
+prop: drowned_mere_sunken_spire 19 76
+prop: drowned_mere_sunken_spire 22 86
+prop: drowned_mere_sunken_spire 11 40
+prop: drowned_mere_sunken_spire 13 56
+prop: drowned_mere_sunken_spire 31 45
+prop: drowned_mere_drowned_statue 25 33
+prop: drowned_mere_drowned_statue 28 66
+prop: drowned_mere_drowned_statue 34 34
+prop: drowned_mere_drowned_statue 42 58
+prop: drowned_mere_drowned_statue 19 50
+prop: drowned_mere_drowned_statue 12 47
+prop: drowned_mere_reeds 26 14
+prop: drowned_mere_reeds 36 12
+prop: drowned_mere_reeds 40 11
+prop: drowned_mere_reeds 22 69
+prop: drowned_mere_reeds 28 82
 ..............................XXXXXXXXXXOOOOOXXXXXXXXXXXXXXX..............................
 ..............................XWWWWWWWWWWWWWWWWWWWWWWWWWWWWX..............................
 ..............................GGGGGGGGGGGGGGGGGGGGGGGGGGGGWX..............................

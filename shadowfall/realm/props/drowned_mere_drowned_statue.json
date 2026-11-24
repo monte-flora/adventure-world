@@ -1,0 +1,17 @@
+{
+ "name": "drowned_mere_drowned_statue",
+ "size": [
+  36,
+  104
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  18,
+  104
+ ],
+ "base": 104
+}

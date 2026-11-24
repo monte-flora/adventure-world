@@ -1,0 +1,17 @@
+{
+ "name": "drowned_mere_dock",
+ "size": [
+  96,
+  33
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  48,
+  33
+ ],
+ "base": 33
+}

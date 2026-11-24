@@ -1,0 +1,28 @@
+{
+ "name": "drowned_mere_lighthouse",
+ "size": [
+  73,
+  224
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   37,
+   27,
+   120
+  ]
+ ],
+ "foot": [
+  11,
+  193,
+  51,
+  31
+ ],
+ "anchor": [
+  36,
+  224
+ ],
+ "base": 224
+}

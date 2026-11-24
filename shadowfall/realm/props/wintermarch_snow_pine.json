@@ -1,0 +1,22 @@
+{
+ "name": "wintermarch_snow_pine",
+ "size": [
+  72,
+  120
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  26,
+  108,
+  20,
+  12
+ ],
+ "anchor": [
+  36,
+  120
+ ],
+ "base": 120
+}

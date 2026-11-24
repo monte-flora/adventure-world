@@ -1,0 +1,38 @@
+{
+ "name": "wintermarch_ice_fortress",
+ "size": [
+  256,
+  224
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   77,
+   157,
+   70
+  ],
+  [
+   179,
+   157,
+   70
+  ],
+  [
+   128,
+   101,
+   60
+  ]
+ ],
+ "foot": [
+  5,
+  148,
+  246,
+  76
+ ],
+ "anchor": [
+  128,
+  224
+ ],
+ "base": 224
+}

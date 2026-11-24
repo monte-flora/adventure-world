@@ -1,0 +1,17 @@
+{
+ "name": "wintermarch_snow_drift",
+ "size": [
+  56,
+  19
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [],
+ "anchor": [
+  28,
+  19
+ ],
+ "base": 19
+}
