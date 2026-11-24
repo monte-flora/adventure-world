@@ -1,0 +1,22 @@
+{
+ "name": "weepingwold_standing_stone",
+ "size": [
+  31,
+  84
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  6,
+  71,
+  19,
+  13
+ ],
+ "anchor": [
+  15,
+  84
+ ],
+ "base": 84
+}

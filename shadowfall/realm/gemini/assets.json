@@ -1,6 +1,9 @@
 {
  "about": "What the import makes from each picture. like = the placeholder shape to draw it as (an older prop); ground_colors = a land ground placeholder's colour. size = the biggest it may be in game pixels (32 = one square); it keeps its shape. foot = the part you bump into, as shares of the picture [x, y, w, h] (none = walk through). lights = warm lights [x share, y share, radius px]. front = rows from the top always drawn over the hero. ground textures become 256x256 seamless tiles.",
- "ground": ["grass", "dirt_road", "cobblestone", "mud", "shallow_water", "rocky_ground", "cliff", "deep_water", "forest_floor"],
+ "ground": ["grass", "dirt_road", "cobblestone", "mud", "shallow_water", "rocky_ground", "cliff", "deep_water", "forest_floor",
+  "weepingwold_ground_moss", "weepingwold_ground_leaf_litter", "hollowcrown_ground_heath", "hollowcrown_ground_kings_road"],
+ "ground_colors": {"weepingwold_ground_moss": [34, 70, 48], "weepingwold_ground_leaf_litter": [70, 46, 32],
+  "hollowcrown_ground_heath": [88, 88, 62], "hollowcrown_ground_kings_road": [118, 116, 112]},
  "props": {
   "oak":         {"size": [96, 108], "foot": [0.36, 0.86, 0.28, 0.14]},
   "pine":        {"size": [64, 108],  "foot": [0.34, 0.88, 0.32, 0.12]},
@@ -25,6 +28,19 @@
   "ivy_cliff":     {"size": [36, 60]},
   "rubble_heap":   {"size": [42, 40]},
   "shadow_thorns": {"size": [40, 50]},
-  "riven_boulder": {"size": [44, 48]}
+  "riven_boulder": {"size": [44, 48]},
+  "weepingwold_willow":        {"size": [112, 120], "foot": [0.4, 0.88, 0.2, 0.12], "like": "oak"},
+  "weepingwold_grieving_oak":  {"size": [192, 192], "foot": [0.38, 0.9, 0.24, 0.1], "like": "oak"},
+  "weepingwold_hollow_stump":  {"size": [72, 60], "foot": [0.1, 0.5, 0.8, 0.5], "like": "rocks"},
+  "weepingwold_toadstools":    {"size": [44, 28], "like": "flowers"},
+  "weepingwold_woodcutter_hut": {"size": [96, 96], "foot": [0.04, 0.55, 0.92, 0.45], "lights": [[0.3, 0.72, 40]], "like": "cottage_b"},
+  "weepingwold_standing_stone": {"size": [48, 84], "foot": [0.2, 0.85, 0.6, 0.15], "like": "waystone"},
+  "hollowcrown_broken_tower":  {"size": [112, 176], "foot": [0.1, 0.7, 0.8, 0.3], "like": "ruined_wall"},
+  "hollowcrown_fallen_arch":   {"size": [112, 80], "foot": [0.0, 0.6, 1.0, 0.4], "like": "ruined_wall"},
+  "hollowcrown_statue":        {"size": [48, 96], "foot": [0.15, 0.86, 0.7, 0.14], "like": "waystone"},
+  "hollowcrown_banner":        {"size": [36, 88], "like": "lamppost"},
+  "hollowcrown_throne":        {"size": [72, 80], "foot": [0.1, 0.6, 0.8, 0.4], "like": "ruined_wall"},
+  "hollowcrown_pillar":        {"size": [32, 80], "foot": [0.1, 0.85, 0.8, 0.15], "like": "waystone"},
+  "hollowcrown_heather":       {"size": [44, 26], "like": "flowers"}
  }
 }

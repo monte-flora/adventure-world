@@ -68,5 +68,5 @@ func test_every_asset_has_a_prompt_and_art() -> void:
 		check(FileAccess.file_exists(ArtImport.GEMINI + "prompts/" + n + ".txt"), "prompt for " + n)
 		check(ResourceLoader.exists(ArtImport.PROPS + n + ".png"), "realm/props/%s.png" % n)
 	for n in a["ground"]:
-		check(FileAccess.file_exists(ArtImport.GEMINI + "prompts/ground_" + n + ".txt"), "prompt for ground " + n)
+		check(FileAccess.file_exists(ArtImport.GEMINI + "prompts/" + ArtImport.ground_stem(n) + ".txt"), "prompt for ground " + n)
 		check(ResourceLoader.exists(ArtImport.GROUND + n + ".png"), "realm/ground/%s.png" % n)

@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one tall wooden pole planted in the ground flying a long tattered faded banner of deep blue cloth with a pale worn crown emblem (no letters), the cloth ragged and torn at the ends, a small cairn of stones at the base of the pole.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

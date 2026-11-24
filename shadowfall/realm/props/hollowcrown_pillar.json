@@ -1,0 +1,22 @@
+{
+ "name": "hollowcrown_pillar",
+ "size": [
+  20,
+  80
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  2,
+  68,
+  16,
+  12
+ ],
+ "anchor": [
+  10,
+  80
+ ],
+ "base": 80
+}

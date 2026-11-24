@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one small woodcutter's hut seen from the front and slightly above: rough log walls, a steep moss-covered thatch roof, a crooked stone chimney, a plank door, one small lit amber window, a stack of split firewood leaning on one side, an axe stuck in a chopping block.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

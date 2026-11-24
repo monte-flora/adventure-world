@@ -1,0 +1,22 @@
+{
+ "name": "hollowcrown_broken_tower",
+ "size": [
+  112,
+  134
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [],
+ "foot": [
+  11,
+  94,
+  90,
+  40
+ ],
+ "anchor": [
+  56,
+  134
+ ],
+ "base": 134
+}

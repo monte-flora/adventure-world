@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one colossal ancient oak, the Grieving Oak: a vast sprawling canopy of heavy dark green leaves, a trunk as wide as a tower with a hollow like a sorrowful face of bark, thick black sap weeping down it in long streaks, great pale roots clutching the earth, a few withered leaves drifting.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.

@@ -1,0 +1,28 @@
+{
+ "name": "weepingwold_woodcutter_hut",
+ "size": [
+  96,
+  94
+ ],
+ "placeholder": true,
+ "keep": false,
+ "front": 0,
+ "lights": [
+  [
+   29,
+   68,
+   40
+  ]
+ ],
+ "foot": [
+  4,
+  52,
+  88,
+  42
+ ],
+ "anchor": [
+  48,
+  94
+ ],
+ "base": 94
+}

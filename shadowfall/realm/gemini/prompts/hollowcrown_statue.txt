@@ -1,0 +1,4 @@
+A single game sprite, 1024x1024: one weathered stone statue of a long-dead king on a square plinth: a tall robed figure in a cloak with a sword held point-down, the crown snapped off the head, the face worn smooth, moss on the shoulders and plinth.
+Exactly one object, alone, centred, whole and not cut off, standing on its base at the bottom middle, filling most of the picture.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around it: no ground, no grass, no shadow on the background, no gradient, no other objects.
+Do not use magenta or pink anywhere on the object itself.
