@@ -1,22 +1,27 @@
 extends SceneTree
-## pixi run hero-compare: today's hero walking down vs the Gemini candidate (art/sheets/candidates/
-## hero_top_walk_down.png, from `pixi run gemini-next --set characters hero_walk_down`), into
-## art/sheets/candidates/hero_compare.png on the realm's dusk grass. Top row 1x (left today, right Gemini);
-## then today at 4x; then Gemini at 4x.
+## pixi run hero-compare: the drawn map hero vs the Gemini one, for every row with a Gemini picture
+## (art/sheets/candidates/hero_top_<anim>.png, from `pixi run gemini-next --set characters hero_<anim>`), into
+## art/sheets/candidates/hero_compare.png on the realm's dusk grass. Per row, top to bottom: 1x (left drawn,
+## right Gemini); then drawn at 4x; then Gemini at 4x. "Drawn" is the sheet from before the first Gemini row
+## (CharImport.DRAWN), or today's hero_top.png when there is none yet.
 
-const CAND := "res://art/sheets/candidates/hero_top_walk_down.png"
 const OUT := "res://art/sheets/candidates/hero_compare.png"
 const BG := Color("3b4a2c")         # about the colour of Emberhold's grass at dusk
 const PAD := 8
 
 
-static func today() -> Image:
-	var img := Image.load_from_file(ProjectSettings.globalize_path(ArtSheet.DIR + ArtSheet.meta("hero_top")["image"]))
+## The drawn frames of one anim, side by side.
+static func today(anim := "walk_down") -> Image:
+	var path := ProjectSettings.globalize_path(CharImport.DRAWN)
+	if not FileAccess.file_exists(path):
+		path = ProjectSettings.globalize_path(ArtSheet.DIR + ArtSheet.meta("hero_top")["image"])
+	var img := Image.load_from_file(path)
 	img.convert(Image.FORMAT_RGBA8)
 	var c := ArtSheet.cell("hero_top")
-	var out := Image.create(c.x * 4, c.y, false, Image.FORMAT_RGBA8)
-	for i in 4:
-		out.blit_rect(img, ArtSheet.region("hero_top", "walk_down", i), Vector2i(i * c.x, 0))
+	var n := int(ArtSheet.meta("hero_top")["anims"][anim]["frames"])
+	var out := Image.create(c.x * n, c.y, false, Image.FORMAT_RGBA8)
+	for i in n:
+		out.blit_rect(img, ArtSheet.region("hero_top", anim, i), Vector2i(i * c.x, 0))
 	return out
 
 
@@ -26,7 +31,7 @@ static func big(img: Image, k: int) -> Image:
 	return out
 
 
-## The comparison picture of two walk strips.
+## The comparison picture of two strips.
 static func compare(a: Image, b: Image) -> Image:
 	var a4 := big(a, 4)
 	var b4 := big(b, 4)
@@ -44,13 +49,32 @@ static func compare(a: Image, b: Image) -> Image:
 	return out
 
 
+## Every row's comparison stacked, in hero_top.json's order ({anim: Image} strips).
+static func compare_all(strips: Dictionary) -> Image:
+	var parts: Array[Image] = []
+	var w := 0
+	var h := 0
+	for anim in ArtSheet.meta("hero_top")["anims"]:
+		if strips.has(anim):
+			var p := compare(today(anim), strips[anim])
+			parts.append(p)
+			w = maxi(w, p.get_width())
+			h += p.get_height()
+	var out := Image.create(maxi(w, 1), maxi(h, 1), false, Image.FORMAT_RGBA8)
+	out.fill(BG)
+	var y := 0
+	for p in parts:
+		out.blit_rect(p, Rect2i(Vector2i.ZERO, p.get_size()), Vector2i(0, y))
+		y += p.get_height()
+	return out
+
+
 func _init() -> void:
-	var cand := Image.load_from_file(ProjectSettings.globalize_path(CAND))
-	if cand == null or cand.is_empty():
-		print("hero-compare: no candidate yet. Make it: pixi run gemini-next --set characters hero_walk_down")
+	var strips := CharImport.hero_strips()
+	if strips.is_empty():
+		print("hero-compare: no Gemini hero rows yet. Make one: pixi run gemini-next --set characters hero_walk_down")
 		quit(1)
 		return
-	cand.convert(Image.FORMAT_RGBA8)
-	compare(today(), cand).save_png(ProjectSettings.globalize_path(OUT))
-	print("hero-compare: wrote " + ProjectSettings.globalize_path(OUT))
+	compare_all(strips).save_png(ProjectSettings.globalize_path(OUT))
+	print("hero-compare: %s (top to bottom) in %s" % [", ".join(strips.keys()), ProjectSettings.globalize_path(OUT)])
 	quit(0)

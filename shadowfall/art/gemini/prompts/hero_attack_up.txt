@@ -1,0 +1,9 @@
+A game sprite sheet, 1536x1024: the Lanternbearer, a young hooded ranger: a deep night-blue hooded cloak, hood up, face in shadow with pale steady eyes; a warm mid-brown leather jerkin crossed with straps over a light grey mail shirt, a polished steel pauldron on one shoulder, bright steel buckles, a dull red sash, brown boots.
+Strong contrast so he reads on dark ground: the cloak is dark, but the leather is a clearly lighter warm brown and the steel (mail, pauldron, buckles, sword hilt) is bright light grey with crisp white highlights.
+A big iron lantern (about as big as his head) held out at his side in the left hand at hip height, its glass panes clearly lit bright warm yellow-orange by a strong flame inside, with a soft warm glow painted on the cloak and hand beside it (the lantern's glow is the one exception to "no glow").
+A 3-frame sword strike away from the camera, seen from behind, facing straight away from the camera (3/4 top-down view from the south), in a 3x1 grid, three figures side by side:
+1: wind-up: the longsword drawn and raised back over his right shoulder. 2: mid-swing: the blade sweeping across in a fast arc away from the camera with a pale silver motion streak. 3: follow-through: the blade low on the other side, the body leaning into the blow.
+The lantern stays low in his left hand, lit, in all three frames. The same character in every frame: same colours, same size, same proportions, the hero the same height as in his walk pictures, all standing on the same ground line.
+Full body in every frame, nothing cut off, a clear gap of background between the figures.
+The background is one flat solid pure magenta colour (#FF00FF) everywhere around them: no ground, no shadow, no gradient, no frame, no numbers.
+Do not use magenta or pink anywhere on the character.

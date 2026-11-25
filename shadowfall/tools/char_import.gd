@@ -7,7 +7,11 @@ class_name CharImport
 ##                                          when there is no still picture of it (needs ffmpeg)
 ##   people_<look>                       -> art/sheets/people_<look>.png: 1 idle + 1 "breath" frame fill
 ##                                          every row of the sheet; its .json is kept as it is
-##   hero_walk_down                      -> art/sheets/candidates/hero_top_walk_down.png (a test only)
+##   hero_<anim> (any hero_top anim)     -> art/sheets/candidates/hero_top_<anim>.png (one row), then the
+##                                          live art/sheets/hero_top.png is rebuilt (hero_sheet): each row with a
+##                                          picture is replaced, every other row keeps its frames, hero_top.json
+##                                          is kept as it is. A *_sunfang row with no picture of its own uses the
+##                                          plain one's.
 ## Each picture is keyed off its flat background (magenta, or green where assets.json says), cut into its
 ## figures, scaled (one scale for all frames) and stood on the sheet's origin. Everything written is listed
 ## in art/gemini/painted.json, so ArtCheck lets its full colour through (like the realm's props).
@@ -15,6 +19,9 @@ class_name CharImport
 const GEMINI := "res://art/gemini/"
 const ART := "res://art/"
 const PAINTED := GEMINI + "painted.json"
+const HERO := ART + "sheets/hero_top.png"
+const CANDIDATES := ART + "sheets/candidates/"
+const DRAWN := CANDIDATES + "hero_top_drawn.png"   # the sheet before any Gemini row: the rows to keep, and hero-compare's left
 const STILLS := ["png", "jpg", "jpeg", "webp"]
 const MOVING := ["gif", "mp4", "webm"]
 const MAX_FRAMES := 32
@@ -141,9 +148,76 @@ static func out_path(name: String) -> String:
 		return ART + "ui/faces/" + name.trim_prefix("face_") + ".png"
 	if name.begins_with("people_"):
 		return ART + "sheets/" + name + ".png"
-	if name == "hero_walk_down":
-		return ART + "sheets/candidates/hero_top_walk_down.png"
+	if name.begins_with("hero_") and ArtSheet.meta("hero_top")["anims"].has(name.trim_prefix("hero_")):
+		return CANDIDATES + "hero_top_" + name.trim_prefix("hero_") + ".png"
 	return ""
+
+
+## The box a hero anim's frames are fit into (assets.json "hero").
+static func hero_box(anim: String, h: Dictionary) -> Vector2i:
+	var key := anim.trim_suffix("_sunfang")
+	var boxes: Dictionary = h.get("boxes", {})
+	var b: Array = boxes.get(key, boxes.get(key.get_slice("_", 0), h["box"]))
+	return Vector2i(int(b[0]), int(b[1]))
+
+
+## One hero row from a keyed-out picture: its `n` figures fit into `box`, each stood on the origin of its cell.
+static func hero_strip(img: Image, n: int, box: Vector2i, meta: Dictionary) -> Image:
+	var c := Vector2i(int(meta["cell"][0]), int(meta["cell"][1]))
+	var o := Vector2i(int(meta["origin"][0]), int(meta["origin"][1]))
+	var fr := fit_all(figures(img, n), box)
+	var out := Image.create(c.x * n, c.y, false, Image.FORMAT_RGBA8)
+	for i in mini(n, fr.size()):
+		stand(out, fr[i], Vector2i(i * c.x, 0) + o)
+	return out
+
+
+## The hero sheet: `base` with each anim that has a strip (or, for X_sunfang, X's strip) written over its row.
+static func hero_sheet(base: Image, strips: Dictionary, meta: Dictionary) -> Image:
+	var c := Vector2i(int(meta["cell"][0]), int(meta["cell"][1]))
+	var sheet := base.duplicate() as Image
+	sheet.convert(Image.FORMAT_RGBA8)
+	for anim in meta["anims"]:
+		var strip: Image = strips.get(anim, strips.get(str(anim).trim_suffix("_sunfang")))
+		if strip == null:
+			continue
+		var a: Dictionary = meta["anims"][anim]
+		var n := mini(int(a["frames"]), strip.get_width() / c.x)
+		strip.convert(Image.FORMAT_RGBA8)
+		sheet.blit_rect(strip, Rect2i(0, 0, n * c.x, c.y), Vector2i(int(a["col"]) * c.x, int(a["row"]) * c.y))
+	return sheet
+
+
+## The hero strips made so far ({anim: Image}) from `dir`.
+static func hero_strips(dir := CANDIDATES) -> Dictionary:
+	var out := {}
+	var path := ProjectSettings.globalize_path(dir)
+	if not DirAccess.dir_exists_absolute(path):
+		return out
+	for anim in ArtSheet.meta("hero_top")["anims"]:
+		var f := path.path_join("hero_top_%s.png" % anim)
+		if FileAccess.file_exists(f):
+			var img := Image.load_from_file(f)
+			if img != null and not img.is_empty():
+				out[anim] = img
+	return out
+
+
+## Rebuilds the live hero sheet `dst` from the strips in `dir` over `drawn` (saved from `dst` the first time,
+## so rows with no picture keep their frames). Returns `dst`, or "! why".
+static func write_hero(dir := CANDIDATES, dst := HERO, drawn := DRAWN) -> String:
+	var strips := hero_strips(dir)
+	if strips.is_empty():
+		return "! no hero rows in " + dir
+	if not FileAccess.file_exists(ProjectSettings.globalize_path(drawn)):
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(drawn.get_base_dir()))
+		DirAccess.copy_absolute(ProjectSettings.globalize_path(dst), ProjectSettings.globalize_path(drawn))
+	var base := Image.load_from_file(ProjectSettings.globalize_path(drawn))
+	if base == null or base.is_empty():
+		return "! can't read " + drawn
+	hero_sheet(base, strips, ArtSheet.meta("hero_top")).save_png(ProjectSettings.globalize_path(dst))
+	mark_painted(dst)
+	return dst
 
 
 ## Makes one picture's game art from `src`. Returns the path written, or "! why".
@@ -179,17 +253,16 @@ static func import_one(src: String, name: String, a: Dictionary) -> String:
 			fr = figures(img, 2)
 		out = people_sheet(fit_all(fr, Vector2i(int(b[0]), int(b[1]))), meta)
 	else:
-		var h: Dictionary = a["hero_walk_down"]
+		var h: Dictionary = a["hero"]
 		var meta := ArtSheet.meta(str(h["like"]))
-		var c := Vector2i(int(meta["cell"][0]), int(meta["cell"][1]))
-		var o := Vector2i(int(meta["origin"][0]), int(meta["origin"][1]))
-		var fr := fit_all(figures(img, int(h["frames"])), Vector2i(int(h["box"][0]), int(h["box"][1])))
-		out = Image.create(c.x * fr.size(), c.y, false, Image.FORMAT_RGBA8)
-		for i in fr.size():
-			stand(out, fr[i], Vector2i(i * c.x, 0) + o)
+		var anim := name.trim_prefix("hero_")
+		if figures(img).is_empty():
+			return "! nothing left after keying out " + src
+		out = hero_strip(img, int(meta["anims"][anim]["frames"]), hero_box(anim, h), meta)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dst.get_base_dir()))
 	out.save_png(ProjectSettings.globalize_path(dst))
-	mark_painted(dst)
+	if not dst.begins_with(CANDIDATES):                # candidates are only steps; ArtCheck skips them
+		mark_painted(dst)
 	return dst
 
 
@@ -393,10 +466,15 @@ static func run(only := PackedStringArray()) -> PackedStringArray:
 		return log
 	var files := DirAccess.get_files_at(dir)
 	files.sort()
+	var hero := false
 	for f in files:
 		var n := f.get_basename()
 		if f.get_extension().to_lower() not in STILLS + MOVING or (only.size() > 0 and n not in only):
 			continue
 		var r := import_one(dir + f, n, a)
 		log.append(r if r.begins_with("!") else "%s <- %s" % [r.trim_prefix("res://"), f])
+		hero = hero or (n.begins_with("hero_") and not r.begins_with("!"))
+	if hero:
+		var r := write_hero()
+		log.append(r if r.begins_with("!") else "%s <- %s" % [r.trim_prefix("res://"), ", ".join(hero_strips().keys())])
 	return log
