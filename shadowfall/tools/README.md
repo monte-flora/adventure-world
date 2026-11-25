@@ -11,6 +11,8 @@ in `realm/gemini/placeholder/`; `pixi run import-art --placeholders` imports tho
 
 `import_characters.sh` (`pixi run import-characters`, + `char_import.gd`, `import_characters.gd`): the characters'
 Gemini pictures (`art/gemini/README.txt`, `pixi run gemini-next --set characters`) into portraits, dialogue faces
-(`art/ui/faces/`), villager sheets (`art/sheets/people_<look>.png`, same layout) and the hero test
-(`art/sheets/candidates/`); `hero_compare.gd` (`pixi run hero-compare`) puts today's hero walk next to the test.
+(`art/ui/faces/`), villager sheets (`art/sheets/people_<look>.png`, same layout) and the map hero (`hero_<anim>` -> one row
+in `art/sheets/candidates/`, then the live `art/sheets/hero_top.png` rebuilt; rows with no picture keep their
+frames; `pixi run import-hero` does only those); `hero_compare.gd` (`pixi run hero-compare`) puts the drawn
+hero next to the Gemini one, row by row.
 What it writes is listed in `art/gemini/painted.json`, which `ArtCheck` lets use any colour.

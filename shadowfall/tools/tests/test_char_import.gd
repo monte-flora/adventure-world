@@ -113,6 +113,117 @@ func test_hero_compare_picture() -> void:
 	check(not today.is_invisible(), "today's hero is in it")
 	var cmp: Image = hc.compare(today, today)
 	check(cmp.get_width() >= today.get_width() * 4 and cmp.get_height() > today.get_height() * 8, "1x and 4x rows: %s" % cmp.get_size())
+	var atk: Image = hc.today("attack_side")
+	check_eq(atk.get_width(), ArtSheet.cell("hero_top").x * 3, "any anim: attack has 3 frames")
+	var all: Image = hc.compare_all({"walk_down": today, "attack_side": atk})
+	check_eq(all.get_height(), cmp.get_height() + hc.compare(atk, atk).get_height(), "one block per row with a picture")
+
+
+func _keep(path: String) -> PackedByteArray:
+	return FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
+
+
+func _put_back(path: String, bytes: PackedByteArray) -> void:
+	if bytes.is_empty():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+		return
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_buffer(bytes)
+	f.close()
+
+
+## A fake hero row: n figures cut, fit and stood on the hero cells.
+func _strip(anim: String) -> Image:
+	var img := _picture(int(ArtSheet.meta("hero_top")["anims"][anim]["frames"]), 60, 120)
+	CharImport.key_out(img)
+	var n := int(ArtSheet.meta("hero_top")["anims"][anim]["frames"])
+	return CharImport.hero_strip(img, n, CharImport.hero_box(anim, CharImport.assets()["hero"]), ArtSheet.meta("hero_top"))
+
+
+func test_hero_prompts_and_paths() -> void:
+	var anims: Dictionary = ArtSheet.meta("hero_top")["anims"]
+	check_eq(CharImport.out_path("hero_walk_up"), "res://art/sheets/candidates/hero_top_walk_up.png", "a hero row")
+	check_eq(CharImport.out_path("hero_flying"), "", "no such hero anim")
+	for d in ["down", "up", "side"]:
+		for a in ["idle_", "walk_", "attack_"]:
+			check(FileAccess.file_exists(CharImport.GEMINI + "prompts/hero_%s%s.txt" % [a, d]), "a prompt for " + a + d)
+	for f in DirAccess.get_files_at(CharImport.GEMINI + "prompts"):
+		if f.begins_with("hero_"):
+			var t := FileAccess.get_file_as_string(CharImport.GEMINI + "prompts/" + f)
+			var n := int(anims[f.get_basename().trim_prefix("hero_")]["frames"])
+			check("%d-frame" % n in t and "%dx1 grid" % n in t, f + " asks for %d frames in a row" % n)
+			check("lantern" in t and "sword" in t.to_lower() and "contrast" in t.to_lower() and "#FF00FF" in t, f + " asks for lantern, sword, contrast, magenta")
+	check_eq(CharImport.hero_box("attack_up_sunfang", CharImport.assets()["hero"]), Vector2i(48, 54), "a swing gets the wide box")
+	check_eq(CharImport.hero_box("walk_side", CharImport.assets()["hero"]), Vector2i(40, 52), "the rest the plain box")
+
+
+func test_hero_sheet_keeps_rows_without_a_picture() -> void:
+	var meta := ArtSheet.meta("hero_top")
+	var base := Image.load_from_file(ProjectSettings.globalize_path(CharImport.HERO))
+	base.convert(Image.FORMAT_RGBA8)
+	var walk := _strip("walk_down")
+	var atk := _strip("attack_side")
+	check_eq(walk.get_size(), Vector2i(48 * 4, 56), "a strip is 4 cells")
+	var sheet := CharImport.hero_sheet(base, {"walk_down": walk, "attack_side": atk}, meta)
+	check_eq(sheet.get_size(), base.get_size(), "same size as today's sheet")
+	var o: Array = meta["origin"]
+	for anim in ["walk_down", "walk_down_sunfang", "attack_side", "attack_side_sunfang"]:
+		var r := ArtSheet.region("hero_top", anim, 0)
+		check(sheet.get_region(r).get_data() == walk.get_region(Rect2i(0, 0, 48, 56)).get_data() if anim.begins_with("walk")
+			else sheet.get_region(r).get_data() == atk.get_region(Rect2i(0, 0, 48, 56)).get_data(), anim + " is the new picture")
+		check_eq(sheet.get_region(r).get_used_rect().end.y, int(o[1]), anim + " stands on the origin")
+	for anim in ["idle_down", "walk_up", "attack_down", "roll_side", "hurt", "lantern_raise"]:
+		for i in int(meta["anims"][anim]["frames"]):
+			var r := ArtSheet.region("hero_top", anim, i)
+			check(sheet.get_region(r).get_data() == base.get_region(r).get_data(), "%s %d keeps its frames" % [anim, i])
+	var sun := CharImport.hero_sheet(base, {"walk_down": walk, "walk_down_sunfang": atk}, meta)
+	var r0 := ArtSheet.region("hero_top", "walk_down_sunfang", 0)
+	check(sun.get_region(r0).get_data() == atk.get_region(Rect2i(0, 0, 48, 56)).get_data(), "a _sunfang picture wins over the plain one")
+
+
+func test_write_hero_into_the_live_sheet_passes_art_check() -> void:
+	var json := _keep("res://art/sheets/hero_top.json")
+	var png := _keep(CharImport.HERO)
+	var painted := _keep(CharImport.PAINTED)
+	var dir := OS.get_user_data_dir() + "/zz_hero/"
+	DirAccess.make_dir_recursive_absolute(dir)
+	_strip("walk_side").save_png(dir + "hero_top_walk_side.png")
+	var drawn := dir + "drawn.png"
+	check_eq(CharImport.write_hero(dir, CharImport.HERO, drawn), CharImport.HERO, "written")
+	check(FileAccess.get_file_as_bytes(drawn) == png, "the drawn sheet kept the first time")
+	check(CharImport.HERO in CharImport.painted(), "listed in painted.json")
+	var bad := PackedStringArray()
+	for l in ArtCheck.check_all():
+		if "hero_top" in l:
+			bad.append(l)
+	check(bad.is_empty(), "ArtCheck takes it: %s" % ", ".join(bad))
+	var img := Image.load_from_file(ProjectSettings.globalize_path(CharImport.HERO))
+	var old := Image.load_from_file(drawn)
+	var r := ArtSheet.region("hero_top", "idle_side", 0)
+	check(img.get_region(r).get_data() == old.get_region(r).get_data(), "idle_side kept")
+	check(img.get_region(ArtSheet.region("hero_top", "walk_side", 0)).get_data() != old.get_region(ArtSheet.region("hero_top", "walk_side", 0)).get_data(), "walk_side new")
+	check(FileAccess.get_file_as_bytes("res://art/sheets/hero_top.json") == json, "hero_top.json untouched")
+	check_eq(CharImport.write_hero(dir + "none/", CharImport.HERO, drawn).left(1), "!", "no strips: says why")
+	_put_back(CharImport.HERO, png)
+	_put_back(CharImport.PAINTED, painted)
+	for f in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir + f)
+	DirAccess.remove_absolute(dir)
+
+
+func test_import_one_hero_makes_a_row() -> void:
+	var had := DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(CharImport.CANDIDATES))
+	var src := OS.get_user_data_dir() + "/zz_hero.png"
+	_picture(3, 60, 120).save_png(src)
+	var r := CharImport.import_one(src, "hero_attack_up", CharImport.assets())
+	check_eq(r, "res://art/sheets/candidates/hero_top_attack_up.png", "a candidate row")
+	var img := Image.load_from_file(ProjectSettings.globalize_path(r))
+	check(img != null and img.get_size() == Vector2i(48 * 3, 56), "3 attack cells: %s" % (img.get_size() if img else Vector2i.ZERO))
+	check(r not in CharImport.painted(), "a candidate is not listed as live art")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(r))
+	DirAccess.remove_absolute(src)
+	if not had:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(CharImport.CANDIDATES))
 
 
 ## A made-up Gemini "animate" GIF: a tall figure on green whose head slides 1 px a frame and back.
