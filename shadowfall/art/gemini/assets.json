@@ -1,5 +1,5 @@
 {
- "about": "What import-characters makes from each picture (tools/char_import.gd). portraits: exact picture size per portrait. face_size: every dialogue face. people_box: the biggest a villager may be in its 32x48 cell (it keeps its shape), by look. green_key: pictures drawn on flat green instead of magenta (purple characters). hero: every hero_<anim> picture becomes that row of the live hero sheet (like), fit into box (or boxes[anim without _sunfang, or its first word]: wider moves like a sword swing).",
+ "about": "What import-characters makes from each picture (tools/char_import.gd). portraits: exact picture size per portrait. face_size: every dialogue face. people_box: the biggest a villager may be in its 32x48 cell (it keeps its shape), by look. green_key: pictures drawn on flat green instead of magenta (purple characters). hero: every hero_<anim> picture becomes that row of the live hero sheet (like), fit into box (or boxes[anim without _sunfang, or its first word]: wider moves like a sword swing); flip: rows mirrored to face right (Gemini draws them facing left).",
  "portraits": {
   "portrait_hero": [
    128,
@@ -34,6 +34,7 @@
  ],
  "hero": {
   "like": "hero_top",
+  "flip": ["idle_side", "walk_side", "attack_side"],
   "box": [
    40,
    52

@@ -226,6 +226,25 @@ func test_import_one_hero_makes_a_row() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(CharImport.CANDIDATES))
 
 
+func test_side_rows_are_flipped_to_face_right() -> void:
+	var h: Dictionary = CharImport.assets()["hero"]
+	for anim in ["idle_side", "walk_side", "attack_side", "attack_side_sunfang"]:
+		check(CharImport.hero_flip(anim, h), "%s is mirrored (Gemini draws it facing left)" % anim)
+	check(not CharImport.hero_flip("walk_down", h), "other rows are not")
+	var meta := ArtSheet.meta("hero_top")
+	var img := Image.create(120, 80, false, Image.FORMAT_RGBA8)       # one figure, its dark half on the left
+	img.fill(Color(0, 0, 0, 0))
+	img.fill_rect(Rect2i(40, 10, 10, 60), Color(0.1, 0.1, 0.1))
+	img.fill_rect(Rect2i(50, 10, 10, 60), Color(0.9, 0.9, 0.9))
+	var plain := CharImport.hero_strip(img, 1, Vector2i(40, 52), meta)
+	var flipped := CharImport.hero_strip(img, 1, Vector2i(40, 52), meta, true)
+	var box := plain.get_used_rect()
+	var l := box.position + Vector2i(1, box.size.y / 2)
+	var r := box.position + Vector2i(box.size.x - 2, box.size.y / 2)
+	check(plain.get_pixelv(l).v < 0.5 and plain.get_pixelv(r).v > 0.5, "plain: dark on the left")
+	check(flipped.get_pixelv(l).v > 0.5 and flipped.get_pixelv(r).v < 0.5, "flipped: dark on the right")
+
+
 ## A made-up Gemini "animate" GIF: a tall figure on green whose head slides 1 px a frame and back.
 func _moving_gif(n := 6) -> String:
 	var dir := OS.get_user_data_dir() + "/zz_gif/"
