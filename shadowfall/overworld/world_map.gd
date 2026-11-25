@@ -34,6 +34,7 @@ var cave_of := {}                       # Mine cell -> cave file inside levels/ 
 var waystones := {}                     # cell -> land id (each land's L)
 var gates := {}                         # cell -> {"name", "needs"}: an ability id or a number of stones
 var nightfall := false
+var painted_screens := {}               # screen (column, row) -> its levels/polish/ folder ("realm_B3"): PaintedScreen
 ## Props (levels/README.md "Props on the realm"): {"name", "at": Vector2 px (the prop's anchor), "meta"}.
 var props: Array[Dictionary] = []
 var prop_rects: Array[Rect2] = []       # footprints in realm px
@@ -126,6 +127,13 @@ func stitch(texts: Dictionary) -> void:
 				gates[cell] = {"name": " ".join(parts.slice(0, parts.size() - 3)), "needs": parts[-1]}
 		for line in lf.all("prop"):
 			add_prop(line, origin, f)
+		for line in lf.all("painted_screen"):       # `painted_screen: B3`: that screen is one Gemini painting
+			for n in line.split(" ", false):
+				var sc := screen_named(n)
+				if sc.x < 0:
+					errors.append("%s: `painted_screen: %s` wants a screen like B3" % [f, n])
+				else:
+					painted_screens[sc] = "realm_" + n.to_upper()
 	if home.x < 0:
 		home = _first("H")
 	for p in cells:
@@ -296,6 +304,20 @@ static func realm_id(id: String) -> String:
 ## Which screen (column, row) a square is on.
 static func screen_of(p: Vector2i) -> Vector2i:
 	return Vector2i(p.x / SCREEN.x, p.y / SCREEN.y)
+
+
+## "B3" -> Vector2i(1, 2) (column letter, row number from 1), or (-1, -1).
+static func screen_named(n: String) -> Vector2i:
+	n = n.to_upper()
+	if n.length() < 2 or not n.substr(1).is_valid_int():
+		return Vector2i(-1, -1)
+	var sc := Vector2i(n.unicode_at(0) - 65, int(n.substr(1)) - 1)
+	return sc if sc.x >= 0 and sc.y >= 0 and sc.x < GRID.x and sc.y < GRID.y else Vector2i(-1, -1)
+
+
+## Vector2i(1, 2) -> "B3".
+static func screen_name(sc: Vector2i) -> String:
+	return String.chr(65 + sc.x) + str(sc.y + 1)
 
 
 ## The shortest walk (4-way) between two squares as it is now; empty if there is none.

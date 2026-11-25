@@ -41,6 +41,7 @@ All 3 kinds of gate letter (`Y` `O` `K`) border Emberhold, so you see them from 
     mine: stone/1_the_crumbling_vigil.txt 23 8     the cave under the Mine (M or S) at that square
     gate: Riven Gap 10 50 dash       a rock (X) that opens with that ability
     ground: painted                  draw this land with the painted ground textures (shadowfall/realm/ground/)
+    painted_screen: B3               that screen is one Gemini painting (pixi run gemini-realm B3; shadowfall/painted/realm_screen.gd)
     prop: oak 12 30                  a prop (a tree, house, lamppost ...): its name, then row and column
 
 Numbers are the land's own rows and columns (row 0, column 0 = its top-left letter). `mine:` and `gate:` can repeat.

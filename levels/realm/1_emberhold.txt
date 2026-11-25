@@ -10,6 +10,7 @@ mine: stone/1_the_crumbling_vigil.txt 23 8
 mine: caves/01_the_easy_moss_cave.txt 30 54
 mine: caves/02_the_vine_garden.txt 3 34
 ground: painted
+painted_screen: B3
 prop: cottage_a 24.5 48
 prop: cottage_b 24.5 52
 prop: cottage_a 26.5 46
