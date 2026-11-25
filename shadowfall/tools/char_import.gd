@@ -161,11 +161,21 @@ static func hero_box(anim: String, h: Dictionary) -> Vector2i:
 	return Vector2i(int(b[0]), int(b[1]))
 
 
-## One hero row from a keyed-out picture: its `n` figures fit into `box`, each stood on the origin of its cell.
-static func hero_strip(img: Image, n: int, box: Vector2i, meta: Dictionary) -> Image:
+## Does this anim's picture get mirrored (assets.json "hero" "flip": side rows Gemini draws facing left;
+## the game wants them facing right and mirrors them itself for left)? X_sunfang follows X.
+static func hero_flip(anim: String, h: Dictionary) -> bool:
+	return anim.trim_suffix("_sunfang") in h.get("flip", [])
+
+
+## One hero row from a keyed-out picture: its `n` figures fit into `box`, each stood on the origin of its cell
+## (each mirrored in place if `flip`, so the frame order stays).
+static func hero_strip(img: Image, n: int, box: Vector2i, meta: Dictionary, flip := false) -> Image:
 	var c := Vector2i(int(meta["cell"][0]), int(meta["cell"][1]))
 	var o := Vector2i(int(meta["origin"][0]), int(meta["origin"][1]))
 	var fr := fit_all(figures(img, n), box)
+	if flip:
+		for f in fr:
+			f.flip_x()
 	var out := Image.create(c.x * n, c.y, false, Image.FORMAT_RGBA8)
 	for i in mini(n, fr.size()):
 		stand(out, fr[i], Vector2i(i * c.x, 0) + o)
@@ -258,7 +268,7 @@ static func import_one(src: String, name: String, a: Dictionary) -> String:
 		var anim := name.trim_prefix("hero_")
 		if figures(img).is_empty():
 			return "! nothing left after keying out " + src
-		out = hero_strip(img, int(meta["anims"][anim]["frames"]), hero_box(anim, h), meta)
+		out = hero_strip(img, int(meta["anims"][anim]["frames"]), hero_box(anim, h), meta, hero_flip(anim, h))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dst.get_base_dir()))
 	out.save_png(ProjectSettings.globalize_path(dst))
 	if not dst.begins_with(CANDIDATES):                # candidates are only steps; ArtCheck skips them
