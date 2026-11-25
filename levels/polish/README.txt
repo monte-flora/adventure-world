@@ -22,3 +22,18 @@ Keys while it waits: n = skip this cave, q = stop for now.
 
 Want different words for a cave? Change its prompt.txt: gemini-caves never overwrites it.
 It only copies and opens the page: you do the Gemini part yourself (no keys, no robots on the site).
+
+Paint a realm screen with Gemini: pixi run gemini-realm B3
+
+One screen of the realm (30 x 17 squares) as one painting (levels/polish/realm_B3/).
+The land file's `painted_screen: B3` line shows it in the game; walls and paths still come
+from the land file. Steps (map, then your style picture, then the words):
+1. It copies the screen's map (layout.png) and opens Gemini. Cmd+V in Gemini's chat, Enter here.
+2. It copies your style picture (the painted-realm mockup: refs/realm_target_painted_mockup.jpg
+   next to the game folder, or --style PICTURE). Cmd+V, Enter here.
+3. It copies the words (prompt.txt). Cmd+V and send. Download the painting you like:
+   it lands in levels/polish/realm_B3/ as painted.webp (960x544). pixi run game.
+
+  pixi run gemini-realm B3 --export     just the map and words
+  pixi run gemini-realm B3 --import     a painting you saved in the folder by hand
+  python shadowfall/tools/painted_compare.py B3     today vs painted, gloom 0 and 3

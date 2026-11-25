@@ -71,6 +71,26 @@ const CRAGS := ["crag"]
 static func scatter(world: WorldMap, sorted: Node2D) -> Dictionary:
 	var out: Array[Sprite2D] = []
 	var gates := {}
+	for d in decor_spots(world):
+		var s := Sprite2D.new()
+		s.name = "decor_" + d.name
+		s.texture = texture(d.name)
+		s.centered = false
+		s.offset = -d.anchor
+		s.position = d.at
+		s.set_meta("prop", d.name)
+		sorted.add_child(s)
+		out.append(s)
+		if d.gate:
+			gates[d.cell] = s
+	refresh_gates(world, gates)
+	return {"sprites": out, "gates": gates}
+
+
+## Where scatter puts each decor sprite: [{"name", "at" (px), "anchor", "cell", "gate"}] (the
+## painted-screen layout draws the same ones: PaintedScreen.layout).
+static func decor_spots(world: WorldMap) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
 	var t := float(LevelFile.TILE)
 	for p: Vector2i in world.cells:
 		var land: Dictionary = world.lands.get(world.land(p), {})
@@ -91,23 +111,12 @@ static func scatter(world: WorldMap, sorted: Node2D) -> Dictionary:
 			nudge = Vector2(RealmTiles.variant(p + Vector2i(7, 3), 13) - 6, RealmTiles.variant(p + Vector2i(2, 9), 9) - 4)
 		if name == "":
 			continue
-		var tex := texture(name)
 		var m := WorldMap.prop_meta(name)
-		if tex == null or m.is_empty():
+		if texture(name) == null or m.is_empty():
 			continue
-		var s := Sprite2D.new()
-		s.name = "decor_" + name
-		s.texture = tex
-		s.centered = false
-		s.offset = -Vector2(m.anchor[0], m.anchor[1])
-		s.position = (Vector2(p) + Vector2(0.5, 0.9)) * t + nudge    # stands near the square's bottom
-		s.set_meta("prop", name)
-		sorted.add_child(s)
-		out.append(s)
-		if name == GATE_ROCK or GATE_PROPS.has(ch):
-			gates[p] = s
-	refresh_gates(world, gates)
-	return {"sprites": out, "gates": gates}
+		out.append({"name": name, "at": (Vector2(p) + Vector2(0.5, 0.9)) * t + nudge,    # near the square's bottom
+			"anchor": Vector2(m.anchor[0], m.anchor[1]), "cell": p, "gate": name == GATE_ROCK or GATE_PROPS.has(ch)})
+	return out
 
 
 ## Shows each gate's sprite only while the gate is shut.

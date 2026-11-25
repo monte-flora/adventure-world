@@ -19,6 +19,7 @@ var objects: TileMapLayer                     # trees, rocks, houses, Mines, way
 var tiles: RealmTiles
 var canopy: TileMapLayer                      # tree crowns, drawn over the hero
 var ground: RealmGround                       # painted ground over the tiles (lands with `ground: painted`)
+var painted: PaintedRealmScreen              # `painted_screen:` screens: one Gemini painting each
 var prop_sprites: Array[Sprite2D] = []        # realm/props/ art from `prop:` lines (RealmProps)
 var decor := {}                               # painted lands' trees, crags and gates (RealmProps.scatter)
 var entities: Node2D                          # y-sorted: objects, hero, people, monsters
@@ -86,6 +87,8 @@ func build(w: WorldMap) -> void:
 	else:
 		ground.free()
 		ground = null
+	painted = PaintedRealmScreen.new(w)
+	add_child(painted)
 	gates_layer = Node2D.new()
 	gates_layer.draw.connect(_draw_marks)
 	add_child(gates_layer)
@@ -97,6 +100,7 @@ func build(w: WorldMap) -> void:
 	add_child(entities)
 	prop_sprites = RealmProps.build(w, entities, canopy)
 	decor = RealmProps.scatter(w, entities)
+	painted.apply(prop_sprites + decor.sprites, decor.gates, objects)
 	Game.changed.connect(_on_game_changed)
 	tiles.refresh(objects, waystone_lit)
 	hero = HeroTop.new()
@@ -135,6 +139,7 @@ func build(w: WorldMap) -> void:
 	canopy.material = light.world_material
 	RealmProps.shade(prop_sprites, light.painted_material)
 	RealmProps.shade(decor.sprites, light.painted_material)
+	painted.shade(light.painted_material)
 	if ground:
 		light.track(ground.material)
 	light.follow(hero)

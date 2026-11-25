@@ -131,12 +131,13 @@ def icon(pic, kind, box):
                                                 (mid[0], mid[1] + h), (mid[0] - h, mid[1])])
 
 
-def legend():
-    """A small strip that says what the map's colours mean (for you, not for Gemini)."""
+def legend(items=None):
+    """A small strip that says what the map's colours mean (for you, not for Gemini).
+    items: [(label, colour)]; the caves' colours by default."""
     pygame.font.init()
     font = pygame.font.Font(None, 40)
-    items = [("rock", ROCK), ("open air", AIR), ("ledge", (120, 110, 100))] + \
-            [(k, COLOUR[k]) for k in ("spikes", "lava", "fire", "thorns", "start", "exit", "shrine")]
+    items = items or [("rock", ROCK), ("open air", AIR), ("ledge", (120, 110, 100))] + \
+        [(k, COLOUR[k]) for k in ("spikes", "lava", "fire", "thorns", "start", "exit", "shrine")]
     strip = pygame.Surface((SIZE[0], 80))
     strip.fill((60, 56, 64))
     x = 24
@@ -236,18 +237,26 @@ def import_painting(cave_path, rows, godot=None):
     src = dropped(cave_path)
     if not src:
         return False, "No picture yet: save Gemini's picture in %s" % short(folder(cave_path))
+    dst = os.path.join(folder(cave_path), "painted.webp")
+    ok, why = shrink(src, dst, len(rows[0]) * TILE, len(rows) * TILE, godot)
+    if not ok:
+        return False, why
+    return True, "Painted! %s is in the game now (%d KB)." % (cave_key(cave_path), os.path.getsize(dst) // 1024)
+
+
+def shrink(src, dst, w, h, godot=None, run_cmd=None):
+    """src -> dst, a w x h WebP under MAX_BYTES (tools/polish_import.gd); src is removed once it worked.
+    Returns (ok, why)."""
     godot = godot or os.environ.get("GODOT", "godot")
     if not shutil.which(godot):
         return False, "I need Godot to shrink the picture (see shadowfall/README.md)."
-    dst = os.path.join(folder(cave_path), "painted.webp")
-    w, h = len(rows[0]) * TILE, len(rows) * TILE
-    result = subprocess.run([godot, "--headless", "--audio-driver", "Dummy", "--path", SHADOWFALL,
-                             "--script", "res://tools/polish_import.gd", "--", src, dst, str(w), str(h),
-                             str(MAX_BYTES)], capture_output=True, text=True, timeout=120)
+    result = (run_cmd or subprocess.run)([godot, "--headless", "--audio-driver", "Dummy", "--path", SHADOWFALL,
+                                         "--script", "res://tools/polish_import.gd", "--", src, dst, str(w),
+                                         str(h), str(MAX_BYTES)], capture_output=True, text=True, timeout=120)
     if result.returncode != 0 or not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
         return False, "I couldn't read that picture: %s" % (result.stdout + result.stderr).strip()[-200:]
     os.remove(src)
-    return True, "Painted! %s is in the game now (%d KB)." % (cave_key(cave_path), os.path.getsize(dst) // 1024)
+    return True, ""
 
 
 def short(path):

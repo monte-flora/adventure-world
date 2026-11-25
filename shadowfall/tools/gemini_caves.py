@@ -77,8 +77,9 @@ def export(name, path, levels=LEVELS, run_cmd=subprocess.run):
 
 
 def copy_picture(png, run_cmd=subprocess.run):
-    """The picture on the clipboard (as a picture, so Cmd+V in Gemini pastes it)."""
-    script = 'set the clipboard to (read (POSIX file "%s") as «class PNGf»)' % png.replace('"', '\\"')
+    """The picture on the clipboard (as a picture, so Cmd+V in Gemini pastes it). A .jpg goes as JPEG."""
+    kind = "JPEG" if png.lower().endswith((".jpg", ".jpeg")) else "PNGf"
+    script = 'set the clipboard to (read (POSIX file "%s") as «class %s»)' % (png.replace('"', '\\"'), kind)
     run_cmd(["osascript", "-e", script], check=True)
 
 
